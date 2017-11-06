@@ -66,10 +66,7 @@ model.add(Dense(1))
 model.add(Activation('linear'))
 model.compile(optimizer='adam', loss='mse')
 
-print("X_train: ")
-print(X_train.shape)
-print(Y_train.shape)
-# model.fit(X_train, Y_train, nb_epoch=5, batch_size=128, verbose=1, validation_split=0.1)
+model.fit(X_train, Y_train, nb_epoch=5, batch_size=128, verbose=1, validation_split=0.1)
 score = model.evaluate(X_test, Y_test, batch_size=128)
 print(score)
 

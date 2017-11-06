@@ -7,7 +7,7 @@ import time
 
 
 def load_snp_returns():
-    f = open('GSPC.csv', 'rb').readlines()[1:]
+    f = open('datasets/GSPC.csv', 'rb').readlines()[1:]
     raw_data = []
     raw_dates = []
     for line in f:
@@ -24,7 +24,7 @@ def load_snp_returns():
 
 # load closing values of SP500
 def load_snp_close():
-    f = open('GSPC.csv', 'r')
+    f = open('datasets/GSPC.csv', 'r')
     raw_data = []
     raw_dates = []
     for line in f:
