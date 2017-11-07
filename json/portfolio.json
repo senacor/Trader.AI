@@ -1,0 +1,13 @@
+{
+  "cash": 10000.00,
+  "shares": [
+    {
+      "name": "GOOG",
+      "amount": 100
+    },
+    {
+      "name": "AAPL",
+      "amount": 200
+    }
+  ]
+}
