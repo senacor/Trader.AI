@@ -1,13 +1,14 @@
 '''
 Created on 08.11.2017
 
-Module for testing of all trader components
+Module for testing of all predicting components
 
 @author: jtymoszuk
 '''
 import unittest
 
 from predicting.simple_predictor import SimplePredictor
+from datetime import date
 
 
 class PredictingTest(unittest.TestCase):
@@ -21,7 +22,16 @@ class PredictingTest(unittest.TestCase):
     def testSimplePredictor(self):
         sp = SimplePredictor()     
         
-        inputData = [1.0, 2.0, 3.0]
+        inputData = list()
+        
+        today = date(2017, 11, 8)
+        yesterday = date(2017, 11, 8)
+        
+        tuple1 = (yesterday, 2.0)
+        tuple2 = (today, 3.0)
+        
+        inputData.append(tuple1)
+        inputData.append(tuple2)
 
         result = sp.doPredict(inputData)
         

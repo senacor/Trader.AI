@@ -15,6 +15,13 @@ class TradingActionEnum(Enum):
     '''  
     BUY = 1
     SELL = 2
+    
+class CompanyEnum(Enum):
+    '''
+    Represents companies on stock market
+    '''  
+    GOOGLE = "GOOG"
+    APPLE = "AAPL"
 
 
 class SharesOfCompany:

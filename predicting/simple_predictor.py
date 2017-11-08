@@ -25,5 +25,5 @@ class SimplePredictor(IPredictor):
         Returns:
           last value from input
         """
-        return data[-1] # return last value from input
+        return data[-1][-1] # return last value from input
         

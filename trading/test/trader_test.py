@@ -6,6 +6,7 @@ Module for testing of all trader components
 @author: jtymoszuk
 '''
 import unittest
+import evaluating.evaluator
 
 from trading.random_trader import RandomTrader
 from trading.simple_trader import SimpleTrader
@@ -30,6 +31,7 @@ class RandomTraderTest(unittest.TestCase):
     def tearDown(self):
         pass
     
+   
     def testStockMarketDataConstruction(self):
         
         companyName2DateValueArrayDict = dict()
@@ -40,7 +42,7 @@ class RandomTraderTest(unittest.TestCase):
         companyName2DateValueArrayDict[CompanyEnum.APPLE.value] = dateValueArray1
         
         dateValueArray2 = np.array([[today, yesterday], [1.0, 2.0]])
-        companyName2DateValueArrayDict[CompanyEnum.BMW.value] = dateValueArray2
+        companyName2DateValueArrayDict[CompanyEnum.GOOGLE.value] = dateValueArray2
         
         stockMarketData = StockMarketData(companyName2DateValueArrayDict)
         stockMarketData.companyName2DateValueArrayDict.items()
@@ -60,20 +62,31 @@ class RandomTraderTest(unittest.TestCase):
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        companyName2DateValueArrayDict = dict()
-        
-        today = date(2017, 11, 8)
-        yesterday = date(2017, 11, 8)
-        dateValueArray = np.array([[today, yesterday], [10.0, 20.0]])
-        companyName2DateValueArrayDict[CompanyEnum.APPLE.value] = dateValueArray
-        stockMarketData = StockMarketData(companyName2DateValueArrayDict)
-
-        tradingAction = rt.doTrade(portfolio, stockMarketData)
+        tradingAction = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(path='../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
         self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
         self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
         self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+        
+    def testSimpleTrader(self):
+        st = SimpleTrader()     
+        
+        sharesOfCompanyList = list()
+        sharesOfCompanyX = SharesOfCompany("Company X", 10)
+        sharesOfCompanyY = SharesOfCompany("Company Y", 50)
+        sharesOfCompanyList.append(sharesOfCompanyX)
+        sharesOfCompanyList.append(sharesOfCompanyY)
+        
+        portfolio = Portfolio(1000.0, sharesOfCompanyList)   
+        
+        tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(path='../../datasets/'))
+        self.assertTrue(isinstance(tradingAction, TradingAction))
+        
+        self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
+        self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
+        self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+        
         
     def testSimpleTraderConstruction(self):
         st = SimpleTrader()

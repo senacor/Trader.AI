@@ -9,6 +9,7 @@ from trading.trader_interface import StockMarketData
 from trading.trader_interface import Portfolio
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import SharesOfCompany
+from trading.trader_interface import CompanyEnum
 
 
 class RandomTrader(ITrader):
@@ -30,9 +31,8 @@ class RandomTrader(ITrader):
         Returns:
           An TradingAction instance
         """
-        sharesOfCompany = SharesOfCompany("Postbank", 10);
+        sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, 10);
         
         result = TradingAction(TradingActionEnum.BUY, sharesOfCompany)
         
         return result
-        
