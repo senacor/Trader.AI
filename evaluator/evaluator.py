@@ -1,31 +1,32 @@
 import json
-from pprint import pprint
+import numpy
 
-from trading.random_trader import RandomTrader
 from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData
 
-rt = RandomTrader()
 
-
-# tradingAction = rt.doTrade(portfolio, stockMarketData)
-
-def read_portfolio() -> Portfolio:
-    json_data = open("json/portfolio.json").read()
+def read_portfolio(name: str = 'portfolio') -> Portfolio:
+    file = open("../json/" + name + ".json")
+    json_data = file.read()
     data = json.loads(json_data)
+    file.close()
 
     shares_list = list()
     for share in data['shares']:
         shares_list.append(SharesOfCompany(share['name'], share['amount']))
 
-    pprint(shares_list[0].companyName)
-    pprint(shares_list[0].amountOfShares)
-    pprint(data['cash'])
+    # pprint(shares_list[0].companyName)
+    # pprint(shares_list[0].amountOfShares)
+    # pprint(data['cash'])
     return Portfolio(data['cash'], shares_list)
 
 
-def read_stock_market_data() -> StockMarketData:
-    return StockMarketData()
+def read_stock_market_data(name: str = 'AAPL') -> StockMarketData:
+    na_portfolio = numpy.loadtxt('../datasets/' + name + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
+                                 delimiter=',', comments="#", skiprows=1)
+    alist = list()
+    for day in na_portfolio:
+        alist.append((day[0], day[4]))
 
+    data = {name: alist}
 
-read_portfolio()
-read_stock_market_data()
+    return StockMarketData(data)
