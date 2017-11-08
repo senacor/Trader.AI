@@ -14,6 +14,9 @@ from trader_interface import SharesOfCompany
 from trader_interface import ITrader
 from trader_interface import TradingAction
 from trader_interface import TradingActionEnum
+from datetime import date
+
+import numpy as np
 
 
 class RandomTraderTest(unittest.TestCase):
@@ -25,7 +28,19 @@ class RandomTraderTest(unittest.TestCase):
         pass
     
     def testStockMarketDataConstruction(self):
-        StockMarketData()
+        
+        companyName2DateValueArrayDict = dict()
+        
+        today = date(2017, 11, 8)
+        yesterday = date(2017, 11, 8)
+        dateValueArray1 = np.array([[today, yesterday], [10.0, 20.0]])
+        companyName2DateValueArrayDict["Postbank"] = dateValueArray1
+        
+        dateValueArray2 = np.array([[today, yesterday], [1.0, 2.0]])
+        companyName2DateValueArrayDict["BMW"] = dateValueArray2
+        
+        stockMarketData = StockMarketData(companyName2DateValueArrayDict)
+        stockMarketData.companyName2DateValueArrayDict.items()
 
     def testRandomTraderConstruction(self):
         rt = RandomTrader()        
@@ -42,7 +57,13 @@ class RandomTraderTest(unittest.TestCase):
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        stockMarketData = StockMarketData()
+        companyName2DateValueArrayDict = dict()
+        
+        today = date(2017, 11, 8)
+        yesterday = date(2017, 11, 8)
+        dateValueArray = np.array([[today, yesterday], [10.0, 20.0]])
+        companyName2DateValueArrayDict["Postbank"] = dateValueArray
+        stockMarketData = StockMarketData(companyName2DateValueArrayDict)
 
         tradingAction = rt.doTrade(portfolio, stockMarketData)
         self.assertTrue(isinstance(tradingAction, TradingAction))
