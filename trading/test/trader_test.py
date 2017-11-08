@@ -6,6 +6,7 @@ Module for testing of all trader components
 @author: jtymoszuk
 '''
 import unittest
+
 from trading.random_trader import RandomTrader
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import StockMarketData
@@ -14,6 +15,8 @@ from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import ITrader
 from trading.trader_interface import TradingAction
 from trading.trader_interface import TradingActionEnum
+from trading.trader_interface import CompanyEnum
+
 from datetime import date
 
 import numpy as np
@@ -34,10 +37,10 @@ class RandomTraderTest(unittest.TestCase):
         today = date(2017, 11, 8)
         yesterday = date(2017, 11, 8)
         dateValueArray1 = np.array([[today, yesterday], [10.0, 20.0]])
-        companyName2DateValueArrayDict["Postbank"] = dateValueArray1
+        companyName2DateValueArrayDict[CompanyEnum.APPLE.value] = dateValueArray1
         
         dateValueArray2 = np.array([[today, yesterday], [1.0, 2.0]])
-        companyName2DateValueArrayDict["BMW"] = dateValueArray2
+        companyName2DateValueArrayDict[CompanyEnum.BMW.value] = dateValueArray2
         
         stockMarketData = StockMarketData(companyName2DateValueArrayDict)
         stockMarketData.companyName2DateValueArrayDict.items()
@@ -62,7 +65,7 @@ class RandomTraderTest(unittest.TestCase):
         today = date(2017, 11, 8)
         yesterday = date(2017, 11, 8)
         dateValueArray = np.array([[today, yesterday], [10.0, 20.0]])
-        companyName2DateValueArrayDict["Postbank"] = dateValueArray
+        companyName2DateValueArrayDict[CompanyEnum.APPLE.value] = dateValueArray
         stockMarketData = StockMarketData(companyName2DateValueArrayDict)
 
         tradingAction = rt.doTrade(portfolio, stockMarketData)
@@ -70,7 +73,7 @@ class RandomTraderTest(unittest.TestCase):
         
         self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
         self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
-        self.assertEqual(tradingAction.sharesOfCompany.companyName, "Postbank")
+        self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
         
     def testSimpleTraderConstruction(self):
         st = SimpleTrader()
