@@ -76,7 +76,7 @@ plt.title('current prices / predicted prices by date')
 plt.ylabel('price')
 plt.xlabel('date')
 plt.legend(['current', 'predicted'], loc='best')
-#plt.show()
+plt.show()
 print("Model evaluated.")
 
 # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
