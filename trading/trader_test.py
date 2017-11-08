@@ -6,14 +6,14 @@ Module for testing of all trader components
 @author: jtymoszuk
 '''
 import unittest
-from random_trader import RandomTrader
-from simple_trader import SimpleTrader
-from trader_interface import StockMarketData
-from trader_interface import Portfolio
-from trader_interface import SharesOfCompany
-from trader_interface import ITrader
-from trader_interface import TradingAction
-from trader_interface import TradingActionEnum
+from trading.random_trader import RandomTrader
+from trading.simple_trader import SimpleTrader
+from trading.trader_interface import StockMarketData
+from trading.trader_interface import Portfolio
+from trading.trader_interface import SharesOfCompany
+from trading.trader_interface import ITrader
+from trading.trader_interface import TradingAction
+from trading.trader_interface import TradingActionEnum
 from datetime import date
 
 import numpy as np

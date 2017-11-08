@@ -3,12 +3,12 @@ Created on 08.11.2017
 
 @author: jtymoszuk
 '''
-from trader_interface import ITrader
-from trader_interface import TradingAction
-from trader_interface import StockMarketData
-from trader_interface import Portfolio
-from trader_interface import TradingActionEnum
-from trader_interface import SharesOfCompany
+from trading.trader_interface import ITrader
+from trading.trader_interface import TradingAction
+from trading.trader_interface import StockMarketData
+from trading.trader_interface import Portfolio
+from trading.trader_interface import TradingActionEnum
+from trading.trader_interface import SharesOfCompany
 
 
 class SimpleTrader(ITrader):
