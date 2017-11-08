@@ -12,6 +12,7 @@ import datetime
 from keras.callbacks import Callback
 from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
+from keras.utils import plot_model
 
 from processing import *
 
@@ -31,11 +32,6 @@ class TrainingHistory(Callback):
             pred = model.predict(X_train)
             self.predictions.append(pred)
 
-
-TRAIN_SIZE = 30
-TARGET_TIME = 1
-LAG_SIZE = 1
-EMB_SIZE = 1
 
 print('Data loading...')
 timeseries, dates = load_snp_close()
@@ -66,8 +62,15 @@ model.add(Dense(1))
 model.add(Activation('linear'))
 model.compile(optimizer='adam', loss='mse')
 
+print("X_train.shape: ")
+print(X_train.shape)
+print("Y_train.shape: ")
+print(Y_train.shape)
+
+print("Training......")
 model.fit(X_train, Y_train, nb_epoch=5, batch_size=128, verbose=1, validation_split=0.1)
 score = model.evaluate(X_test, Y_test, batch_size=128)
+print("Score:")
 print(score)
 
 params = []
@@ -86,6 +89,7 @@ for pred, par in zip(predicted, params):
     new_predicted.append(a)
 
 mse = mean_squared_error(predicted, new_predicted)
+print("mean_squared_error:")
 print(mse)
 
 try:
@@ -95,5 +99,8 @@ try:
     plt.plot(Y_testp[:150], color='green')  # GREEN - actual RESULT
     plt.plot(new_predicted[:150], color='red')  # ORANGE - restored PREDICTION
     plt.show()
+    
 except Exception as e:
     print(str(e))
+    
+plot_model(model, to_file='model.png', show_shapes=True)

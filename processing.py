@@ -47,6 +47,7 @@ def split_into_chunks(data, train, predict, step, binary=True, scale=True):
 
             # Use it only for daily return time series
             if binary:
+
                 if y_i > 0.:
                     y_i = [1., 0.]
                 else:

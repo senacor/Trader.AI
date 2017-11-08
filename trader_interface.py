@@ -1,6 +1,8 @@
 '''
 Created on 07.11.2017
 
+Module contains interfaces for trader implementations and model classes
+
 @author: jtymoszuk
 '''
 import abc
@@ -13,6 +15,22 @@ class TradingActionEnum(Enum):
     '''  
     BUY = 1
     SELL = 2
+
+
+class SharesOfCompany:
+    '''
+    Represents number of owned shares of one type (company) 
+    '''
+
+    def __init__(self, companyName: str, amountOfShares: int):
+        """ Constructor
+    
+        Args:
+          companyName : name of company
+          amountOfShares : amount of shares
+        """
+        self.companyName = companyName
+        self.amountOfShares = amountOfShares
 
 
 class TradingAction:
@@ -30,29 +48,13 @@ class TradingAction:
         self.actionEnum = actionEnum
         self.sharesOfCompany = sharesOfCompany
 
-        
-class SharesOfCompany:
-    '''
-    Represents number of owned shares of one type (company) 
-    '''
-
-    def __init__(self, companyName: str, amountOfShares: int):
-        """ Constructor
-    
-        Args:
-          companyName : name of company
-          amountOfShares : amount of shares
-        """
-        self.companyName = companyName
-        self.amountOfShares = amountOfShares
-
     
 class Portfolio:
     '''
     Represents portfolio of a client
     '''
 
-    def __init__(self,  cash: float, sharesOfCompanyList: list):
+    def __init__(self, cash: float, sharesOfCompanyList: list):
         """ Constructor
     
         Args:
@@ -67,7 +69,8 @@ class StockMarketData:
     '''
     Represents current and historical stick market data of all companies
     '''
-#TODO
+# TODO
+
 
 class ITrader(metaclass=abc.ABCMeta):
     '''
@@ -82,6 +85,6 @@ class ITrader(metaclass=abc.ABCMeta):
           portfolio : current Portfolio of this trader
           stockMarketData : StockMarketData for evaluation
         Returns:
-          An Action instance
+          An TradingAction instance
         """
         pass
