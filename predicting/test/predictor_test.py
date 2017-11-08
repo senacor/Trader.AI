@@ -10,7 +10,7 @@ import unittest
 from predicting.simple_predictor import SimplePredictor
 
 
-class RandomTraderTest(unittest.TestCase):
+class PredictingTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -29,5 +29,5 @@ class RandomTraderTest(unittest.TestCase):
 
     
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(RandomTraderTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(PredictingTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
