@@ -1,6 +1,8 @@
 import json
 from pprint import pprint
-from TraderAI.trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData
+
+from trading.random_trader import RandomTrader
+from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData
 
 rt = RandomTrader()
 
