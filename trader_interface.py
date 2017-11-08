@@ -69,7 +69,15 @@ class StockMarketData:
     '''
     Represents current and historical stick market data of all companies
     '''
-# TODO
+
+    def __init__(self, companyName2DateValueArrayDict: dict):
+        """ Constructor
+    
+        Args:
+          companyName2DateValueArrayDict : Dictionary containing current and historical data for all companies in Stock Market. 
+                                           Structure: key: company name as string, value: 2 column array: datetime.date, float
+        """
+        self.companyName2DateValueArrayDict = companyName2DateValueArrayDict
 
 
 class ITrader(metaclass=abc.ABCMeta):
