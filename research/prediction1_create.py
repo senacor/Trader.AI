@@ -11,7 +11,7 @@ from keras.utils import plot_model
 # Load source data
 print("Data loading...")
 dates, prices = [], []
-f = open('datasets/GSPC.csv', 'r')
+f = open('datasets/^DJT.csv', 'r')
 next(f) # skip the header line
 for line in f:
     try:
@@ -27,9 +27,14 @@ print("Data loaded:", len(prices), "prices and", len(dates), "dates read.")
 # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
 print("Data splitting...")
 lastPrices, currentPrice = [], []
+from sklearn import preprocessing
 for i in range(0, len(prices)-100):
+    # scaledLastPrices = preprocessing.scale(prices[i:101+i])
+    # assert len(scaledLastPrices) == 101
     lastPrices.append(prices[i:100+i])
     currentPrice.append(prices[100+i])
+    # lastPrices.append(scaledLastPrices[:100])
+    # currentPrice.append(scaledLastPrices[100])
 # Split lastPrices and currentPrice into 80% training data and 20% test data
 from sklearn.model_selection import train_test_split
 lastPrices_training, lastPrices_test, currentPrice_training, currentPrice_test = train_test_split(lastPrices, currentPrice, test_size=0.2)
