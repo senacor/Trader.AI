@@ -1,0 +1,3 @@
+stock A: Disney
+stock B: IBM
+stock C: Coca Cola

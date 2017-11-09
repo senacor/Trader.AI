@@ -1,6 +1,7 @@
 import json
 import numpy
 
+import Columns
 from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData
 
 
@@ -20,14 +21,13 @@ def read_portfolio(name: str = 'portfolio') -> Portfolio:
     return Portfolio(data['cash'], shares_list)
 
 
-def read_stock_market_data(name: str = 'AAPL', path:str='../datasets/') -> StockMarketData:
+def read_stock_market_data(name: str = 'AAPL', path: str = '../datasets/') -> StockMarketData:
     na_portfolio = numpy.loadtxt(path + name + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
                                  delimiter=',', comments="#", skiprows=1)
     alist = list()
     for day in na_portfolio:
-        alist.append((day[0], day[4]))
+        alist.append((day[Columns.DATE], day[Columns.ADJ_CLOSE]))
 
     data = {name: alist}
 
     return StockMarketData(data)
-
