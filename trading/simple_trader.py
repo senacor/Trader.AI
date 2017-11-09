@@ -20,15 +20,15 @@ class SimpleTrader(ITrader):
     Simple Trader generates TradingAction based on simple logic, input data and prediction from NN-Engine
     '''
 
-    def __init__(self,predictor:IPredictor = None):
+    def __init__(self, predictor: IPredictor = None):
         '''
         Constructor
         '''
-        if(predictor is not None):
-            self.predictor
-        else :
-            self.perfectStockAPredictor = PerfectStockAPredictor()
-        
+        if (predictor is not None):
+            self.predictor = predictor
+        else:
+            self.predictor = PerfectStockAPredictor()
+
     def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingAction:
         """ Generate action to be taken on the "stock market"
     
@@ -38,40 +38,42 @@ class SimpleTrader(ITrader):
         Returns:
           An TradingAction instance
         """
-        
-        appleData = stockMarketData.companyName2DateValueArrayDict.get(CompanyEnum.APPLE.value)
+
+        symbol = next(iter(stockMarketData.companyName2DateValueArrayDict.keys()))
+        appleData = stockMarketData.companyName2DateValueArrayDict[symbol]
         lastValue = appleData[-1][-1]
         # googleData =stockMarketData.companyName2DateValueArrayDict.get(CompanyEnum.GOOGLE.value)
-        
-        predictedNextAppleValue = self.perfectStockAPredictor.doPredict(appleData)
+
+        predictedNextAppleValue = self.predictor.doPredict(appleData)
         # predictedNextGoogleValue = self.perfectStockAPredictor.doPredict(googleData)
-        
+
+        result = None
         tradingAction = None
         if predictedNextAppleValue > lastValue:
             tradingAction = TradingActionEnum.BUY
         elif predictedNextAppleValue < lastValue:
             tradingAction = TradingActionEnum.SELL
-        
+
         if tradingAction == TradingActionEnum.BUY:
-            if(portfolio.cash > lastValue) :
+            if (portfolio.cash > lastValue):
                 # We can buy something
                 amountOfUnitsToBuy = int(portfolio.cash // lastValue)
-                sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, amountOfUnitsToBuy);
+                sharesOfCompany = SharesOfCompany(symbol, amountOfUnitsToBuy);
                 result = TradingAction(tradingAction, sharesOfCompany)
         elif tradingAction == TradingActionEnum.SELL:
             # Check if something can be selled
-            sharesOfAppleInPortfolio = self.findSharesOfCompany(CompanyEnum.APPLE.value, portfolio.shares)
-            if(sharesOfAppleInPortfolio is not None) :
+            sharesOfAppleInPortfolio = self.findSharesOfCompany(symbol, portfolio.shares)
+            if (sharesOfAppleInPortfolio is not None):
                 # Sell everything
-                sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, sharesOfAppleInPortfolio.amountOfShares);
+                sharesOfCompany = SharesOfCompany(symbol, sharesOfAppleInPortfolio.amountOfShares);
                 result = TradingAction(tradingAction, sharesOfCompany)
             else:
                 # Nothing to sell
                 result = None
-          
+
         return result
-        
-    def findSharesOfCompany(self , companyName: str, shares: list) -> SharesOfCompany:
+
+    def findSharesOfCompany(self, companyName: str, shares: list) -> SharesOfCompany:
         """ Finds SharesOfCompany in list by company name
     
         Args:
@@ -83,6 +85,5 @@ class SimpleTrader(ITrader):
         for sharesOfCompany in shares:
             if (isinstance(sharesOfCompany, SharesOfCompany) and sharesOfCompany.companyName == companyName):
                 return sharesOfCompany
-        
-        return None 
-        
+
+        return None

@@ -12,14 +12,15 @@ from enum import Enum
 class TradingActionEnum(Enum):
     '''
     Represents possible actions on stock market
-    '''  
+    '''
     BUY = 1
     SELL = 2
-    
+
+
 class CompanyEnum(Enum):
     '''
     Represents companies on stock market
-    '''  
+    '''
     GOOGLE = "GOOG"
     APPLE = "AAPL"
 
@@ -45,7 +46,7 @@ class TradingAction:
     Represents action to be taken on a portfolio of a client
     '''
 
-    def __init__(self, actionEnum: TradingActionEnum , sharesOfCompany: SharesOfCompany):
+    def __init__(self, actionEnum: TradingActionEnum, sharesOfCompany: SharesOfCompany):
         """ Constructor
     
         Args:
@@ -55,7 +56,7 @@ class TradingAction:
         self.actionEnum = actionEnum
         self.sharesOfCompany = sharesOfCompany
 
-    
+
 class Portfolio:
     '''
     Represents portfolio of a client
@@ -70,6 +71,11 @@ class Portfolio:
         """
         self.cash = cash
         self.shares = sharesOfCompanyList
+
+    def total_value(self, date: str, prices: dict):
+        values = [share.amountOfShares * [price[1] for price in prices[share.companyName] if date == price[0]][0] for
+                  share in self.shares]
+        return sum(values) + self.cash
 
 
 class StockMarketData:
