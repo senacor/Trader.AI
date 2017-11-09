@@ -3,7 +3,7 @@ Created on 08.11.2017
 
 @author: jtymoszuk
 '''
-import abc
+import random
 from predicting.predictor_interface import IPredictor
 
 
@@ -25,5 +25,5 @@ class SimplePredictor(IPredictor):
         Returns:
           last value from input
         """
-        return data[-1][-1] # return last value from input
+        return data[-1][-1] + random.uniform(-1.0, 1.0)  # return last value from input +- random value between -1 and +1
         

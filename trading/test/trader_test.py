@@ -73,8 +73,8 @@ class RandomTraderTest(unittest.TestCase):
         st = SimpleTrader()     
         
         sharesOfCompanyList = list()
-        sharesOfCompanyX = SharesOfCompany("Company X", 10)
-        sharesOfCompanyY = SharesOfCompany("Company Y", 50)
+        sharesOfCompanyX = SharesOfCompany(CompanyEnum.APPLE.value, 10)
+        sharesOfCompanyY = SharesOfCompany(CompanyEnum.GOOGLE.value, 50)
         sharesOfCompanyList.append(sharesOfCompanyX)
         sharesOfCompanyList.append(sharesOfCompanyY)
         

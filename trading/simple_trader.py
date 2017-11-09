@@ -48,11 +48,37 @@ class SimpleTrader(ITrader):
         elif predictedNextAppleValue < lastValue:
             tradingAction = TradingActionEnum.SELL
         
-        if not (tradingAction is None):
-            sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, 10);
-            result = TradingAction(tradingAction, sharesOfCompany)
-        else:
-            result = None
+        if tradingAction == TradingActionEnum.BUY:
+            if(portfolio.cash > lastValue) :
+                # We can buy something
+                amountOfUnitsToBuy = int(portfolio.cash // lastValue)
+                sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, amountOfUnitsToBuy);
+                result = TradingAction(tradingAction, sharesOfCompany)
+        elif tradingAction == TradingActionEnum.SELL:
+            # Check if something can be selled
+            sharesOfAppleInPortfolio = self.findSharesOfCompany(CompanyEnum.APPLE.value, portfolio.shares)
+            if(sharesOfAppleInPortfolio is not None) :
+                # Sell everything
+                sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, sharesOfAppleInPortfolio.amountOfShares);
+                result = TradingAction(tradingAction, sharesOfCompany)
+            else:
+                # Nothing to sell
+                result = None
           
         return result
+        
+    def findSharesOfCompany(self , companyName: str, shares: list) -> SharesOfCompany:
+        """ Finds SharesOfCompany in list by company name
+    
+        Args:
+          companyName : company to find
+          list : list with SharesOfCompany
+        Returns:
+          SharesOfCompany for given company or None 
+        """
+        for sharesOfCompany in shares:
+            if (isinstance(sharesOfCompany, SharesOfCompany) and sharesOfCompany.companyName == companyName):
+                return sharesOfCompany
+        
+        return None 
         
