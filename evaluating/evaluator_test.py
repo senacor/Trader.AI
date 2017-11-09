@@ -110,9 +110,13 @@ class EvaluatorTest(unittest.TestCase):
         t = -len(data2.companyName2DateValueArrayDict['stock_a_2012-2017']) + 1
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
-        stock_market_data = getMarketData(symbol, full_stock_market_data, t)
+        stock_market_data = getMarketData(symbol, full_stock_market_data, t) # TODO this is also done inside while loop
         portfolio = Portfolio(50000.0, [SharesOfCompany(symbol, 0)])
         portfolio_over_time[get_current_date(symbol, stock_market_data)] = portfolio
+
+        # TODO loop over (indices of) data2
+        # for index in range(len(data2.companyName2DateValueArrayDict['stock_a_2012-2017']))
+        #     stock_market_data_for_traders = data1 + data2[0:index]
 
         # Iterate over each day between 2012 and 2017
         while t <= 0:

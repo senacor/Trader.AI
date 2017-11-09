@@ -56,7 +56,6 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
         if share.companyName is update.sharesOfCompany.companyName:
             amount = update.sharesOfCompany.amountOfShares
             trade_volume = amount * last_close
-
             if update.actionEnum is TradingActionEnum.BUY:
                 print(f"  Buying {amount} shares of '{share.companyName}' with an individual value of {last_close}")
                 print(f"  Volume of this trade: {trade_volume}")
@@ -68,11 +67,13 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
                     print(  f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
                           f"volume of {trade_volume}")
             elif update.actionEnum is TradingActionEnum.SELL:
+                # TODO check whether selling is possible
                 print(f"  Selling {amount} shares of {share.companyName} with individual value of {last_close}")
                 print(f"  Volume of this trade: {trade_volume}")
 
                 share.amountOfShares -= amount
                 updated_portfolio.cash += trade_volume
+
 
     print(f"Resulting available cash after trade: {updated_portfolio.cash}")
     total_portfolio_value = updated_portfolio.total_value(current_date[-1][0],
