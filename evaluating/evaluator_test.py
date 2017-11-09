@@ -7,9 +7,9 @@ Module for testing of the evaluating component
 '''
 import unittest
 
-from evaluating.evaluator import read_portfolio, read_stock_market_data
+from evaluating.evaluator import read_portfolio, read_stock_market_data, update_portfolio
 from trading.simple_trader import SimpleTrader
-from trading.trader_interface import CompanyEnum
+from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, Portfolio
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -33,10 +33,22 @@ class EvaluatorTest(unittest.TestCase):
         self.assertTrue(stock_market_data.companyName2DateValueArrayDict.__contains__(CompanyEnum.APPLE.value))
 
     def testDoTrade(self):
-        rt = SimpleTrader()
-        tradingAction = rt.doTrade(read_portfolio(), read_stock_market_data())
+        portfolio = read_portfolio()
 
-        # self.assertEqual(tradingAction., )
+        trading_action = SimpleTrader().doTrade(portfolio, read_stock_market_data())
+
+        if trading_action is not None:
+            self.assertEqual(trading_action.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+
+    def testUpdatePortfolio(self):
+        cash_reserve = 10000.0
+
+        portfolio = Portfolio(cash_reserve, [SharesOfCompany('AAPL', 200)])
+        update = TradingAction(TradingActionEnum.BUY, SharesOfCompany('AAPL', 100))
+        update_portfolio(read_stock_market_data(), portfolio, update)
+
+        # Trade volume is too high for current cash reserve. Nothing should happen
+        self.assertEqual(portfolio.cash, cash_reserve)
 
 
 if __name__ == "__main__":
