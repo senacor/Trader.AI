@@ -11,6 +11,7 @@ from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import CompanyEnum
 from predicting.simple_predictor import SimplePredictor
+from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 
 
 class SimpleTrader(ITrader):
@@ -22,7 +23,7 @@ class SimpleTrader(ITrader):
         '''
         Constructor
         '''
-        self.applePredictor = SimplePredictor()
+        self.perfectStockAPredictor = PerfectStockAPredictor()
         self.bmwPredictor = SimplePredictor()
         
     def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingAction:
@@ -39,8 +40,8 @@ class SimpleTrader(ITrader):
         lastValue = appleData[-1][-1]
         # googleData =stockMarketData.companyName2DateValueArrayDict.get(CompanyEnum.GOOGLE.value)
         
-        predictedNextAppleValue = self.applePredictor.doPredict(appleData)
-        # predictedNextGoogleValue = self.applePredictor.doPredict(googleData)
+        predictedNextAppleValue = self.perfectStockAPredictor.doPredict(appleData)
+        # predictedNextGoogleValue = self.perfectStockAPredictor.doPredict(googleData)
         
         tradingAction = None
         if predictedNextAppleValue > lastValue:
