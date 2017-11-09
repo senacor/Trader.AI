@@ -61,7 +61,7 @@ class RandomTraderTest(unittest.TestCase):
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        tradingAction = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(path='../../datasets/'))
+        tradingAction = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
         self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
@@ -79,7 +79,7 @@ class RandomTraderTest(unittest.TestCase):
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(path='../../datasets/'))
+        tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
         if(tradingAction.actionEnum == TradingActionEnum.BUY):
