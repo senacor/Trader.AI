@@ -12,6 +12,7 @@ from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import CompanyEnum
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
+from predicting.predictor_interface import IPredictor
 
 
 class SimpleTrader(ITrader):
@@ -19,12 +20,14 @@ class SimpleTrader(ITrader):
     Simple Trader generates TradingAction based on simple logic, input data and prediction from NN-Engine
     '''
 
-    def __init__(self):
+    def __init__(self,predictor:IPredictor = None):
         '''
         Constructor
         '''
-        self.perfectStockAPredictor = PerfectStockAPredictor()
-        self.bmwPredictor = SimplePredictor()
+        if(predictor is not None):
+            self.predictor
+        else :
+            self.perfectStockAPredictor = PerfectStockAPredictor()
         
     def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingAction:
         """ Generate action to be taken on the "stock market"
