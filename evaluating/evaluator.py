@@ -48,18 +48,18 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
         print("No action this time")
         return updated_portfolio
 
-    current_date = stock_market_data.market_data.get(update.shares.name)
-    last_close = current_date[-1][1]
+    current_date = stock_market_data.get_most_recent_trade_day(update.shares.name)
+    current_price = stock_market_data.get_most_recent_price(update.shares.name)
 
-    print(f"Available cash on {current_date[-1][0]}: {updated_portfolio.cash}")
+    print(f"Available cash on {current_date}: {updated_portfolio.cash}")
     # for share in update.shares:
     share = updated_portfolio.get_or_insert(update.shares.name)
     # if share.name is update.shares.name:
     amount = update.shares.amount
-    trade_volume = amount * last_close
+    trade_volume = amount * current_price
 
     if update.action is TradingActionEnum.BUY:
-        print(f"  Buying {amount} shares of '{share.name}' with an individual value of {last_close}")
+        print(f"  Buying {amount} shares of '{share.name}' with an individual value of {current_price}")
         print(f"  Volume of this trade: {trade_volume}")
 
         if trade_volume <= updated_portfolio.cash:
@@ -69,7 +69,7 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
             print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
                   f"volume of {trade_volume}")
     elif update.action is TradingActionEnum.SELL:
-        print(f"  Selling {amount} shares of {share.name} with individual value of {last_close}")
+        print(f"  Selling {amount} shares of {share.name} with individual value of {current_price}")
         print(f"  Volume of this trade: {trade_volume}")
 
         if share.amount > amount:
@@ -79,8 +79,8 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
             print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
 
     print(f"Resulting available cash after trade: {updated_portfolio.cash}")
-    total_portfolio_value = updated_portfolio.total_value(current_date[-1][0],
-                                                          stock_market_data.market_data)
+
+    total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
     print(f"Total portfolio value after trade: {total_portfolio_value}")
     return updated_portfolio
 

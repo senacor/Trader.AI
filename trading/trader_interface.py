@@ -103,6 +103,12 @@ class StockMarketData:
         """
         self.market_data = market_data
 
+    def get_most_recent_trade_day(self, stock: str):
+        return self.market_data.get(stock)[-1][0]
+
+    def get_most_recent_price(self, stock: str):
+        return self.market_data.get(stock)[-1][1]
+
 
 class ITrader(metaclass=abc.ABCMeta):
     '''

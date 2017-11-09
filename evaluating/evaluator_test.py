@@ -35,7 +35,7 @@ class EvaluatorTest(unittest.TestCase):
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].companyName, CompanyEnum.GOOGLE.value)
+        self.assertEqual(portfolio.shares[0].name, CompanyEnum.GOOGLE.value)
 
     def testReadStockMarketData(self):
         apple = CompanyEnum.APPLE.value
@@ -53,7 +53,7 @@ class EvaluatorTest(unittest.TestCase):
         trading_action = SimpleTrader().doTrade(read_portfolio(), read_stock_market_data([apple]))
 
         self.assertTrue(trading_action is not None)
-        self.assertEqual(trading_action.shares.companyName, apple)
+        self.assertEqual(trading_action.shares.name, apple)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         cash_reserve = 10000.0
@@ -70,8 +70,8 @@ class EvaluatorTest(unittest.TestCase):
         # Trade volume is too high for current cash reserve. Nothing should happen
         self.assertEqual(updated_portfolio.cash, cash_reserve)
         self.assertEqual(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].companyName, symbol)
-        self.assertEqual(updated_portfolio.shares[0].amountOfShares, 200)
+        self.assertEqual(updated_portfolio.shares[0].name, symbol)
+        self.assertEqual(updated_portfolio.shares[0].amount, 200)
 
     def testUpdatePortfolio_sufficientCashReserve(self):
         cash_reserve = 20000.0
@@ -88,8 +88,8 @@ class EvaluatorTest(unittest.TestCase):
         # Current cash reserve is sufficient for trade volume. Trade should happen
         self.assertLess(updated_portfolio.cash, cash_reserve)
         self.assertLess(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].companyName, symbol)
-        self.assertEqual(updated_portfolio.shares[0].amountOfShares, 300)
+        self.assertEqual(updated_portfolio.shares[0].name, symbol)
+        self.assertEqual(updated_portfolio.shares[0].amount, 300)
 
     def testUpdateAndDraw(self):
         symbol = 'stock_a'
