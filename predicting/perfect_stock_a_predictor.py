@@ -3,10 +3,13 @@ Created on 08.11.2017
 
 @author: rmueller
 '''
-import abc
 from predicting.predictor_interface import IPredictor
 from keras.models import model_from_json
 import numpy as np
+
+import os
+from definitions import ROOT_DIR
+from definitions import DATASETS_DIR
 
 
 class PerfectStockAPredictor(IPredictor):
@@ -18,12 +21,12 @@ class PerfectStockAPredictor(IPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        #TODO use other concept for paths
-        json_file = open('/Users/rmueller/Downloads/trader/predicting/perfect_stock_a_predictor.json', 'r')
+        # TODO use other concept for paths
+        json_file = open(os.path.join(ROOT_DIR, 'predicting', 'perfect_stock_a_predictor.json'), 'r')
         loaded_model_json = json_file.read()
         json_file.close()
         self.network = model_from_json(loaded_model_json)
-        self.network.load_weights('/Users/rmueller/Downloads/trader/predicting/perfect_stock_a_predictor.h5')
+        self.network.load_weights(os.path.join(ROOT_DIR, 'predicting', 'perfect_stock_a_predictor.h5'))
         self.network.compile(loss='mean_squared_error', optimizer='adam')
         
     def doPredict(self, data:list) -> float:
@@ -39,18 +42,18 @@ class PerfectStockAPredictor(IPredictor):
         dataAsArray = np.array(data)
         inputForNetwork = dataAsArray[:, [1]]
         inputForNetwork100 = inputForNetwork[:100]
-        inputForNetwork100 = np.reshape(inputForNetwork100, (1,100))
+        inputForNetwork100 = np.reshape(inputForNetwork100, (1, 100))
 
         try:
             return self.network.predict(inputForNetwork100, batch_size=128)
         except:
             print("Error in predicting next stock value.")
             assert False
-        
 
 ###############################################################################
 # The following code trains and stores the corresponding neural network
 ###############################################################################
+
 
 if __name__ == "__main__":
     # Necessary imports
@@ -62,12 +65,12 @@ if __name__ == "__main__":
     # Load the training data; here: complete data about stock A (Disney)
     print("Data loading...")
     dates, prices = [], []
-    f = open('../datasets/DIS.csv', 'r')
-    next(f) # skip the header line
+    f = open(os.path.join(DATASETS_DIR, 'DIS.csv'), 'r')
+    next(f)  # skip the header line
     for line in f:
         try:
-            dates.append(dt.datetime.strptime(line.split(',')[0], '%Y-%m-%d').date()) # save dates in datetime.date format
-            prices.append(float(line.split(',')[4])) # save prices in float format
+            dates.append(dt.datetime.strptime(line.split(',')[0], '%Y-%m-%d').date())  # save dates in datetime.date format
+            prices.append(float(line.split(',')[4]))  # save prices in float format
         except:
             print("Error in reading line", line)
     f.close()
@@ -75,9 +78,9 @@ if __name__ == "__main__":
 
     # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
     lastPrices, currentPrice = [], []
-    for i in range(0, len(prices)-100):
-        lastPrices.append(prices[i:100+i])
-        currentPrice.append(prices[100+i])
+    for i in range(0, len(prices) - 100):
+        lastPrices.append(prices[i:100 + i])
+        currentPrice.append(prices[100 + i])
 
     # Building a neural network
     network = Sequential()
@@ -100,8 +103,8 @@ if __name__ == "__main__":
     plt.legend(['training', 'testing'], loc='best')
     plt.figure()
     currentPrice_prediction = network.predict(lastPrices, batch_size=128)
-    plt.plot(dates[100:], currentPrice, color="black") # current prices in reality
-    plt.plot(dates[100:], currentPrice_prediction, color="green") # predicted prices by neural network
+    plt.plot(dates[100:], currentPrice, color="black")  # current prices in reality
+    plt.plot(dates[100:], currentPrice_prediction, color="green")  # predicted prices by neural network
     plt.title('current prices / predicted prices by date')
     plt.ylabel('price')
     plt.xlabel('date')
