@@ -14,7 +14,7 @@ from definitions import DATASETS_DIR
 
 class PerfectStockAPredictor(IPredictor):
     '''
-    Simple Predicator always returning last value form given input vector.
+    Perfect predictor for stock A based on an already trained neural network.
     '''
 
     def __init__(self):
@@ -27,7 +27,6 @@ class PerfectStockAPredictor(IPredictor):
         json_file.close()
         self.network = model_from_json(loaded_model_json)
         self.network.load_weights(os.path.join(ROOT_DIR, 'predicting', 'perfect_stock_a_predictor.h5'))
-        self.network.compile(loss='mean_squared_error', optimizer='adam')
         
     def doPredict(self, data:list) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
@@ -35,17 +34,19 @@ class PerfectStockAPredictor(IPredictor):
         Args:
           data : historical stock values of a company 
         Returns:
-          last value from input
+          predicted next stock value for that company
         """
-        # Our trained neural network takes 100 floats as input
+        # Assumptions about data: at least 100 pairs of type (_, float)
         assert len(data) >= 100
-        dataAsArray = np.array(data)
-        inputForNetwork = dataAsArray[:, [1]]
-        inputForNetwork100 = inputForNetwork[:100]
-        inputForNetwork100 = np.reshape(inputForNetwork100, (1, 100))
+        assert len(data[0]) == 2
+        assert isinstance(data[0][1], float)
+
+        # Extract last 100 floats (here: stock values) as input for neural network (format: numpy array of arrays)
+        inputValues = np.array([[x[1] for x in data[-100:]]])
 
         try:
-            return self.network.predict(inputForNetwork100, batch_size=128)
+            # Let network predict the next stock value based on last 100 stock values
+            return self.network.predict(inputValues)
         except:
             print("Error in predicting next stock value.")
             assert False
@@ -90,7 +91,7 @@ if __name__ == "__main__":
 
     # Configure and train the neural network
     network.compile(loss='mean_squared_error', optimizer='adam')
-    history = network.fit(lastPrices, currentPrice, epochs=5, batch_size=128, verbose=1)
+    history = network.fit(lastPrices, currentPrice, epochs=10, batch_size=128, verbose=1)
 
     # Evaluate the trained neural network and plot results
     score = network.evaluate(lastPrices, currentPrice, batch_size=128, verbose=0)

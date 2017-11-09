@@ -17,6 +17,9 @@ from trading.trader_interface import ITrader
 from trading.trader_interface import TradingAction
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import CompanyEnum
+from definitions import DATASETS_DIR
+
+import os
 
 from datetime import date
 
@@ -32,7 +35,6 @@ class RandomTraderTest(unittest.TestCase):
         pass
    
     def testStockMarketDataConstruction(self):
-        
         companyName2DateValueArrayDict = dict()
         
         today = date(2017, 11, 8)
@@ -69,6 +71,9 @@ class RandomTraderTest(unittest.TestCase):
         self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
         
     def testSimpleTrader(self):
+        
+        path = DATASETS_DIR
+        
         st = SimpleTrader()     
         
         sharesOfCompanyList = list()
