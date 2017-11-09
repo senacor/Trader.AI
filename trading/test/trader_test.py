@@ -30,7 +30,6 @@ class RandomTraderTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-    
    
     def testStockMarketDataConstruction(self):
         
@@ -83,10 +82,14 @@ class RandomTraderTest(unittest.TestCase):
         tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(path='../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
-        self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
-        self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
-        self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
-        
+        if(tradingAction.actionEnum == TradingActionEnum.BUY):
+            self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
+            self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 5)
+            self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+        elif (tradingAction.actionEnum, TradingActionEnum.SELL):
+            self.assertEqual(tradingAction.actionEnum, TradingActionEnum.SELL)
+            self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
+            self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
         
     def testSimpleTraderConstruction(self):
         st = SimpleTrader()
