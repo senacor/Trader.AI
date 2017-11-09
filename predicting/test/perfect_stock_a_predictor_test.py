@@ -28,7 +28,7 @@ class PerfectStockAPredictorTest(unittest.TestCase):
         predictor = PerfectStockAPredictor()
 
         # Get stock data from Apple stock
-        input = evaluating.evaluator.read_stock_market_data(['AAPL'], path='../../datasets/').companyName2DateValueArrayDict['AAPL']
+        input = evaluating.evaluator.read_stock_market_data(['AAPL'], path='../../datasets/').market_data['AAPL']
         self.assertTrue( len(input) >= 0)
 
         # Get a prediction

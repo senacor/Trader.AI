@@ -30,15 +30,15 @@ class SharesOfCompany:
     Represents number of owned shares of one type (company) 
     '''
 
-    def __init__(self, companyName: str, amountOfShares: int):
+    def __init__(self, name: str, amount: int):
         """ Constructor
     
         Args:
-          companyName : name of company
-          amountOfShares : amount of shares
+          name : name of company
+          amount : amount of shares
         """
-        self.companyName = companyName
-        self.amountOfShares = amountOfShares
+        self.name = name
+        self.amount = amount
 
 
 class TradingAction:
@@ -46,15 +46,15 @@ class TradingAction:
     Represents action to be taken on a portfolio of a client
     '''
 
-    def __init__(self, actionEnum: TradingActionEnum, sharesOfCompany: SharesOfCompany):
+    def __init__(self, action: TradingActionEnum, shares: SharesOfCompany):
         """ Constructor
     
         Args:
-          actionEnum : see TradingActionEnum
-          sharesOfCompany : see SharesOfCompany
+          action : see TradingActionEnum
+          shares : see SharesOfCompany
         """
-        self.actionEnum = actionEnum
-        self.sharesOfCompany = sharesOfCompany
+        self.action = action
+        self.shares = shares
 
 
 class Portfolio:
@@ -62,20 +62,31 @@ class Portfolio:
     Represents portfolio of a client
     '''
 
-    def __init__(self, cash: float, sharesOfCompanyList: list):
+    def __init__(self, cash: float, shares: list):
         """ Constructor
     
         Args:
           cash : current cash level
-          sharesOfCompanyList : list of SharesOfCompany, see SharesOfCompany
+          shares : list of SharesOfCompany, see SharesOfCompany
         """
         self.cash = cash
-        self.shares = sharesOfCompanyList
+        self.shares = shares
 
     def total_value(self, date: str, prices: dict):
-        values = [share.amountOfShares * [price[1] for price in prices[share.companyName] if date == price[0]][0] for
+        values = [share.amount * [price[1] for price in prices[share.name] if date == price[0]][0] for
                   share in self.shares]
         return sum(values) + self.cash
+
+    def has_stock(self, name: str):
+        return len(self.shares) != 0 and len([share for share in self.shares if share.name == name]) != 0
+
+    def get_or_insert(self, name: str):
+        if not self.has_stock(name):
+            share = SharesOfCompany(name, 0)
+            self.shares.append(share)
+            return share
+
+        return next(share for share in self.shares if share.name == name)
 
 
 class StockMarketData:
@@ -83,14 +94,14 @@ class StockMarketData:
     Represents current and historical stick market data of all companies
     '''
 
-    def __init__(self, companyName2DateValueArrayDict: dict):
+    def __init__(self, market_data: dict):
         """ Constructor
     
         Args:
-          companyName2DateValueArrayDict : Dictionary containing current and historical data for all companies in Stock Market. 
+          market_data : Dictionary containing current and historical data for all companies in Stock Market. 
                                            Structure: key: company name as string, value: 2 column array: datetime.date, float
         """
-        self.companyName2DateValueArrayDict = companyName2DateValueArrayDict
+        self.market_data = market_data
 
 
 class ITrader(metaclass=abc.ABCMeta):

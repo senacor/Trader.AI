@@ -48,36 +48,39 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
         print("No action this time")
         return updated_portfolio
 
-    current_date = stock_market_data.companyName2DateValueArrayDict.get(update.sharesOfCompany.companyName)
+    current_date = stock_market_data.market_data.get(update.shares.name)
     last_close = current_date[-1][1]
 
     print(f"Available cash on {current_date[-1][0]}: {updated_portfolio.cash}")
-    for share in updated_portfolio.shares:
-        if share.companyName is update.sharesOfCompany.companyName:
-            amount = update.sharesOfCompany.amountOfShares
-            trade_volume = amount * last_close
-            if update.actionEnum is TradingActionEnum.BUY:
-                print(f"  Buying {amount} shares of '{share.companyName}' with an individual value of {last_close}")
-                print(f"  Volume of this trade: {trade_volume}")
+    # for share in update.shares:
+    share = updated_portfolio.get_or_insert(update.shares.name)
+    # if share.name is update.shares.name:
+    amount = update.shares.amount
+    trade_volume = amount * last_close
 
-                if trade_volume <= updated_portfolio.cash:
-                    share.amountOfShares += amount
-                    updated_portfolio.cash -= trade_volume
-                else:
-                    print(  f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
-                          f"volume of {trade_volume}")
-            elif update.actionEnum is TradingActionEnum.SELL:
-                # TODO check whether selling is possible
-                print(f"  Selling {amount} shares of {share.companyName} with individual value of {last_close}")
-                print(f"  Volume of this trade: {trade_volume}")
+    if update.action is TradingActionEnum.BUY:
+        print(f"  Buying {amount} shares of '{share.name}' with an individual value of {last_close}")
+        print(f"  Volume of this trade: {trade_volume}")
 
-                share.amountOfShares -= amount
-                updated_portfolio.cash += trade_volume
+        if trade_volume <= updated_portfolio.cash:
+            share.amount += amount
+            updated_portfolio.cash -= trade_volume
+        else:
+            print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
+                  f"volume of {trade_volume}")
+    elif update.action is TradingActionEnum.SELL:
+        print(f"  Selling {amount} shares of {share.name} with individual value of {last_close}")
+        print(f"  Volume of this trade: {trade_volume}")
 
+        if share.amount > amount:
+            share.amount -= amount
+            updated_portfolio.cash += trade_volume
+        else:
+            print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
 
     print(f"Resulting available cash after trade: {updated_portfolio.cash}")
     total_portfolio_value = updated_portfolio.total_value(current_date[-1][0],
-                                                          stock_market_data.companyName2DateValueArrayDict)
+                                                          stock_market_data.market_data)
     print(f"Total portfolio value after trade: {total_portfolio_value}")
     return updated_portfolio
 
@@ -86,7 +89,7 @@ def draw(portfolio_over_time: dict, prices: StockMarketData):
     plt.figure()
 
     dates = portfolio_over_time.keys()
-    values = [pf.total_value(date, prices.companyName2DateValueArrayDict) for date, pf in portfolio_over_time.items()]
+    values = [pf.total_value(date, prices.market_data) for date, pf in portfolio_over_time.items()]
 
     plt.plot(dates, values, color="black")
     plt.show()

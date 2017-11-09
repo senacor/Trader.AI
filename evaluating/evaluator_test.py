@@ -16,11 +16,11 @@ from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEn
 
 def getMarketData(symbol: str, stock_market_data: StockMarketData, offset: int):
     if offset == 0: return stock_market_data
-    return StockMarketData({symbol: stock_market_data.companyName2DateValueArrayDict[symbol].copy()[:offset]})
+    return StockMarketData({symbol: stock_market_data.market_data[symbol].copy()[:offset]})
 
 
 def get_current_date(symbol: str, stock_market_data: StockMarketData):
-    return stock_market_data.companyName2DateValueArrayDict[symbol][-1][0]
+    return stock_market_data.market_data[symbol][-1][0]
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -43,9 +43,9 @@ class EvaluatorTest(unittest.TestCase):
 
         stock_market_data = read_stock_market_data([apple, google])
 
-        self.assertGreater(len(stock_market_data.companyName2DateValueArrayDict), 0)
-        self.assertTrue(apple in stock_market_data.companyName2DateValueArrayDict)
-        self.assertTrue(google in stock_market_data.companyName2DateValueArrayDict)
+        self.assertGreater(len(stock_market_data.market_data), 0)
+        self.assertTrue(apple in stock_market_data.market_data)
+        self.assertTrue(google in stock_market_data.market_data)
 
     def testDoTrade(self):
         apple = CompanyEnum.APPLE.value
@@ -53,7 +53,7 @@ class EvaluatorTest(unittest.TestCase):
         trading_action = SimpleTrader().doTrade(read_portfolio(), read_stock_market_data([apple]))
 
         self.assertTrue(trading_action is not None)
-        self.assertEqual(trading_action.sharesOfCompany.companyName, apple)
+        self.assertEqual(trading_action.shares.companyName, apple)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         cash_reserve = 10000.0
@@ -100,28 +100,24 @@ class EvaluatorTest(unittest.TestCase):
         data2 = read_stock_market_data(['stock_a_2012-2017'])
 
         # Combine both datasets to one StockMarketData object
-        full_stock_market_data = StockMarketData({symbol:
-                                                      data1.companyName2DateValueArrayDict['stock_a_1962-2011'] +
-                                                      data2.companyName2DateValueArrayDict[
-                                                          'stock_a_2012-2017']})
-        portfolio_over_time = {}
+        old_data = data1.market_data['stock_a_1962-2011']
+        new_data = data2.market_data['stock_a_2012-2017']
+        full_stock_market_data = StockMarketData({symbol: old_data + new_data})
 
-        # Start the time at the beginning of the second file
-        t = -len(data2.companyName2DateValueArrayDict['stock_a_2012-2017']) + 1
+        portfolio_over_time = {}
+        count_of_new_market_data = len(new_data) - 1
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
-        stock_market_data = getMarketData(symbol, full_stock_market_data, t) # TODO this is also done inside while loop
-        portfolio = Portfolio(50000.0, [SharesOfCompany(symbol, 0)])
-        portfolio_over_time[get_current_date(symbol, stock_market_data)] = portfolio
+        portfolio = Portfolio(50000.0, [])
+        portfolio_over_time[new_data[0][0]] = portfolio
 
-        # TODO loop over (indices of) data2
-        # for index in range(len(data2.companyName2DateValueArrayDict['stock_a_2012-2017']))
-        #     stock_market_data_for_traders = data1 + data2[0:index]
+        print(portfolio_over_time)
 
-        # Iterate over each day between 2012 and 2017
-        while t <= 0:
+        for index in range(count_of_new_market_data):
+            currentTick = index - count_of_new_market_data
+
             # Retrieve the stock market data up the current day
-            stock_market_data = getMarketData(symbol, full_stock_market_data, t)
+            stock_market_data = getMarketData(symbol, full_stock_market_data, currentTick)
 
             # Ask the trader for its action
             update = trader.doTrade(portfolio, stock_market_data)
@@ -131,7 +127,6 @@ class EvaluatorTest(unittest.TestCase):
 
             # Save the updated portfolio in our dict
             portfolio_over_time[get_current_date(symbol, stock_market_data)] = portfolio
-            t += 1
 
         # Draw a diagram of the portfolio's changes over time
         draw(portfolio_over_time, stock_market_data)

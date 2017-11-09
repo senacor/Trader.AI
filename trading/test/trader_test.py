@@ -46,7 +46,7 @@ class RandomTraderTest(unittest.TestCase):
         companyName2DateValueArrayDict[CompanyEnum.GOOGLE.value] = dateValueArray2
         
         stockMarketData = StockMarketData(companyName2DateValueArrayDict)
-        stockMarketData.companyName2DateValueArrayDict.items()
+        stockMarketData.market_data.items()
 
     def testRandomTraderConstruction(self):
         rt = RandomTrader()        
@@ -66,9 +66,9 @@ class RandomTraderTest(unittest.TestCase):
         tradingAction = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
-        self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
-        self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
-        self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+        self.assertEqual(tradingAction.action, TradingActionEnum.BUY)
+        self.assertEqual(tradingAction.shares.amountOfShares, 10)
+        self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
         
     def testSimpleTrader(self):
         
@@ -87,14 +87,14 @@ class RandomTraderTest(unittest.TestCase):
         tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
         self.assertTrue(isinstance(tradingAction, TradingAction))
         
-        if(tradingAction.actionEnum == TradingActionEnum.BUY):
-            self.assertEqual(tradingAction.actionEnum, TradingActionEnum.BUY)
-            self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 5)
-            self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
-        elif (tradingAction.actionEnum, TradingActionEnum.SELL):
-            self.assertEqual(tradingAction.actionEnum, TradingActionEnum.SELL)
-            self.assertEqual(tradingAction.sharesOfCompany.amountOfShares, 10)
-            self.assertEqual(tradingAction.sharesOfCompany.companyName, CompanyEnum.APPLE.value)
+        if(tradingAction.action == TradingActionEnum.BUY):
+            self.assertEqual(tradingAction.action, TradingActionEnum.BUY)
+            self.assertEqual(tradingAction.shares.amountOfShares, 5)
+            self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
+        elif (tradingAction.action, TradingActionEnum.SELL):
+            self.assertEqual(tradingAction.action, TradingActionEnum.SELL)
+            self.assertEqual(tradingAction.shares.amountOfShares, 10)
+            self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
         
     def testSimpleTraderConstruction(self):
         st = SimpleTrader()

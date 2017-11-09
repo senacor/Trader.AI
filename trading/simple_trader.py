@@ -39,8 +39,8 @@ class SimpleTrader(ITrader):
           An TradingAction instance
         """
 
-        symbol = next(iter(stockMarketData.companyName2DateValueArrayDict.keys()))
-        appleData = stockMarketData.companyName2DateValueArrayDict[symbol]
+        symbol = next(iter(stockMarketData.market_data.keys()))
+        appleData = stockMarketData.market_data[symbol]
         lastValue = appleData[-1][-1]
         # googleData =stockMarketData.companyName2DateValueArrayDict.get(CompanyEnum.GOOGLE.value)
 
@@ -65,7 +65,7 @@ class SimpleTrader(ITrader):
             sharesOfAppleInPortfolio = self.findSharesOfCompany(symbol, portfolio.shares)
             if (sharesOfAppleInPortfolio is not None):
                 # Sell everything
-                sharesOfCompany = SharesOfCompany(symbol, sharesOfAppleInPortfolio.amountOfShares);
+                sharesOfCompany = SharesOfCompany(symbol, sharesOfAppleInPortfolio.amount);
                 result = TradingAction(tradingAction, sharesOfCompany)
             else:
                 # Nothing to sell
@@ -83,7 +83,7 @@ class SimpleTrader(ITrader):
           SharesOfCompany for given company or None 
         """
         for sharesOfCompany in shares:
-            if (isinstance(sharesOfCompany, SharesOfCompany) and sharesOfCompany.companyName == companyName):
+            if (isinstance(sharesOfCompany, SharesOfCompany) and sharesOfCompany.name == companyName):
                 return sharesOfCompany
 
         return None
