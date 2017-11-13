@@ -26,16 +26,19 @@ class SimpleTrader(ITrader):
         self.stockAPredictor = stockAPredictor
         self.stockBPredictor = stockBPredictor
 
-    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData,
+    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData,
                 company_a_name=CompanyEnum.COMPANY_A.value,
                 company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
-          portfolio : current Portfolio of this trader_interface
+          portfolio : current Portfolio of this trader
+          currentPortfolioValue : value of Portfolio at given Momemnt
           stockMarketData : StockMarketData for evaluation
+          company_a_name : optional name of 1st company, or default
+          company_b_name : optional name of 2nd company, or default
         Returns:
-          An TradingActionList instance, may be empty never None
+          A TradingActionList instance, may be empty never None
         """
         
         localPortfolio = copy.deepcopy(portfolio)

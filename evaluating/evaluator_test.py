@@ -43,7 +43,8 @@ class EvaluatorTest(unittest.TestCase):
         symbol = 'AAPL'
 
         trader = SimpleTrader(PerfectStockAPredictor(), None)
-        trading_action_list = trader.doTrade(read_portfolio(), read_stock_market_data([symbol]), company_a_name=symbol)
+        currentPortfolioValue = 0.0 #Dummy value
+        trading_action_list = trader.doTrade(read_portfolio(), currentPortfolioValue,  read_stock_market_data([symbol]), company_a_name=symbol)
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)

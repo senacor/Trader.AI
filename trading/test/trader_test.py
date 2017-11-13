@@ -58,8 +58,9 @@ class TraderTest(unittest.TestCase):
         sharesOfCompanyList.append(sharesOfCompanyY)
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
+        currentPortfolioValue = 0.0 #Dummy value
         
-        tradingActionList = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
+        tradingActionList = rt.doTrade(portfolio, currentPortfolioValue, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
         self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
         self.assertEqual(tradingActionList.len(), 1)
@@ -78,8 +79,9 @@ class TraderTest(unittest.TestCase):
         sharesOfCompanyList.append(sharesOfCompanyY)
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
+        currentPortfolioValue = 0.0 #Dummy value
         
-        tradingActionList = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
+        tradingActionList = st.doTrade(portfolio, currentPortfolioValue, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
         self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
         self.assertEqual(tradingActionList.len(), 1)
