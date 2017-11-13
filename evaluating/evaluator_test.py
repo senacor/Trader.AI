@@ -9,6 +9,7 @@ import unittest
 
 from evaluating.evaluator import read_portfolio, read_stock_market_data, update_portfolio, draw
 from predicting.simple_predictor import SimplePredictor
+from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, Portfolio, \
     StockMarketData
@@ -35,11 +36,11 @@ class EvaluatorTest(unittest.TestCase):
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].name, CompanyEnum.GOOGLE.value)
+        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_B.value)
 
     def testReadStockMarketData(self):
-        apple = CompanyEnum.APPLE.value
-        google = CompanyEnum.GOOGLE.value
+        apple = CompanyEnum.COMPANY_A.value
+        google = CompanyEnum.COMPANY_B.value
 
         stock_market_data = read_stock_market_data([apple, google])
 
@@ -48,16 +49,17 @@ class EvaluatorTest(unittest.TestCase):
         self.assertTrue(google in stock_market_data.market_data)
 
     def testDoTrade(self):
-        apple = CompanyEnum.APPLE.value
+        apple = CompanyEnum.COMPANY_A.value
 
-        trading_action = SimpleTrader().doTrade(read_portfolio(), read_stock_market_data([apple]))
+        tradingActionList = SimpleTrader(PerfectStockAPredictor(), None).doTrade(read_portfolio(), read_stock_market_data([apple]))
 
-        self.assertTrue(trading_action is not None)
-        self.assertEqual(trading_action.shares.name, apple)
+        self.assertTrue(tradingActionList is not None)
+        self.assertTrue(tradingActionList.len(),1)
+        self.assertEqual(tradingActionList.get(0).shares.name, apple)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         cash_reserve = 10000.0
-        symbol = CompanyEnum.APPLE.value
+        symbol = CompanyEnum.COMPANY_A.value
 
         data = list()
         data.append(('2017-01-01', 150.0))
@@ -75,7 +77,7 @@ class EvaluatorTest(unittest.TestCase):
 
     def testUpdatePortfolio_sufficientCashReserve(self):
         cash_reserve = 20000.0
-        symbol = CompanyEnum.APPLE.value
+        symbol = CompanyEnum.COMPANY_A.value
 
         data = list()
         data.append(('2017-01-01', 150.0))
@@ -92,8 +94,8 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(updated_portfolio.shares[0].amount, 300)
 
     def testUpdateAndDraw(self):
-        symbol = 'stock_a'
-        trader = SimpleTrader(SimplePredictor())
+        symbol = CompanyEnum.COMPANY_A.value
+        trader = SimpleTrader(SimplePredictor(), None)
 
         # Reading in *all* available data
         data1 = read_stock_market_data(['stock_a_1962-2011'])
@@ -123,7 +125,11 @@ class EvaluatorTest(unittest.TestCase):
             update = trader.doTrade(portfolio, stock_market_data)
 
             # Update the portfolio that is saved at the ILSE
-            portfolio = update_portfolio(stock_market_data, portfolio, update)
+            tradingAction = None
+            if (update.len()>0): 
+                tradingAction=update.get(0)
+                        
+            portfolio = update_portfolio(stock_market_data, portfolio, tradingAction)
 
             # Save the updated portfolio in our dict
             portfolio_over_time[get_current_date(symbol, stock_market_data)] = portfolio

@@ -8,11 +8,7 @@ Module for testing of all predicting components
 import unittest
 
 import evaluating.evaluator
-from trading.trader_interface import StockMarketData
-
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
-from datetime import date
-import numpy as np
 
 
 class PerfectStockAPredictorTest(unittest.TestCase):

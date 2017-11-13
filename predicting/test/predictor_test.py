@@ -35,7 +35,7 @@ class PredictingTest(unittest.TestCase):
 
         result = sp.doPredict(inputData)
         
-        self.assertEqual(result, 3.0)
+        self.assertNotEqual(result, 3.0)
 
     
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ Created on 08.11.2017
 
 @author: jtymoszuk
 '''
-from trading.trader_interface import ITrader
+from trading.trader_interface import ITrader, TradingActionList
 from trading.trader_interface import TradingAction
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import Portfolio
@@ -22,7 +22,7 @@ class RandomTrader(ITrader):
         Constructor
         '''
         
-    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingAction:
+    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
@@ -31,8 +31,9 @@ class RandomTrader(ITrader):
         Returns:
           An TradingAction instance
         """
-        sharesOfCompany = SharesOfCompany(CompanyEnum.APPLE.value, 10);
+        sharesOfCompany = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10);
         
-        result = TradingAction(TradingActionEnum.BUY, sharesOfCompany)
+        result = TradingActionList()
+        result.addTradingAction(TradingAction(TradingActionEnum.BUY, sharesOfCompany))
         
         return result

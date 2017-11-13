@@ -14,19 +14,17 @@ from trading.trader_interface import StockMarketData
 from trading.trader_interface import Portfolio
 from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import ITrader
-from trading.trader_interface import TradingAction
+from trading.trader_interface import TradingActionList
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import CompanyEnum
-from definitions import DATASETS_DIR
-
-import os
+from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 
 from datetime import date
 
 import numpy as np
 
 
-class RandomTraderTest(unittest.TestCase):
+class TraderTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -40,10 +38,10 @@ class RandomTraderTest(unittest.TestCase):
         today = date(2017, 11, 8)
         yesterday = date(2017, 11, 8)
         dateValueArray1 = np.array([[today, yesterday], [10.0, 20.0]])
-        companyName2DateValueArrayDict[CompanyEnum.APPLE.value] = dateValueArray1
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_A.value] = dateValueArray1
         
         dateValueArray2 = np.array([[today, yesterday], [1.0, 2.0]])
-        companyName2DateValueArrayDict[CompanyEnum.GOOGLE.value] = dateValueArray2
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_B.value] = dateValueArray2
         
         stockMarketData = StockMarketData(companyName2DateValueArrayDict)
         stockMarketData.market_data.items()
@@ -56,68 +54,68 @@ class RandomTraderTest(unittest.TestCase):
         rt = RandomTrader()     
         
         sharesOfCompanyList = list()
-        sharesOfCompanyX = SharesOfCompany("Company X", 10)
-        sharesOfCompanyY = SharesOfCompany("Company Y", 50)
+        sharesOfCompanyX = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
+        sharesOfCompanyY = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
         sharesOfCompanyList.append(sharesOfCompanyX)
         sharesOfCompanyList.append(sharesOfCompanyY)
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        tradingAction = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
-        self.assertTrue(isinstance(tradingAction, TradingAction))
+        tradingActionList = rt.doTrade(portfolio, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
+        self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
-        self.assertEqual(tradingAction.action, TradingActionEnum.BUY)
-        self.assertEqual(tradingAction.shares.amountOfShares, 10)
-        self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
+        self.assertEqual(tradingActionList.len(), 1)
+        self.assertEqual(tradingActionList.get(0).action, TradingActionEnum.BUY)
+        self.assertEqual(tradingActionList.get(0).shares.amount, 10)
+        self.assertEqual(tradingActionList.get(0).shares.name, CompanyEnum.COMPANY_A.value)
         
     def testSimpleTrader(self):
         
-        path = DATASETS_DIR
-        
-        st = SimpleTrader()     
+        st = SimpleTrader(PerfectStockAPredictor(), None)     
         
         sharesOfCompanyList = list()
-        sharesOfCompanyX = SharesOfCompany(CompanyEnum.APPLE.value, 10)
-        sharesOfCompanyY = SharesOfCompany(CompanyEnum.GOOGLE.value, 50)
+        sharesOfCompanyX = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
+        sharesOfCompanyY = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
         sharesOfCompanyList.append(sharesOfCompanyX)
         sharesOfCompanyList.append(sharesOfCompanyY)
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         
-        tradingAction = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data(['AAPL'], '../../datasets/'))
-        self.assertTrue(isinstance(tradingAction, TradingAction))
+        tradingActionList = st.doTrade(portfolio, evaluating.evaluator.read_stock_market_data([CompanyEnum.COMPANY_A.value], '../../datasets/'))
+        self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
-        if(tradingAction.action == TradingActionEnum.BUY):
-            self.assertEqual(tradingAction.action, TradingActionEnum.BUY)
-            self.assertEqual(tradingAction.shares.amountOfShares, 5)
-            self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
-        elif (tradingAction.action, TradingActionEnum.SELL):
-            self.assertEqual(tradingAction.action, TradingActionEnum.SELL)
-            self.assertEqual(tradingAction.shares.amountOfShares, 10)
-            self.assertEqual(tradingAction.shares.companyName, CompanyEnum.APPLE.value)
+        self.assertEqual(tradingActionList.len(), 1)
+        if(tradingActionList.get(0).action == TradingActionEnum.BUY):
+            self.assertEqual(tradingActionList.get(0).action, TradingActionEnum.BUY)
+            self.assertEqual(tradingActionList.get(0).shares.amount, 5)
+            self.assertEqual(tradingActionList.get(0).shares.name, CompanyEnum.COMPANY_A.value)
+        elif (tradingActionList.get(0).action, TradingActionEnum.SELL):
+            self.assertEqual(tradingActionList.get(0).action, TradingActionEnum.SELL)
+            self.assertEqual(tradingActionList.get(0).shares.amount, 10)
+            self.assertEqual(tradingActionList.get(0).shares.name, CompanyEnum.COMPANY_A.value)
         
     def testSimpleTraderConstruction(self):
-        st = SimpleTrader()
+        st = SimpleTrader(PerfectStockAPredictor(), None)
         self.assertTrue(isinstance(st, ITrader))
         
     def testPortfolioConstruction(self):        
         sharesOfCompanyList = list()
-        sharesOfCompanyX = SharesOfCompany("Company X", 10)
-        sharesOfCompanyY = SharesOfCompany("Company Y", 50)
-        sharesOfCompanyList.append(sharesOfCompanyX)
-        sharesOfCompanyList.append(sharesOfCompanyY)
+        sharesOfCompanyA = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
+        sharesOfCompanyB = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
+        sharesOfCompanyList.append(sharesOfCompanyA)
+        sharesOfCompanyList.append(sharesOfCompanyB)
         
         portfolio = Portfolio(1000.0, sharesOfCompanyList)
        
         self.assertEqual(portfolio.cash, 1000.0)
         self.assertEqual(len(portfolio.shares), 2)
-        self.assertEqual(portfolio.shares[0].companyName, "Company X")
-        self.assertEqual(portfolio.shares[0].amountOfShares, 10)
+        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_A.value)
+        self.assertEqual(portfolio.shares[0].amount, 10)
         
-        self.assertEqual(portfolio.shares[1].companyName, "Company Y")
-        self.assertEqual(portfolio.shares[1].amountOfShares, 50)
+        self.assertEqual(portfolio.shares[1].name, CompanyEnum.COMPANY_B.value)
+        self.assertEqual(portfolio.shares[1].amount, 50)
 
     
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(RandomTraderTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TraderTest)
     unittest.TextTestRunner(verbosity=2).run(suite)

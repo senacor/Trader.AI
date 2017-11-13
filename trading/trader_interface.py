@@ -21,8 +21,8 @@ class CompanyEnum(Enum):
     '''
     Represents companies on stock market
     '''
-    GOOGLE = "GOOG"
-    APPLE = "AAPL"
+    COMPANY_A = "AAPL"
+    COMPANY_B = "GOOG"
 
 
 class SharesOfCompany:
@@ -55,6 +55,27 @@ class TradingAction:
         """
         self.action = action
         self.shares = shares
+
+
+class TradingActionList:
+    '''
+    Represents typesafe container to hold a list of TradingAction's
+    '''
+    
+    def __init__(self):
+        """ 
+        Constructor
+        """
+        self.tradingActionList = list()
+        
+    def addTradingAction(self, tradingAction:TradingAction):
+        self.tradingActionList.append(tradingAction)
+        
+    def len(self) -> int:
+        return len(self.tradingActionList)
+    
+    def get(self, index:int) -> TradingAction:
+        return self.tradingActionList[index]
 
 
 class Portfolio:
@@ -116,7 +137,7 @@ class ITrader(metaclass=abc.ABCMeta):
     '''
 
     @abc.abstractmethod
-    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingAction:
+    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
