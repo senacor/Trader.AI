@@ -11,6 +11,7 @@ from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import CompanyEnum
 from predicting.predictor_interface import IPredictor
+import copy
 
 
 class SimpleTrader(ITrader):
@@ -36,12 +37,15 @@ class SimpleTrader(ITrader):
         Returns:
           An TradingActionList instance, may be empty never None
         """
+        
+        localPortfolio = copy.deepcopy(portfolio)
+        
         result = TradingActionList()
 
         companyAName = company_a_name
         companyAData = stockMarketData.market_data.get(companyAName)
         if (self.stockAPredictor is not None and companyAData is not None):
-            self.tradeForCompany(companyAName, companyAData, self.stockAPredictor, portfolio, result)
+            self.tradeForCompany(companyAName, companyAData, self.stockAPredictor, localPortfolio, result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockAPredictor or companyAData is None -> No prediction for Company A")
@@ -49,7 +53,7 @@ class SimpleTrader(ITrader):
         companyBName = company_b_name
         companyBData = stockMarketData.market_data.get(companyBName)
         if (self.stockBPredictor is not None and companyBData is not None):
-            self.tradeForCompany(companyBName, companyBData, self.stockBPredictor, portfolio, result)
+            self.tradeForCompany(companyBName, companyBData, self.stockBPredictor, localPortfolio, result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockBPredictor or companyBData is None -> No prediction for Company B")
@@ -74,6 +78,10 @@ class SimpleTrader(ITrader):
                 amountOfUnitsToBuy = int(portfolio.cash // lastValue)
                 sharesOfCompany = SharesOfCompany(companyName, amountOfUnitsToBuy);
                 resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
+                
+                #Update Cash in portfolio
+                portfolio.cash = portfolio.cash - (amountOfUnitsToBuy * lastValue)
+                
         elif tradingAction == TradingActionEnum.SELL:
             # Check if something can be selled
             sharesOfAppleInPortfolio = self.findSharesOfCompany(companyName, portfolio.shares)
