@@ -1,7 +1,7 @@
 from typing import List
 
 from evaluating.evaluator import update_portfolio, draw
-from trading.trader_interface import ITrader, Portfolio, StockMarketData, CompanyEnum
+from trading.trader_interface import ITrader, Portfolio, StockMarketData
 
 PortfolioList = List[Portfolio]
 
@@ -17,7 +17,7 @@ class PortfolioEvaluator:
         '''
         self.trader = trader
 
-    #TODO Convention: Camel case for variables and function/method names
+    # TODO Convention: Camel case for variables and function/method names
     def inspect_over_time(self, evaluation_offset: int, market_data: StockMarketData, portfolios: PortfolioList):
         all_portfolios = {}
 
@@ -39,18 +39,17 @@ class PortfolioEvaluator:
                 stock_market_data = self.get_data_up_to_offset(market_data, current_tick)
 
                 # Ask the trader for its action
-                #TODO -> current date should be independent from company name! 
-                #TODO -> Use Constants or Enums - no magic values or strings
-                currentDate = stock_market_data.get_most_recent_trade_day('stock_a')
+                currentDate = stock_market_data.get_most_recent_trade_day()
                 currentTotalPortfolioValue = portfolio.total_value(currentDate, stock_market_data.market_data)
-                
-                update = self.trader.doTrade(portfolio, currentTotalPortfolioValue, stock_market_data, 'stock_a', 'stock_b')
+
+                update = self.trader.doTrade(portfolio, currentTotalPortfolioValue, stock_market_data, 'stock_a',
+                                             'stock_b')
 
                 # Update the portfolio that is saved at the ILSE
                 portfolio = update_portfolio(stock_market_data, portfolio, update)
 
                 # Save the updated portfolio in our dict
-                portfolio_over_time[stock_market_data.market_data['stock_a'][-1][0]] = portfolio
+                portfolio_over_time[currentDate] = portfolio
 
         # Draw a diagram of the portfolios' changes over time
         draw(all_portfolios, stock_market_data)

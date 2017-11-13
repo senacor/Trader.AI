@@ -39,12 +39,21 @@ class EvaluatorTest(unittest.TestCase):
         self.assertTrue(apple in stock_market_data.market_data)
         self.assertTrue(google in stock_market_data.market_data)
 
+    def testGetMostRecentTradeDay(self):
+        apple = 'AAPL'
+        google = 'GOOG'
+
+        stock_market_data = read_stock_market_data([apple, google])
+
+        self.assertEqual(stock_market_data.get_most_recent_trade_day(), stock_market_data.market_data[apple][-1][0])
+
     def testDoTrade(self):
         symbol = 'AAPL'
 
         trader = SimpleTrader(PerfectStockAPredictor(), None)
-        currentPortfolioValue = 0.0 #Dummy value
-        trading_action_list = trader.doTrade(read_portfolio(), currentPortfolioValue,  read_stock_market_data([symbol]), company_a_name=symbol)
+        currentPortfolioValue = 0.0  # Dummy value
+        trading_action_list = trader.doTrade(read_portfolio(), currentPortfolioValue, read_stock_market_data([symbol]),
+                                             company_a_name=symbol)
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)

@@ -1,6 +1,6 @@
 import datetime as dt
 import json
-from typing import Dict, List
+from typing import Dict
 
 import copy
 import numpy
@@ -8,8 +8,7 @@ import random
 from matplotlib import pyplot as plt
 
 import Columns
-from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingAction, TradingActionEnum, \
-    TradingActionList
+from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingActionEnum, TradingActionList
 
 
 def read_portfolio(name: str = 'portfolio') -> Portfolio:
@@ -55,7 +54,7 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, t
     for trade_action in trade_action_list.tradingActionList:
         shares_name = trade_action.shares.name
 
-        current_date = stock_market_data.get_most_recent_trade_day(shares_name)
+        current_date = stock_market_data.get_most_recent_trade_day()
         current_price = stock_market_data.get_most_recent_price(shares_name)
 
         print(f"Available cash on {current_date}: {updated_portfolio.cash}")
