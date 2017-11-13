@@ -22,8 +22,8 @@ class CompanyEnum(Enum):
     '''
     Represents companies on stock market
     '''
-    COMPANY_A = "stock_a"
-    COMPANY_B = "stock_b"
+    COMPANY_A = "AAPL"
+    COMPANY_B = "GOOG"
 
 
 class SharesOfCompany:
@@ -77,6 +77,9 @@ class TradingActionList:
 
     def get(self, index: int) -> TradingAction:
         return self.tradingActionList[index]
+
+    def isEmpty(self):
+        return len(self.tradingActionList) == 0
 
 
 class Portfolio:
@@ -141,7 +144,9 @@ class ITrader(metaclass=abc.ABCMeta):
     '''
 
     @abc.abstractmethod
-    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData,
+                company_a_name=CompanyEnum.COMPANY_A.value,
+                company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:

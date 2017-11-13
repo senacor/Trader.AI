@@ -12,7 +12,7 @@ from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, Portfolio, \
-    StockMarketData
+    StockMarketData, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -58,8 +58,10 @@ class EvaluatorTest(unittest.TestCase):
         stock_market_data = StockMarketData({symbol: data})
 
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(symbol, 200)])
-        update = TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100))
-        updated_portfolio = update_portfolio(stock_market_data, portfolio, update)
+        trading_action_list = TradingActionList()
+        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
+
+        updated_portfolio = update_portfolio(stock_market_data, portfolio, trading_action_list)
 
         # Trade volume is too high for current cash reserve. Nothing should happen
         self.assertEqual(updated_portfolio.cash, cash_reserve)
@@ -76,8 +78,11 @@ class EvaluatorTest(unittest.TestCase):
         stock_market_data = StockMarketData({symbol: data})
 
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(symbol, 200)])
-        update = TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100))
-        updated_portfolio = update_portfolio(stock_market_data, portfolio, update)
+
+        trading_action_list = TradingActionList()
+        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
+
+        updated_portfolio = update_portfolio(stock_market_data, portfolio, trading_action_list)
 
         # Current cash reserve is sufficient for trade volume. Trade should happen
         self.assertLess(updated_portfolio.cash, cash_reserve)
@@ -94,8 +99,8 @@ class EvaluatorTest(unittest.TestCase):
         period1 = '1962-2011'
         period2 = '2012-2017'
 
-        stock_a = CompanyEnum.COMPANY_A.value
-        stock_b = CompanyEnum.COMPANY_B.value
+        stock_a = 'stock_a'
+        stock_b = 'stock_b'
 
         # Reading in *all* available data
         data_a1 = read_stock_market_data([('%s_%s' % (stock_a, period1))])
@@ -116,8 +121,9 @@ class EvaluatorTest(unittest.TestCase):
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
         portfolio1 = Portfolio(50_000.0, [], 'portfolio 1')
         portfolio2 = Portfolio(100_000.0, [], 'portfolio 2')
+        portfolio3 = Portfolio(150_000.0, [], 'portfolio 3')
 
-        evaluator.inspect_over_time(200, full_stock_market_data, [portfolio1, portfolio2])
+        evaluator.inspect_over_time(200, full_stock_market_data, [portfolio1, portfolio2, portfolio3])
 
 
 if __name__ == "__main__":

@@ -38,18 +38,13 @@ class PortfolioEvaluator:
                 stock_market_data = self.get_data_up_to_offset(market_data, current_tick)
 
                 # Ask the trader for its action
-                update = self.trader.doTrade(portfolio, stock_market_data)
-                trading_action = None
-                if update.len() > 0:
-                    trading_action = update.get(0)
-                    if (update.len() > 1):
-                        print("1")
+                update = self.trader.doTrade(portfolio, stock_market_data, 'stock_a', 'stock_b')
 
                 # Update the portfolio that is saved at the ILSE
-                portfolio = update_portfolio(stock_market_data, portfolio, trading_action)
+                portfolio = update_portfolio(stock_market_data, portfolio, update)
 
                 # Save the updated portfolio in our dict
-                portfolio_over_time[stock_market_data.market_data[CompanyEnum.COMPANY_A.value][-1][0]] = portfolio
+                portfolio_over_time[stock_market_data.market_data['stock_a'][-1][0]] = portfolio
 
         # Draw a diagram of the portfolios' changes over time
         draw(all_portfolios, stock_market_data)

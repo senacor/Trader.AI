@@ -8,7 +8,8 @@ import random
 from matplotlib import pyplot as plt
 
 import Columns
-from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingAction, TradingActionEnum
+from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingAction, TradingActionEnum, \
+    TradingActionList
 
 
 def read_portfolio(name: str = 'portfolio') -> Portfolio:
@@ -42,53 +43,57 @@ def read_stock_market_data(name: list, path: str = '../datasets/') -> StockMarke
     return StockMarketData(data)
 
 
-def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, update: TradingAction):
+def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, trade_action_list: TradingActionList):
     updated_portfolio = copy.deepcopy(portfolio)
 
     print("")
 
-    if update is None:
+    if trade_action_list.isEmpty():
         print("No action this time")
         return updated_portfolio
 
-    current_date = stock_market_data.get_most_recent_trade_day(update.shares.name)
-    current_price = stock_market_data.get_most_recent_price(update.shares.name)
+    for trade_action in trade_action_list.tradingActionList:
+        shares_name = trade_action.shares.name
 
-    print(f"Available cash on {current_date}: {updated_portfolio.cash}")
-    # for share in update.shares:
-    share = updated_portfolio.get_or_insert(update.shares.name)
-    # if share.name is update.shares.name:
-    amount = update.shares.amount
-    trade_volume = amount * current_price
+        current_date = stock_market_data.get_most_recent_trade_day(shares_name)
+        current_price = stock_market_data.get_most_recent_price(shares_name)
 
-    if update.action is TradingActionEnum.BUY:
-        print(f"  Buying {amount} shares of '{share.name}' with an individual value of {current_price}")
-        print(f"  Volume of this trade: {trade_volume}")
+        print(f"Available cash on {current_date}: {updated_portfolio.cash}")
+        # for share in update.shares:
+        share = updated_portfolio.get_or_insert(shares_name)
+        # if share.name is update.shares.name:
+        amount = trade_action.shares.amount
+        trade_volume = amount * current_price
 
-        if trade_volume <= updated_portfolio.cash:
-            share.amount += amount
-            updated_portfolio.cash -= trade_volume
-        else:
-            print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
-                  f"volume of {trade_volume}")
-    elif update.action is TradingActionEnum.SELL:
-        print(f"  Selling {amount} shares of {share.name} with individual value of {current_price}")
-        print(f"  Volume of this trade: {trade_volume}")
+        if trade_action.action is TradingActionEnum.BUY:
+            print(f"  Buying {amount} shares of '{share.name}' with an individual value of {current_price}")
+            print(f"  Volume of this trade: {trade_volume}")
 
-        if share.amount > amount:
-            share.amount -= amount
-            updated_portfolio.cash += trade_volume
-        else:
-            print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
+            if trade_volume <= updated_portfolio.cash:
+                share.amount += amount
+                updated_portfolio.cash -= trade_volume
+            else:
+                print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
+                      f"volume of {trade_volume}")
+        elif trade_action.action is TradingActionEnum.SELL:
+            print(f"  Selling {amount} shares of {share.name} with individual value of {current_price}")
+            print(f"  Volume of this trade: {trade_volume}")
 
-    print(f"Resulting available cash after trade: {updated_portfolio.cash}")
+            if share.amount > amount:
+                share.amount -= amount
+                updated_portfolio.cash += trade_volume
+            else:
+                print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
 
-    total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
-    print(f"Total portfolio value after trade: {total_portfolio_value}")
+        print(f"Resulting available cash after trade: {updated_portfolio.cash}")
+
+        total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
+        print(f"Total portfolio value after trade: {total_portfolio_value}")
+
     return updated_portfolio
 
 
-def draw(portfolio_over_time: Dict[str, Dict[str, Portfolio]], prices: StockMarketData):
+def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
     plt.figure()
 
     colors = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
