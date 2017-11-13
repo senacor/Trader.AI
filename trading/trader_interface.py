@@ -6,6 +6,7 @@ Module contains interfaces for trader implementations and model classes
 @author: jtymoszuk
 '''
 import abc
+import datetime
 from enum import Enum
 
 
@@ -21,8 +22,8 @@ class CompanyEnum(Enum):
     '''
     Represents companies on stock market
     '''
-    COMPANY_A = "AAPL"
-    COMPANY_B = "GOOG"
+    COMPANY_A = "stock_a"
+    COMPANY_B = "stock_b"
 
 
 class SharesOfCompany:
@@ -61,20 +62,20 @@ class TradingActionList:
     '''
     Represents typesafe container to hold a list of TradingAction's
     '''
-    
+
     def __init__(self):
         """ 
         Constructor
         """
         self.tradingActionList = list()
-        
-    def addTradingAction(self, tradingAction:TradingAction):
+
+    def addTradingAction(self, tradingAction: TradingAction):
         self.tradingActionList.append(tradingAction)
-        
+
     def len(self) -> int:
         return len(self.tradingActionList)
-    
-    def get(self, index:int) -> TradingAction:
+
+    def get(self, index: int) -> TradingAction:
         return self.tradingActionList[index]
 
 
@@ -83,19 +84,22 @@ class Portfolio:
     Represents portfolio of a client
     '''
 
-    def __init__(self, cash: float, shares: list):
+    def __init__(self, cash: float, shares: list, name: str = 'nameless'):
         """ Constructor
     
         Args:
           cash : current cash level
           shares : list of SharesOfCompany, see SharesOfCompany
         """
+        self.name = name
         self.cash = cash
         self.shares = shares
 
-    def total_value(self, date: str, prices: dict):
-        values = [share.amount * [price[1] for price in prices[share.name] if date == price[0]][0] for
-                  share in self.shares]
+    def total_value(self, date: datetime.date, prices: dict):
+        values = [share.amount *
+                  [price[1] for price in prices[share.name] if date == price[0]][0]
+                  for share in self.shares]
+
         return sum(values) + self.cash
 
     def has_stock(self, name: str):

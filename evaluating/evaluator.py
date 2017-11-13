@@ -1,11 +1,14 @@
-import copy
+import datetime as dt
 import json
+from typing import Dict, List
+
+import copy
 import numpy
+import random
+from matplotlib import pyplot as plt
 
 import Columns
 from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingAction, TradingActionEnum
-from matplotlib import pyplot as plt
-import datetime as dt
 
 
 def read_portfolio(name: str = 'portfolio') -> Portfolio:
@@ -85,11 +88,15 @@ def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, u
     return updated_portfolio
 
 
-def draw(portfolio_over_time: dict, prices: StockMarketData):
+def draw(portfolio_over_time: Dict[str, Dict[str, Portfolio]], prices: StockMarketData):
     plt.figure()
 
-    dates = portfolio_over_time.keys()
-    values = [pf.total_value(date, prices.market_data) for date, pf in portfolio_over_time.items()]
+    colors = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
 
-    plt.plot(dates, values, color="black")
+    for name, portfolio in portfolio_over_time.items():
+        values = [pf.total_value(date, prices.market_data) for date, pf in portfolio.items()]
+
+        plt.plot(portfolio.keys(), values, label=name, color=random.choice(colors))
+
+    plt.legend(portfolio_over_time.keys())
     plt.show()

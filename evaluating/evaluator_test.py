@@ -7,21 +7,12 @@ Module for testing of the evaluating component
 '''
 import unittest
 
-from evaluating.evaluator import read_portfolio, read_stock_market_data, update_portfolio, draw
+from evaluating.evaluator import read_portfolio, read_stock_market_data, update_portfolio
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, Portfolio, \
     StockMarketData
-
-
-def getMarketData(symbol: str, stock_market_data: StockMarketData, offset: int):
-    if offset == 0: return stock_market_data
-    return StockMarketData({symbol: stock_market_data.market_data[symbol].copy()[:offset]})
-
-
-def get_current_date(symbol: str, stock_market_data: StockMarketData):
-    return stock_market_data.market_data[symbol][-1][0]
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -36,11 +27,11 @@ class EvaluatorTest(unittest.TestCase):
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_B.value)
+        self.assertEqual(portfolio.shares[0].name, 'GOOG')
 
     def testReadStockMarketData(self):
-        apple = CompanyEnum.COMPANY_A.value
-        google = CompanyEnum.COMPANY_B.value
+        apple = 'AAPL'
+        google = 'GOOG'
 
         stock_market_data = read_stock_market_data([apple, google])
 
@@ -49,13 +40,14 @@ class EvaluatorTest(unittest.TestCase):
         self.assertTrue(google in stock_market_data.market_data)
 
     def testDoTrade(self):
-        apple = CompanyEnum.COMPANY_A.value
+        symbol = 'AAPL'
 
-        tradingActionList = SimpleTrader(PerfectStockAPredictor(), None).doTrade(read_portfolio(), read_stock_market_data([apple]))
+        trader = SimpleTrader(PerfectStockAPredictor(), None)
+        trading_action_list = trader.doTrade(read_portfolio(), read_stock_market_data([symbol]), company_a_name=symbol)
 
-        self.assertTrue(tradingActionList is not None)
-        self.assertTrue(tradingActionList.len(),1)
-        self.assertEqual(tradingActionList.get(0).shares.name, apple)
+        self.assertTrue(trading_action_list is not None)
+        self.assertTrue(trading_action_list.len(), 1)
+        self.assertEqual(trading_action_list.get(0).shares.name, symbol)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         cash_reserve = 10000.0
@@ -94,48 +86,38 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(updated_portfolio.shares[0].amount, 300)
 
     def testUpdateAndDraw(self):
-        symbol = CompanyEnum.COMPANY_A.value
-        trader = SimpleTrader(SimplePredictor(), None)
+        trader = SimpleTrader(SimplePredictor(), SimplePredictor())
+
+        from evaluating.portfolio_evaluator import PortfolioEvaluator
+        evaluator = PortfolioEvaluator(trader)
+
+        period1 = '1962-2011'
+        period2 = '2012-2017'
+
+        stock_a = CompanyEnum.COMPANY_A.value
+        stock_b = CompanyEnum.COMPANY_B.value
 
         # Reading in *all* available data
-        data1 = read_stock_market_data(['stock_a_1962-2011'])
-        data2 = read_stock_market_data(['stock_a_2012-2017'])
+        data_a1 = read_stock_market_data([('%s_%s' % (stock_a, period1))])
+        data_a2 = read_stock_market_data([('%s_%s' % (stock_a, period2))])
+
+        data_b1 = read_stock_market_data([('%s_%s' % (stock_b, period1))])
+        data_b2 = read_stock_market_data([('%s_%s' % (stock_b, period2))])
 
         # Combine both datasets to one StockMarketData object
-        old_data = data1.market_data['stock_a_1962-2011']
-        new_data = data2.market_data['stock_a_2012-2017']
-        full_stock_market_data = StockMarketData({symbol: old_data + new_data})
+        old_data_a = data_a1.market_data[('%s_%s' % (stock_a, period1))]
+        new_data_a = data_a2.market_data[('%s_%s' % (stock_a, period2))]
 
-        portfolio_over_time = {}
-        count_of_new_market_data = len(new_data) - 1
+        old_data_b = data_b1.market_data[('%s_%s' % (stock_b, period1))]
+        new_data_b = data_b2.market_data[('%s_%s' % (stock_b, period2))]
+
+        full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
-        portfolio = Portfolio(50000.0, [])
-        portfolio_over_time[new_data[0][0]] = portfolio
+        portfolio1 = Portfolio(50_000.0, [], 'portfolio 1')
+        portfolio2 = Portfolio(100_000.0, [], 'portfolio 2')
 
-        print(portfolio_over_time)
-
-        for index in range(count_of_new_market_data):
-            currentTick = index - count_of_new_market_data
-
-            # Retrieve the stock market data up the current day
-            stock_market_data = getMarketData(symbol, full_stock_market_data, currentTick)
-
-            # Ask the trader for its action
-            update = trader.doTrade(portfolio, stock_market_data)
-
-            # Update the portfolio that is saved at the ILSE
-            tradingAction = None
-            if (update.len()>0): 
-                tradingAction=update.get(0)
-                        
-            portfolio = update_portfolio(stock_market_data, portfolio, tradingAction)
-
-            # Save the updated portfolio in our dict
-            portfolio_over_time[get_current_date(symbol, stock_market_data)] = portfolio
-
-        # Draw a diagram of the portfolio's changes over time
-        draw(portfolio_over_time, stock_market_data)
+        evaluator.inspect_over_time(200, full_stock_market_data, [portfolio1, portfolio2])
 
 
 if __name__ == "__main__":

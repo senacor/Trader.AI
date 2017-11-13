@@ -25,7 +25,9 @@ class SimpleTrader(ITrader):
         self.stockAPredictor = stockAPredictor
         self.stockBPredictor = stockBPredictor
 
-    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, stockMarketData: StockMarketData,
+                company_a_name=CompanyEnum.COMPANY_A.value,
+                company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
@@ -35,30 +37,31 @@ class SimpleTrader(ITrader):
           An TradingActionList instance, may be empty never None
         """
         result = TradingActionList()
-        
-        companyAName = CompanyEnum.COMPANY_A.value
+
+        companyAName = company_a_name
         companyAData = stockMarketData.market_data.get(companyAName)
-        if(self.stockAPredictor is not None and companyAData is not None):
+        if (self.stockAPredictor is not None and companyAData is not None):
             self.tradeForCompany(companyAName, companyAData, self.stockAPredictor, portfolio, result)
         else:
-            #TODO: use Logging!!!
+            # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockAPredictor or companyAData is None -> No prediction for Company A")
-            
-        companyBName = CompanyEnum.COMPANY_B.value
+
+        companyBName = company_b_name
         companyBData = stockMarketData.market_data.get(companyBName)
-        if(self.stockBPredictor is not None and companyBData is not None):
+        if (self.stockBPredictor is not None and companyBData is not None):
             self.tradeForCompany(companyBName, companyBData, self.stockBPredictor, portfolio, result)
         else:
-            #TODO: use Logging!!!
+            # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockBPredictor or companyBData is None -> No prediction for Company B")
 
         return result
-    
-    def tradeForCompany(self, companyName: str, companyData: list, predictor: IPredictor, portfolio: Portfolio, resultTradingActionList: TradingActionList):
-        
+
+    def tradeForCompany(self, companyName: str, companyData: list, predictor: IPredictor, portfolio: Portfolio,
+                        resultTradingActionList: TradingActionList):
+
         lastValue = companyData[-1][-1]
         predictedNextAppleValue = predictor.doPredict(companyData)
-        
+
         tradingAction = None
         if predictedNextAppleValue > lastValue:
             tradingAction = TradingActionEnum.BUY
