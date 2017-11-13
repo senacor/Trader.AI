@@ -7,8 +7,8 @@ Module for testing of all predicting components
 '''
 import unittest
 
-from predicting.simple_predictor import SimplePredictor
 from datetime import date
+from depenedency_injection_containers import Predictors
 
 
 class PredictingTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class PredictingTest(unittest.TestCase):
         pass
        
     def testSimplePredictor(self):
-        sp = SimplePredictor()     
+        sp = Predictors.simplePredictor() 
         
         inputData = list()
         

@@ -8,8 +8,6 @@ Module for testing of all trader components
 import unittest
 import evaluating.evaluator
 
-from trading.random_trader import RandomTrader
-from trading.simple_trader import SimpleTrader
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import Portfolio
 from trading.trader_interface import SharesOfCompany
@@ -17,7 +15,7 @@ from trading.trader_interface import ITrader
 from trading.trader_interface import TradingActionList
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import CompanyEnum
-from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
+from depenedency_injection_containers import Traders
 
 from datetime import date
 
@@ -47,11 +45,11 @@ class TraderTest(unittest.TestCase):
         stockMarketData.market_data.items()
 
     def testRandomTraderConstruction(self):
-        rt = RandomTrader()        
+        rt = Traders.randomTrader()      
         self.assertTrue(isinstance(rt, ITrader))
         
     def testRandomTrader(self):
-        rt = RandomTrader()     
+        rt = Traders.randomTrader()     
         
         sharesOfCompanyList = list()
         sharesOfCompanyX = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
@@ -71,7 +69,7 @@ class TraderTest(unittest.TestCase):
         
     def testSimpleTrader(self):
         
-        st = SimpleTrader(PerfectStockAPredictor(), None)     
+        st = Traders.simpleTraderForTest()
         
         sharesOfCompanyList = list()
         sharesOfCompanyX = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
@@ -95,7 +93,7 @@ class TraderTest(unittest.TestCase):
             self.assertEqual(tradingActionList.get(0).shares.name, CompanyEnum.COMPANY_A.value)
         
     def testSimpleTraderConstruction(self):
-        st = SimpleTrader(PerfectStockAPredictor(), None)
+        st = Traders.simpleTraderForTest()
         self.assertTrue(isinstance(st, ITrader))
         
     def testPortfolioConstruction(self):        
