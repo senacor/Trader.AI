@@ -42,8 +42,8 @@ class PortfolioEvaluator:
                 currentDate = stock_market_data.get_most_recent_trade_day()
                 currentTotalPortfolioValue = portfolio.total_value(currentDate, stock_market_data.market_data)
 
-                update = self.trader.doTrade(portfolio, currentTotalPortfolioValue, stock_market_data, 'stock_a',
-                                             'stock_b')
+                update = self.trader.doTrade(portfolio, currentTotalPortfolioValue, stock_market_data,
+                                             *stock_market_data.market_data.keys())
 
                 # Update the portfolio that is saved at the ILSE
                 portfolio = update_portfolio(stock_market_data, portfolio, update)
