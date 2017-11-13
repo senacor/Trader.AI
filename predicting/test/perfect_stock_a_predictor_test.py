@@ -8,8 +8,7 @@ Module for testing of all predicting components
 import unittest
 
 import evaluating.evaluator
-from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
-
+from depenedency_injection_containers import Predictors
 
 class PerfectStockAPredictorTest(unittest.TestCase):
 
@@ -21,7 +20,7 @@ class PerfectStockAPredictorTest(unittest.TestCase):
        
     def testPerfectStockAPredictor(self):
         # Load predictor
-        predictor = PerfectStockAPredictor()
+        predictor = Predictors.perfectStockAPredictor()
 
         # Get stock data from Apple stock
         input = evaluating.evaluator.read_stock_market_data(['AAPL'], path='../../datasets/').market_data['AAPL']
