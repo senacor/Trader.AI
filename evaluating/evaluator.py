@@ -7,6 +7,7 @@ from typing import Dict
 import numpy
 import random
 from matplotlib import pyplot as plt
+import os
 
 from trading.trader_interface import SharesOfCompany, StockMarketData, Portfolio
 
@@ -60,7 +61,9 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
     """
     data = {}
     for companyname_and_filename_tuple in companynames_and_filenames_tuples: 
-        na_portfolio = numpy.loadtxt(path + companyname_and_filename_tuple[1] + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
+        
+        filepath = os.path.join(path, companyname_and_filename_tuple[1] + '.csv')
+        na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
         dates = list()
         for day in na_portfolio:
