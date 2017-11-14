@@ -8,6 +8,7 @@ import dependency_injector.providers as providers
 
 from trading.simple_trader import SimpleTrader
 from trading.random_trader import RandomTrader
+from trading.rnn_trader import RnnTrader
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 
@@ -25,6 +26,8 @@ class Traders(containers.DeclarativeContainer):
     simpleTraderForTest = providers.Factory(SimpleTrader, stockAPredictor=Predictors.perfectStockAPredictor, stockBPredictor=None)
     simpleTraderWithPerfectStockAPrediction = providers.Factory(SimpleTrader, stockAPredictor=Predictors.perfectStockAPredictor, stockBPredictor=Predictors.simplePredictor)
     simpleTraderWithSimplePredictors = providers.Factory(SimpleTrader, stockAPredictor=Predictors.simplePredictor, stockBPredictor=Predictors.simplePredictor)
+
+    rnnTraderWithSimplePredictors = providers.Factory(RnnTrader, stockAPredictor=Predictors.simplePredictor, stockBPredictor=Predictors.simplePredictor)
     
     randomTrader = providers.Factory(RandomTrader)
 
