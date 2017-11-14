@@ -39,9 +39,9 @@ class SimpleTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        
+
         localPortfolio = copy.deepcopy(portfolio)
-        
+
         result = TradingActionList()
 
         companyAName = company_a_name
@@ -66,13 +66,9 @@ class SimpleTrader(ITrader):
                         resultTradingActionList: TradingActionList):
 
         lastValue = companyData[-1][-1]
-        predictedNextAppleValue = predictor.doPredict(companyData)
 
-        tradingAction = None
-        if predictedNextAppleValue > lastValue:
-            tradingAction = TradingActionEnum.BUY
-        elif predictedNextAppleValue < lastValue:
-            tradingAction = TradingActionEnum.SELL
+        # This determines the trade action to apply
+        tradingAction = self.determine_action(companyData, predictor, lastValue)
 
         if tradingAction == TradingActionEnum.BUY:
             if (portfolio.cash > lastValue):
@@ -80,10 +76,10 @@ class SimpleTrader(ITrader):
                 amountOfUnitsToBuy = int(portfolio.cash // lastValue)
                 sharesOfCompany = SharesOfCompany(companyName, amountOfUnitsToBuy);
                 resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
-                
+
                 #Update Cash in portfolio
                 portfolio.cash = portfolio.cash - (amountOfUnitsToBuy * lastValue)
-                
+
         elif tradingAction == TradingActionEnum.SELL:
             # Check if something can be selled
             sharesOfAppleInPortfolio = self.findSharesOfCompany(companyName, portfolio.shares)
@@ -91,6 +87,17 @@ class SimpleTrader(ITrader):
                 # Sell everything
                 sharesOfCompany = SharesOfCompany(companyName, sharesOfAppleInPortfolio.amount);
                 resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
+
+    def determine_action(self, companyData, predictor, last_value):
+        predictedNextAppleValue = predictor.doPredict(companyData)
+
+        action = None
+        if predictedNextAppleValue > last_value:
+            action = TradingActionEnum.BUY
+        elif predictedNextAppleValue < last_value:
+            action = TradingActionEnum.SELL
+
+        return action
 
     def findSharesOfCompany(self, companyName: str, shares: list) -> SharesOfCompany:
         """ Finds SharesOfCompany in list by company name
@@ -106,3 +113,8 @@ class SimpleTrader(ITrader):
                 return sharesOfCompany
 
         return None
+
+
+class AlwaysBuyingTrader(SimpleTrader):
+    def determine_action(self, companyData, predictor, last_value):
+        return TradingActionEnum.BUY
