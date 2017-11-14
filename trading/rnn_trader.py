@@ -187,8 +187,7 @@ class RnnTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        #self.portfolio = portfolio
-        
+       
         # build current state object
         current_state = None
         if self.lastPortfolioValue is not None: # doTrade was called before at least once
@@ -201,52 +200,84 @@ class RnnTrader(ITrader):
         # Create actions for current state and save them for the next call of doTrade
         self.lastActionA, self.lastActionB = self.get_action(current_state)
         self.lastPortfolioValue = currentPortfolioValue
-        return self.create_TradingActionList(self.lastActionA, self.lastActionB, portfolio)
+        return self.create_TradingActionList(self.lastActionA, self.lastActionB, portfolio, stockMarketData)
 
-    # TODO description
-    def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio) -> TradingActionList:
+    def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
+        """
+        Creates TradingActionList for later Evaluation
+        Args:
+          actionA : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for Company A
+          actionB : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for Company B
+          currentPortfolio : current Portfolio of this Trader
+          stockMarketData: StockMarketData
+        Returns:
+          A TradingActionList instance, may be empty never None
+        """
         result = TradingActionList()
         
-        tradingActionA = self.create_TradingAction(self, CompanyEnum.COMPANY_A, actionA, currentPortfolio)
+        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        tradingActionA = self.create_TradingAction(CompanyEnum.COMPANY_A, actionA, currentPortfolio, mostRecentPriceCompanyA)
         if(tradingActionA is not None):
             result.addTradingAction(tradingActionA)
             
-        tradingActionB = self.create_TradingAction(self, CompanyEnum.COMPANY_B, actionB, currentPortfolio)        
+        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio, mostRecentPriceCompanyB)        
         if(tradingActionB is not None):
             result.addTradingAction(tradingActionB)  
         
         return result
 
-    # TODO description
-    def create_TradingAction(self, companyEnum: CompanyEnum, action: float, currentPortfolio: Portfolio) -> TradingAction:
+    def create_TradingAction(self, companyEnum: CompanyEnum, action: float, currentPortfolio: Portfolio, mostRecentPriceCompany: float) -> TradingAction:
+        """
+        Creates single TradingAction for later evaluation in Stock Market
+        Args:
+          companyEnum : CompanyEnum describes current Company
+          action : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for given Company
+          currentPortfolio : current Portfolio of this Trader
+          mostRecentPriceCompany: most recent price of given company on stock market as float
+        Returns:
+          A TradingAction instance, may be None
+        """
         assert action >= -1.0 and action <= 1.0
         
-        tradingAction = None
         if (action > 0.0):
-            tradingAction = TradingActionEnum.BUY
+            possibleAmountOfUnitsToBuy = int(currentPortfolio.cash // mostRecentPriceCompany)
+                
+            amountOfSharesOfComapanyToBuy = int(action * possibleAmountOfUnitsToBuy)
+
+            sharesOfCompanyToBuy = SharesOfCompany(companyEnum.value, amountOfSharesOfComapanyToBuy)
+                
+            return TradingAction(TradingActionEnum.BUY, sharesOfCompanyToBuy)
+                
         elif (action < 0.0):
-            tradingAction = TradingActionEnum.SELL
-        
-        if (tradingAction is not None):
             sharesOfCompany = currentPortfolio.get_by_name(companyEnum.value)
             if(sharesOfCompany is not None):
                 # Percent of actions to sell/buy multiply by number of owned actions
-                amountOfSharesOfComapanyToSellOrBuy = abs(int(action * sharesOfCompany.amount))
+                amountOfSharesOfComapanyToSell = abs(int(action * sharesOfCompany.amount))
                 
-                sharesOfCompanyToSellOrBuy = SharesOfCompany(companyEnum, amountOfSharesOfComapanyToSellOrBuy)
+                sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesOfComapanyToSell)
                 
-                return TradingAction(tradingAction, sharesOfCompanyToSellOrBuy)
+                return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
             else:
                 # TODO: use Logging!!!
                 print(f"!!!! RnnTrader - WARNING: sharesOfCompany {companyEnum.value} NOT found in Portfolio {currentPortfolio}")
+        
         else:
             # TODO: use Logging!!!
-            print(f"!!!! RnnTrader - INFO: sTrading action is None, action: {action}, Portfolio: {currentPortfolio}")
+            print(f"!!!! RnnTrader - INFO: Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
         
         return None
 
-    # TODO description
     def isTradingActionListValid(self, tradingActionList : TradingActionList, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> bool:
+        """
+        Validates if generated TradingActionList is valid in comparison to current Portfolio
+        Args:
+          tradingActionList : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          currentPortfolio : current Portfolio of this Trader
+          stockMarketData: StockMarketData containing date for all companies 
+        Returns:
+          A True if given TradingActionList is valid in comparison to current Portfolio, False otherwise, never None
+        """
         
         currentCash = currentPortfolio.cash
 
@@ -266,8 +297,18 @@ class RnnTrader(ITrader):
         
         return True
 
-    # TODO description
     def isTradingActionValid(self, currentCash: float, companyName: str, tradingActionForCompany: TradingAction, mostRecentPriceCompany: float, currentPortfolio: Portfolio):
+        """
+        Validates if given TradingAction is valid
+        Args:
+          currentCash : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          companyName : Company name as String
+          tradingActionForCompany: TradingAction
+          mostRecentPriceCompany: most recent price of company as float 
+          currentPortfolio: current Portfolio
+        Returns:
+          A True if given TradingAction is valid in comparison to current Portfolio and Cash, False otherwise, never None
+        """
         if(tradingActionForCompany is not None):
             if(tradingActionForCompany.action == TradingActionEnum.BUY):
                 priceToPay = mostRecentPriceCompany * tradingActionForCompany.shares
@@ -309,7 +350,7 @@ from evaluating.evaluator import read_stock_market_data
 EPISODES = 2
 if __name__ == "__main__":
     # Reading training data
-    training_data = read_stock_market_data(['stock_a_1962-2011', 'stock_b_1962-2011'])
+    training_data = read_stock_market_data([['stock_a','stock_a_1962-2011'], ['stock_b','stock_b_1962-2011']])
 
     # Define initial portfolio
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
