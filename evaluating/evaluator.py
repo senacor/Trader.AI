@@ -1,3 +1,5 @@
+# TODO Wo ist denn der Unterschied zwischen "evaluator.py" und "portfolio_evaluator.py"?
+
 import datetime as dt
 import json
 from typing import Dict
