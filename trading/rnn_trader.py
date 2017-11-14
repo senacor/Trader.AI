@@ -134,8 +134,10 @@ class RnnTrader(ITrader):
     # TODO save sample <s,a,r,s'> to the replay memory
     def append_sample(self, state: State, actionA: float, actionB: float, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+
+    # decreases epsilon by one step (decay), but not lower than its defined minimum
+    def decrease_epsilon(self):
+        self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
 
     # TODO pick samples randomly from replay memory (with batch_size)
     def train_model(self):
@@ -362,4 +364,4 @@ if __name__ == "__main__":
         evaluator.inspect_over_time(training_data, [initial_portfolio])
 
     # Save trained neural network
-    trader.save_net()
+    trader.save_model()
