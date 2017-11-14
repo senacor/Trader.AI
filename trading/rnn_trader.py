@@ -341,16 +341,13 @@ class RnnTrader(ITrader):
             return 0   
 
 
-
-
-
 # Train the trader and its respective neural network(s)
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from evaluating.evaluator import read_stock_market_data
 EPISODES = 2
 if __name__ == "__main__":
     # Reading training data
-    training_data = read_stock_market_data([['stock_a','stock_a_1962-2011'], ['stock_b','stock_b_1962-2011']])
+    training_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, CompanyEnum.COMPANY_A.value + '_1962-2011'], [CompanyEnum.COMPANY_B.value, CompanyEnum.COMPANY_B.value + '_1962-2011']])
 
     # Define initial portfolio
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
