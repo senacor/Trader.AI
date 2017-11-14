@@ -79,6 +79,9 @@ class TradingActionList:
 
     def get(self, index: int) -> TradingAction:
         return self.tradingActionList[index]
+    
+    def get_by_CompanyEnum(self, companyEnum: CompanyEnum) -> TradingAction:
+        return next(tradingAction for tradingAction in self.tradingActionList if tradingAction.companyEnum == companyEnum)
 
     def isEmpty(self):
         return len(self.tradingActionList) == 0
@@ -136,6 +139,9 @@ class Portfolio:
             self.shares.append(share)
             return share
 
+        return next(share for share in self.shares if share.name == name)
+    
+    def get_by_name(self, name: str) -> SharesOfCompany:
         return next(share for share in self.shares if share.name == name)
 
     def update(self, stock_market_data: StockMarketData, trade_action_list: TradingActionList):

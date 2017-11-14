@@ -9,13 +9,16 @@ import numpy as np
 
 from predicting.predictor_interface import IPredictor
 from predicting.simple_predictor import SimplePredictor
-from trading.trader_interface import Portfolio
+from trading.trader_interface import Portfolio, TradingAction
 from trading.trader_interface import ITrader
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import TradingActionList
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import sgd, Adam
+from trading.trader_interface import TradingActionEnum
+from trading.trader_interface import CompanyEnum
+from trading.trader_interface import SharesOfCompany
 
 
 # Define state from the trader's viewpoint
@@ -155,6 +158,8 @@ class RnnTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
+        self.portfolio = portfolio
+        
         # build current state object
         current_state = None
         if self.lastPortfolioValue is not None: # doTrade was called before at least once
@@ -169,8 +174,84 @@ class RnnTrader(ITrader):
         self.lastPortfolioValue = currentPortfolioValue
         return self.create_TradingActionList(self.lastActionA, self.lastActionB)
 
-    def create_TradingActionList(self, actionA: float, actionB: float) -> TradingActionList:
-        pass # TODO implement
+    def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio) -> TradingActionList:
+        result = TradingActionList()
+        
+        tradingActionA = self.create_TradingAction(self, CompanyEnum.COMPANY_A, actionA, currentPortfolio)
+        if(tradingActionA is not None):
+            result.addTradingAction(tradingActionA)
+            
+        tradingActionB = self.create_TradingAction(self, CompanyEnum.COMPANY_B, actionB, currentPortfolio)        
+        if(tradingActionB is not None):
+            result.addTradingAction(tradingActionB)  
+        
+        return result
+    
+    def create_TradingAction(self, companyEnum: CompanyEnum, action: float, currentPortfolio: Portfolio) -> TradingAction:
+        assert action >= -1.0 and action <= 1.0
+        
+        tradingAction = None
+        if (action > 0.0):
+            tradingAction = TradingActionEnum.BUY
+        elif (action < 0.0):
+            tradingAction = TradingActionEnum.SELL
+        
+        if (tradingAction is not None):
+            sharesOfCompany = currentPortfolio.get_by_name(companyEnum.value)
+            if(sharesOfCompany is not None):
+                # Percent of actions to sell/buy multiply by number of owned actions
+                amountOfSharesOfComapanyToSellOrBuy = abs(int(action * sharesOfCompany.amount))
+                
+                sharesOfCompanyToSellOrBuy = SharesOfCompany(companyEnum, amountOfSharesOfComapanyToSellOrBuy)
+                
+                return TradingAction(tradingAction, sharesOfCompanyToSellOrBuy)
+            else:
+                # TODO: use Logging!!!
+                print(f"!!!! RnnTrader - WARNING: sharesOfCompany {companyEnum.value} NOT found in Portfolio {currentPortfolio}")
+        else:
+            # TODO: use Logging!!!
+            print(f"!!!! RnnTrader - INFO: sTrading action is None, action: {action}, Portfolio: {currentPortfolio}")
+        
+        return None
+    
+    def isTradingActionListValid(self, tradingActionList : TradingActionList, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> bool:
+        
+        currentCash = currentPortfolio.cash
+
+        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        tradingActionForCompanyA = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
+        
+        isValid, currentCash = self.isTradingActionValid(currentCash, CompanyEnum.COMPANY_A.value, tradingActionForCompanyA, mostRecentPriceCompanyA, currentPortfolio)
+        if(isValid is False):
+            return False
+        
+        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        tradingActionForCompanyB = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
+        
+        isValid, currentCash = self.isTradingActionValid(currentCash, CompanyEnum.COMPANY_B.value, tradingActionForCompanyB, mostRecentPriceCompanyB, currentPortfolio)
+        if(isValid is False):
+            return False
+        
+        return True
+    
+    def isTradingActionValid(self, currentCash: float, companyName: str, tradingActionForCompany: TradingAction, mostRecentPriceCompany: float, currentPortfolio: Portfolio):
+        if(tradingActionForCompany is not None):
+            if(tradingActionForCompany.action == TradingActionEnum.BUY):
+                priceToPay = mostRecentPriceCompany * tradingActionForCompany.shares
+                
+                currentCash = currentCash - priceToPay
+                if(currentCash < 0):
+                    # TODO: use Logging!!!
+                    print(f"!!!! RnnTrader - WARNING: Not enough money to pay! tradingActionForCompany: {tradingActionForCompany}, Portfolio: {currentPortfolio}")
+                    return False, currentCash
+                
+            elif (tradingActionForCompany.action == TradingActionEnum.SELL):
+                if (tradingActionForCompany.shares > currentPortfolio.get_by_name(companyName).amount):
+                    return False
+            else:
+                raise ValueError(f'Action for tradingActionForCompanyB is not valid: {tradingActionForCompany}') 
+            
+        return True, currentCash
 
     def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
         
