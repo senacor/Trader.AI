@@ -155,15 +155,23 @@ class RnnTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        # TODO implement me
-        rewardFromLastTrading = self.calculateReward(self.lastPortfolioValue, currentPortfolioValue)
-        
-        
-        
-        
+        # build current state object
+        current_state = None
+        if self.lastPortfolioValue is not None: # doTrade was called before at least once
+            assert self.lastActionA is not None and self.lastActionB is not None
+            # baue memory tuple auf
+            # memory tuple speichern
+            # nehmen zufällige Teilmenge von memory
+            # trainieren model mit obiger Teilmenge
+
+        # Create actions for current state and save them for the next call of doTrade
+        self.lastActionA, self.lastActionB = self.get_action(current_state)
         self.lastPortfolioValue = currentPortfolioValue
-        return None   
-        
+        return self.create_TradingActionList(self.lastActionA, self.lastActionB)
+
+    def create_TradingActionList(self, actionA: float, actionB: float) -> TradingActionList:
+        pass # TODO implement
+
     def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
         
         if lastPortfolioValue is None or currentPortfolioValue is None:
