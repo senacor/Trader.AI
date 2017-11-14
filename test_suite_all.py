@@ -1,6 +1,6 @@
 import unittest
 
-from evaluating.evaluator_test import EvaluatorTest
+from evaluating.test.evaluator_test import EvaluatorTest
 from predicting.test.predictor_test import PredictingTest
 from trading.test.trader_test import TraderTest
 

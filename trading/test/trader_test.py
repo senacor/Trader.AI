@@ -114,6 +114,29 @@ class TraderTest(unittest.TestCase):
         self.assertEqual(portfolio.shares[1].name, CompanyEnum.COMPANY_B.value)
         self.assertEqual(portfolio.shares[1].amount, 50)
 
+    def testRnnTraderConstruction(self): # TODO check with and without saved neural network
+        trader = Traders.rnnTraderWithSimplePredictors()
+        self.assertTrue(isinstance(trader, ITrader))
+
+    def testRnnTraderGetAction(self):
+        trader = Traders.rnnTraderWithSimplePredictors()
+        from trading.rnn_trader import State
+        state = State(1000, 0, 0, 0, 0, 0, 0)
+        # Check random actions because epsilon is 1.0
+        trader.epsilon = 1.0
+        actionA, actionB = trader.get_action(state)
+        self.assertGreaterEqual(actionA, -1.0)
+        self.assertGreaterEqual(actionB, -1.0)
+        self.assertLessEqual(actionA, 1.0)
+        self.assertLessEqual(actionB, 1.0)
+        # Check predicted actions because epsilon is 0.0
+        trader.epsilon = 0.0
+        actionA, actionB = trader.get_action(state)
+        print(actionA, actionB)
+        self.assertGreaterEqual(actionA, -1.0)
+        self.assertGreaterEqual(actionB, -1.0)
+        self.assertLessEqual(actionA, 1.0)
+        self.assertLessEqual(actionB, 1.0)
     
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TraderTest)

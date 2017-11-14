@@ -106,6 +106,9 @@ class StockMarketData:
     def get_most_recent_price(self, stock: str):
         return self.market_data.get(stock)[-1][1]
 
+    def get_row_count(self):
+        return len(next(iter(self.market_data.values())))
+
 
 class Portfolio:
     """
@@ -154,7 +157,7 @@ class Portfolio:
         """
         updated_portfolio = copy.deepcopy(self)
 
-        print("")
+        print(f"\nUpdate portfolio {self.name}")
 
         if trade_action_list.isEmpty():
             print("No action this time")
