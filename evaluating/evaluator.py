@@ -31,13 +31,14 @@ Colors `matplotlib` chooses randomly from to create graphs
 COLORS = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
 
 
-def read_portfolio(name: str = 'portfolio') -> Portfolio:
+def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
     """
     Reads the JSON file from "../json/`name`.json" and creates a `Portfolio` object from this
     :param name: The filename to read
+    :param path: The path from which to read. Default: "../json/"
     :return: The created `Portfolio` object
     """
-    file = open("../json/" + name + ".json")
+    file = open(path + name + ".json")
     data = json.loads(file.read())
     file.close()
 

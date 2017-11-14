@@ -148,7 +148,7 @@ class Portfolio:
         """
         updated_portfolio = copy.deepcopy(self)
 
-        print("")
+        print(f"\nUpdate portfolio {self.name}")
 
         if trade_action_list.isEmpty():
             print("No action this time")
