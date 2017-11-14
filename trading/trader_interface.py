@@ -103,6 +103,9 @@ class StockMarketData:
     def get_most_recent_price(self, stock: str):
         return self.market_data.get(stock)[-1][1]
 
+    def get_row_count(self):
+        return len(next(iter(self.market_data.values())))
+
 
 class Portfolio:
     """

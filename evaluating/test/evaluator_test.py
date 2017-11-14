@@ -7,6 +7,8 @@ Module for testing of the evaluating component
 """
 import unittest
 
+import datetime as dt
+
 from evaluating.evaluator import read_portfolio, read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from predicting.simple_predictor import SimplePredictor
@@ -160,7 +162,10 @@ class EvaluatorTest(unittest.TestCase):
         portfolios_over_time = evaluator.inspect_over_time(full_stock_market_data, [portfolio1, portfolio2, portfolio3],
                                                            evaluation_offset=100)
 
-        # TODO assert portfolio_over_time values
+        data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
+        self.assertEqual(list(portfolios_over_time['portfolio 1'].keys())[-1], dt.datetime.strptime('2017-11-07', '%Y-%m-%d').date())
+        self.assertEqual(len(data_row_lengths), 1)
+        self.assertEqual(data_row_lengths.pop(), 100)
 
     def get_test_data(self, stock_a, stock_b):
         period1 = '1962-2011'

@@ -48,9 +48,14 @@ class PortfolioEvaluator:
             # Checks whether all data series are of the same length (i.e. have an equal count of date->price items)
             return
 
-        # And now the clock ticks: We start at `offset - 1` and roll through the `market_data` in forward direction
-        for index in range(evaluation_offset - 1):
-            current_tick = index - evaluation_offset - 1
+        if evaluation_offset == -1:
+            # `evaluation_offset` has the 'disabled' value, so we calculate it based on the underlying data
+            evaluation_offset = market_data.get_row_count() - 1
+
+        # And now the clock ticks
+        for index in range(1, evaluation_offset):
+            # We start at -`evaluation_offset` and roll through the `market_data` in forward direction
+            current_tick = index - evaluation_offset + 1
 
             # Retrieve the stock market data up the current day, i.e. move one tick further in `market_data`
             current_market_data = get_data_up_to_offset(market_data, current_tick)
@@ -59,7 +64,7 @@ class PortfolioEvaluator:
             current_date = current_market_data.get_most_recent_trade_day()
 
             for portfolio in portfolios:
-                if index == 0:
+                if index == 1:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)
                     all_portfolios.update({portfolio.name: {yesterday: portfolio}})
