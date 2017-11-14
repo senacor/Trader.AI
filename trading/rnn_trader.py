@@ -5,8 +5,10 @@ Created on 13.11.2017
 '''
 import random
 from collections import deque
-
 import numpy as np
+
+from predicting.predictor_interface import IPredictor
+from predicting.simple_predictor import SimplePredictor
 from trading.trader_interface import Portfolio
 from trading.trader_interface import ITrader
 from trading.trader_interface import StockMarketData
@@ -45,10 +47,14 @@ class RnnTrader(ITrader):
     Implementation of ITrader based on Reinforced Neural Network (RNN): doTrade generates TradingActionList according to last generated changes on Portfolio value.
     '''
 
-    def __init__(self):
+    def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor):
         '''
         Constructor
         '''
+        # Save predictors
+        self.stockAPredictor = stockAPredictor
+        self.stockBPredictor = stockBPredictor
+
         # Hyperparameters for neural network
         self.state_size = 7 # TODO: infer from...
         self.action_size = 2 # TODO: infer from ...
@@ -175,8 +181,23 @@ class RnnTrader(ITrader):
 
 
 # Train the trader and its respective neural network(s)
-EPISODES = 1
+from evaluating.portfolio_evaluator import PortfolioEvaluator
+from evaluating.evaluator import read_stock_market_data
+EPISODES = 2
 if __name__ == "__main__":
-    # TODO börse initialisieren mit diesem Trader
-    # TODO börse starten und dabei lernen lassen
-    # TODO trainiertes Netz vom Trader speichern
+    # Reading training data
+    training_data = read_stock_market_data(['stock_a_1962-2011', 'stock_b_1962-2011'])
+
+    # Define initial portfolio
+    initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
+
+    # Define this trader, thereby loading trained networks
+    trader = RnnTrader(SimplePredictor(), SimplePredictor())
+
+    # Start evaluation and thereby learn training data
+    evaluator = PortfolioEvaluator(trader)
+    for i in range(EPISODES):
+        evaluator.inspect_over_time(100, training_data, [initial_portfolio]) # TODO loop over total data
+
+    # Save trained neural network
+    trader.save_net()
