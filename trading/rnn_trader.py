@@ -364,4 +364,4 @@ if __name__ == "__main__":
         evaluator.inspect_over_time(training_data, [initial_portfolio])
 
     # Save trained neural network
-    trader.save_net()
+    trader.save_model()
