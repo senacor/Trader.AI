@@ -84,7 +84,7 @@ class PortfolioEvaluator:
                 portfolio_cache.update({portfolio.name: updated_portfolio})
 
         # Draw a diagram of the portfolios' changes over time - if we're not unit testing
-        if not self.draw_results:
+        if self.draw_results:
             draw(all_portfolios, market_data)
 
         return all_portfolios
