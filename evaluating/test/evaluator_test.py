@@ -146,8 +146,7 @@ class EvaluatorTest(unittest.TestCase):
         """
         trader = SimpleTrader(SimplePredictor(), SimplePredictor())
 
-        # TODO mapping from one portfolio to one trader each
-        evaluator = PortfolioEvaluator(trader, draw_results=False)
+        evaluator = PortfolioEvaluator([trader] * 3, draw_results=False)
 
         stock_a = 'stock_a'
         stock_b = 'stock_b'
@@ -156,14 +155,16 @@ class EvaluatorTest(unittest.TestCase):
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
         portfolio1 = Portfolio(50000.0, [], 'portfolio 1')
-        portfolio2 = Portfolio(50000.0, [], 'portfolio 2')
-        portfolio3 = Portfolio(50000.0, [], 'portfolio 3')
+        portfolio2 = Portfolio(100000.0, [], 'portfolio 2')
+        portfolio3 = Portfolio(150000.0, [], 'portfolio 3')
 
         portfolios_over_time = evaluator.inspect_over_time(full_stock_market_data, [portfolio1, portfolio2, portfolio3],
                                                            evaluation_offset=100)
 
+        last_date = list(portfolios_over_time['portfolio 1'].keys())[-1]
+        self.assertEqual(last_date, dt.datetime.strptime('2017-11-07', '%Y-%m-%d').date())
+
         data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
-        self.assertEqual(list(portfolios_over_time['portfolio 1'].keys())[-1], dt.datetime.strptime('2017-11-07', '%Y-%m-%d').date())
         self.assertEqual(len(data_row_lengths), 1)
         self.assertEqual(data_row_lengths.pop(), 100)
 

@@ -6,6 +6,7 @@ from evaluating.evaluator import draw, get_data_up_to_offset, check_data_length
 from trading.trader_interface import ITrader, StockMarketData, Portfolio
 
 PortfolioList = List[Portfolio]
+TraderList = List[ITrader]
 
 
 class PortfolioEvaluator:
@@ -13,13 +14,13 @@ class PortfolioEvaluator:
     Given an `ITrader` implementation and `StockMarketData` this evaluator watches a list of `Portfolios` over time
     """
 
-    def __init__(self, trader: ITrader = None, draw_results: bool = False):
+    def __init__(self, trader_list: TraderList, draw_results: bool = False):
         """
         Constructor
         :param trader: The `ITrader` implementation to use
         :param draw_results: If this is set to `False` a diagram is *not* drawn
         """
-        self.trader = trader
+        self.trader_list = trader_list
         self.draw_results = draw_results
 
     def inspect_over_time(self, market_data: StockMarketData, portfolios: PortfolioList, evaluation_offset: int = -1):
@@ -37,6 +38,8 @@ class PortfolioEvaluator:
         :return: If `self.test_mode` is `True`: All portfolios' value courses. Otherwise: Nothing. It just draws the
         course of all portfolios given the market data
         """
+
+        portfolio_trader_mapping = list(zip(portfolios, self.trader_list))
 
         # Map that holds all portfolios in the course of time. Structure: {portfolio_name => {date => portfolio}}
         all_portfolios = {}
@@ -63,7 +66,7 @@ class PortfolioEvaluator:
             # Retrieve the current date
             current_date = current_market_data.get_most_recent_trade_day()
 
-            for portfolio in portfolios:
+            for portfolio, trader in portfolio_trader_mapping:
                 if index == 1:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)
@@ -78,7 +81,7 @@ class PortfolioEvaluator:
                                                                                 current_market_data.market_data)
 
                 # Ask the trader for its action
-                update = self.trader.doTrade(portfolio_to_update, current_total_portfolio_value, current_market_data,
+                update = trader.doTrade(portfolio_to_update, current_total_portfolio_value, current_market_data,
                                              *current_market_data.market_data.keys())
 
                 # Update the portfolio that is saved at ILSE - The InnovationLab Stock Exchange ;-)
