@@ -3,10 +3,9 @@ Created on 08.11.2017
 
 @author: jtymoszuk
 '''
-from trading.trader_interface import ITrader, TradingActionList
+from trading.trader_interface import ITrader, TradingActionList, Portfolio
 from trading.trader_interface import TradingAction
 from trading.trader_interface import StockMarketData
-from trading.trader_interface import Portfolio
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import CompanyEnum

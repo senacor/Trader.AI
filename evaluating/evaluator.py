@@ -2,105 +2,113 @@ import datetime as dt
 import json
 from typing import Dict
 
-import copy
 import numpy
 import random
 from matplotlib import pyplot as plt
 
-import Columns
-from trading.trader_interface import Portfolio, SharesOfCompany, StockMarketData, TradingActionEnum, TradingActionList
+from trading.trader_interface import SharesOfCompany, StockMarketData, Portfolio
+
+"""
+This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
+"""
+
+"""
+Some JSON keys
+"""
+JSON_KEY_SHARES = 'shares'
+JSON_KEY_NAME = 'name'
+JSON_KEY_AMOUNT = 'amount'
+JSON_KEY_CASH = 'cash'
+
+"""
+The csv's column keys
+"""
+DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
+
+"""
+Colors `matplotlib` chooses randomly from to create graphs
+"""
+COLORS = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
 
 
 def read_portfolio(name: str = 'portfolio') -> Portfolio:
+    """
+    Reads the JSON file from "../json/`name`.json" and creates a `Portfolio` object from this
+    :param name: The filename to read
+    :return: The created `Portfolio` object
+    """
     file = open("../json/" + name + ".json")
-    json_data = file.read()
-    data = json.loads(json_data)
+    data = json.loads(file.read())
     file.close()
 
     shares_list = list()
-    for share in data['shares']:
-        shares_list.append(SharesOfCompany(share['name'], share['amount']))
+    for share in data[JSON_KEY_SHARES]:
+        shares_list.append(SharesOfCompany(share[JSON_KEY_NAME], share[JSON_KEY_AMOUNT]))
 
-    # pprint(shares_list[0].companyName)
-    # pprint(shares_list[0].amountOfShares)
-    # pprint(data['cash'])
-    return Portfolio(data['cash'], shares_list)
+    return Portfolio(data[JSON_KEY_CASH], shares_list)
 
 
 def read_stock_market_data(name: list, path: str = '../datasets/') -> StockMarketData:
+    """
+    Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
+    :param name: The names of the files to read
+    :param path: The path from which to read. Default: "../datasets/"
+    :return: The created `StockMarketData` object
+    """
     data = {}
     for symbol in name:
         na_portfolio = numpy.loadtxt(path + symbol + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
         dates = list()
         for day in na_portfolio:
-            date = dt.datetime.strptime(day[Columns.DATE].decode('UTF-8'), '%Y-%m-%d').date()
-            dates.append((date, day[Columns.ADJ_CLOSE]))
+            date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
+            dates.append((date, day[ADJ_CLOSE]))
 
         data[symbol] = dates
 
     return StockMarketData(data)
 
 
-def update_portfolio(stock_market_data: StockMarketData, portfolio: Portfolio, trade_action_list: TradingActionList):
-    updated_portfolio = copy.deepcopy(portfolio)
-
-    print("")
-
-    if trade_action_list.isEmpty():
-        print("No action this time")
-        return updated_portfolio
-
-    for trade_action in trade_action_list.tradingActionList:
-        shares_name = trade_action.shares.name
-
-        current_date = stock_market_data.get_most_recent_trade_day()
-        current_price = stock_market_data.get_most_recent_price(shares_name)
-
-        print(f"Available cash on {current_date}: {updated_portfolio.cash}")
-        # for share in update.shares:
-        share = updated_portfolio.get_or_insert(shares_name)
-        # if share.name is update.shares.name:
-        amount = trade_action.shares.amount
-        trade_volume = amount * current_price
-
-        if trade_action.action is TradingActionEnum.BUY:
-            print(f"  Buying {amount} shares of '{share.name}' with an individual value of {current_price}")
-            print(f"  Volume of this trade: {trade_volume}")
-
-            if trade_volume <= updated_portfolio.cash:
-                share.amount += amount
-                updated_portfolio.cash -= trade_volume
-            else:
-                print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
-                      f"volume of {trade_volume}")
-        elif trade_action.action is TradingActionEnum.SELL:
-            print(f"  Selling {amount} shares of {share.name} with individual value of {current_price}")
-            print(f"  Volume of this trade: {trade_volume}")
-
-            if share.amount > amount:
-                share.amount -= amount
-                updated_portfolio.cash += trade_volume
-            else:
-                print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
-
-        print(f"Resulting available cash after trade: {updated_portfolio.cash}")
-
-        total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
-        print(f"Total portfolio value after trade: {total_portfolio_value}")
-
-    return updated_portfolio
-
-
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
+    """
+    Draws all given `Portfolios` based on the given `prices`
+    :param portfolio_over_time:
+    :param prices:
+    """
     plt.figure()
-
-    colors = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
 
     for name, portfolio in portfolio_over_time.items():
         values = [pf.total_value(date, prices.market_data) for date, pf in portfolio.items()]
 
-        plt.plot(portfolio.keys(), values, label=name, color=random.choice(colors))
+        plt.plot(portfolio.keys(), values, label=name, color=random.choice(COLORS))
 
     plt.legend(portfolio_over_time.keys())
     plt.show()
+
+
+def get_data_up_to_offset(stock_market_data: StockMarketData, offset: int):
+    """
+    Removes all data items *behind* the given `offset` - this emulates going through history in a list of
+    date->price items
+    :param stock_market_data: The `market_data` to step through
+    :param offset: The offset to apply
+    :return: A copied `StockMarketData` object which only reaches to position `offset`
+    """
+    if offset == 0:
+        return stock_market_data
+
+    offset_data = {}
+    for key, value in stock_market_data.market_data.items():
+        offset_data[key] = value.copy()[:offset]
+
+    return StockMarketData(offset_data)
+
+
+def check_data_length(market_data):
+    """
+    Checks if the value rows of all keys inside `market_data` have the same count. Does this by extracting every
+    row count, inserting those numbers into a set and checking if this set has the length of 1
+    :param market_data: The `market_data` to check
+    :return: `True` if all value rows have the same length, `False` if not
+    """
+    return len(set([len(key) for key in market_data.market_data.keys()])) == 1
