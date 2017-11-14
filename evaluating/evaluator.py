@@ -51,7 +51,7 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
     return Portfolio(data[JSON_KEY_CASH], shares_list)
 
 
-def read_stock_market_data(name: list, path: str = '../datasets/') -> StockMarketData:
+def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
     """
     Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
     :param name: The names of the files to read
@@ -59,15 +59,15 @@ def read_stock_market_data(name: list, path: str = '../datasets/') -> StockMarke
     :return: The created `StockMarketData` object
     """
     data = {}
-    for symbol in name:
-        na_portfolio = numpy.loadtxt(path + symbol + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
+    for companyname_and_filename_tuple in companynames_and_filenames_tuples: 
+        na_portfolio = numpy.loadtxt(path + companyname_and_filename_tuple[1] + '.csv', dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
         dates = list()
         for day in na_portfolio:
             date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
             dates.append((date, day[ADJ_CLOSE]))
 
-        data[symbol] = dates
+        data[companyname_and_filename_tuple[0]] = dates
 
     return StockMarketData(data)
 

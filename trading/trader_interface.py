@@ -24,8 +24,8 @@ class CompanyEnum(Enum):
     '''
     Represents companies on stock market
     '''
-    COMPANY_A = "AAPL"
-    COMPANY_B = "GOOG"
+    COMPANY_A = "stock_a"
+    COMPANY_B = "stock_b"
 
 
 class SharesOfCompany:
