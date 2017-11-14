@@ -4,7 +4,7 @@ Created on 13.11.2017
 @author: jtymoszuk
 '''
 
-from trading.trader_interface import Portfolio
+from trading.portfolio import Portfolio
 from trading.trader_interface import ITrader
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import TradingActionList

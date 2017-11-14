@@ -8,8 +8,7 @@ Module for testing of all trader components
 import unittest
 import evaluating.evaluator
 
-from trading.trader_interface import StockMarketData
-from trading.trader_interface import Portfolio
+from trading.trader_interface import StockMarketData, Portfolio
 from trading.trader_interface import SharesOfCompany
 from trading.trader_interface import ITrader
 from trading.trader_interface import TradingActionList

@@ -1,18 +1,18 @@
-'''
+"""
 Created on 08.11.2017
 
 Module for testing of the evaluating component
 
-@author: jholtkamp
-'''
+@author: Jonas Holtkamp
+"""
 import unittest
 
-from evaluating.evaluator import read_portfolio, read_stock_market_data, update_portfolio
+from evaluating.evaluator import read_portfolio, read_stock_market_data
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
-from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, Portfolio, \
-    StockMarketData, TradingActionList
+from trading.trader_interface import CompanyEnum, TradingAction, TradingActionEnum, SharesOfCompany, StockMarketData, \
+    TradingActionList, Portfolio
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -51,9 +51,9 @@ class EvaluatorTest(unittest.TestCase):
         symbol = 'AAPL'
 
         trader = SimpleTrader(PerfectStockAPredictor(), None)
-        currentPortfolioValue = 0.0  # Dummy value
-        trading_action_list = trader.doTrade(read_portfolio(), currentPortfolioValue, read_stock_market_data([symbol]),
-                                             company_a_name=symbol)
+        current_portfolio_value = 0.0  # Dummy value
+        trading_action_list = trader.doTrade(read_portfolio(), current_portfolio_value,
+                                             read_stock_market_data([symbol]), company_a_name=symbol)
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)
@@ -71,7 +71,7 @@ class EvaluatorTest(unittest.TestCase):
         trading_action_list = TradingActionList()
         trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
 
-        updated_portfolio = update_portfolio(stock_market_data, portfolio, trading_action_list)
+        updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Trade volume is too high for current cash reserve. Nothing should happen
         self.assertEqual(updated_portfolio.cash, cash_reserve)
@@ -92,7 +92,7 @@ class EvaluatorTest(unittest.TestCase):
         trading_action_list = TradingActionList()
         trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
 
-        updated_portfolio = update_portfolio(stock_market_data, portfolio, trading_action_list)
+        updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Current cash reserve is sufficient for trade volume. Trade should happen
         self.assertLess(updated_portfolio.cash, cash_reserve)
@@ -129,9 +129,9 @@ class EvaluatorTest(unittest.TestCase):
         full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
-        portfolio1 = Portfolio(50_000.0, [], 'portfolio 1')
-        portfolio2 = Portfolio(100_000.0, [], 'portfolio 2')
-        portfolio3 = Portfolio(150_000.0, [], 'portfolio 3')
+        portfolio1 = Portfolio(50000.0, [], 'portfolio 1')
+        portfolio2 = Portfolio(100000.0, [], 'portfolio 2')
+        portfolio3 = Portfolio(150000.0, [], 'portfolio 3')
 
         evaluator.inspect_over_time(200, full_stock_market_data, [portfolio1, portfolio2, portfolio3])
 

@@ -1,67 +1,65 @@
 from typing import List
 
-from evaluating.evaluator import update_portfolio, draw
-from trading.trader_interface import ITrader, Portfolio, StockMarketData
+from evaluating.evaluator import draw, get_data_up_to_offset, check_data_length
+from trading.trader_interface import ITrader, StockMarketData, Portfolio
 
 PortfolioList = List[Portfolio]
 
 
 class PortfolioEvaluator:
-    '''
-    Simple Trader generates TradingAction based on simple logic, input data and prediction from NN-Engine
-    '''
+    """
+    Given an `ITrader` implementation and `StockMarketData` this evaluator watches a list of `Portfolios` over time
+    """
 
     def __init__(self, trader: ITrader = None):
-        '''
+        """
         Constructor
-        '''
+        """
         self.trader = trader
 
-    # TODO Convention: Camel case for variables and function/method names
     def inspect_over_time(self, evaluation_offset: int, market_data: StockMarketData, portfolios: PortfolioList):
+        """
+
+        :param evaluation_offset: How many data rows should we look backward (from the end of `market_data`) as a start
+        date?
+        :param market_data: The stock market data with which to work. Only those symbols are tradable for that are
+        contained in this data
+        :param portfolios: The list of portfolios to manage
+        :return: Nothing. It just draws the course of all portfolios given the market data
+        """
         all_portfolios = {}
 
-        if not self.check_data_length(market_data):
-            # Checks whether all data series are of the same length (i.e. have equal date->price items)
+        if not check_data_length(market_data):
+            # Checks whether all data series are of the same length (i.e. have an equal count of date->price items)
             return
 
         for portfolio in portfolios:
             portfolio_over_time = {}
             all_portfolios[portfolio.name] = portfolio_over_time
 
+            # Save the starting state of this portfolio
             portfolio_over_time[next(iter(market_data.market_data.values()))[-evaluation_offset][0]] = portfolio
-            print(portfolio_over_time)
 
+            # And now the clock ticks: We start at `offset - 1` and roll through the `market_data` in forward direction
             for index in range(evaluation_offset - 1):
                 current_tick = index - evaluation_offset - 1
 
-                # Retrieve the stock market data up the current day
-                stock_market_data = self.get_data_up_to_offset(market_data, current_tick)
+                # Retrieve the stock market data up the current day, i.e. move one tick further in `market_data`
+                current_market_data = get_data_up_to_offset(market_data, current_tick)
+
+                # Retrieve the current date and the total portfolio value at this time
+                current_date = current_market_data.get_most_recent_trade_day()
+                current_total_portfolio_value = portfolio.total_value(current_date, current_market_data.market_data)
 
                 # Ask the trader for its action
-                currentDate = stock_market_data.get_most_recent_trade_day()
-                currentTotalPortfolioValue = portfolio.total_value(currentDate, stock_market_data.market_data)
+                update = self.trader.doTrade(portfolio, current_total_portfolio_value, current_market_data,
+                                             *current_market_data.market_data.keys())
 
-                update = self.trader.doTrade(portfolio, currentTotalPortfolioValue, stock_market_data,
-                                             *stock_market_data.market_data.keys())
+                # Update the portfolio that is saved at ILSE - The InnovationLab Stock Exchange ;-)
+                portfolio = portfolio.update(current_market_data, update)
 
-                # Update the portfolio that is saved at the ILSE
-                portfolio = update_portfolio(stock_market_data, portfolio, update)
-
-                # Save the updated portfolio in our dict
-                portfolio_over_time[currentDate] = portfolio
+                # Save the updated portfolio in our dict under the current date as key
+                portfolio_over_time[current_date] = portfolio
 
         # Draw a diagram of the portfolios' changes over time
-        draw(all_portfolios, stock_market_data)
-
-    def get_data_up_to_offset(self, stock_market_data: StockMarketData, offset: int):
-        if offset == 0: return stock_market_data
-
-        offset_data = {}
-        for key, value in stock_market_data.market_data.items():
-            offset_data[key] = value.copy()[:offset]
-
-        return StockMarketData(offset_data)
-
-    def check_data_length(self, market_data):
-        return len(set([len(key) for key in market_data.market_data.keys()])) == 1
+        draw(all_portfolios, current_market_data)
