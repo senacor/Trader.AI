@@ -13,7 +13,7 @@ from trading.trader_interface import Portfolio
 from trading.trader_interface import ITrader
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import TradingActionList
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from keras.layers import Dense
 from keras.optimizers import sgd, Adam
 
@@ -37,8 +37,8 @@ class State:
     def deepcopy(self):
         return State(self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB)
 
-    def array(self):
-        return np.array([self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB])
+    def input_array(self):
+        return np.array([[self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB]])
 
 
 
@@ -71,38 +71,62 @@ class RnnTrader(ITrader):
         # create replay memory using deque
         self.memory = deque(maxlen=2000)
 
-        # create main model and target model
-        # TODO create OR load trained model
-        #self.model = self.build_model()
-        self.model = Sequential()
-        self.model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        self.model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
-        self.model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
-        #model.summary()
-        self.model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
-        #self.target_model = self.build_model()
+        # create main model, either from file or (if not existent) from scratch
+        try:
+            self.model = self.load_model()
+        except:
+            self.model = self.build_model()
 
-        # initialize target model
+        # create and initialize target model
+        # self.target_model = self.build_model()
         #self.update_target_model()
 
         self.lastPortfolioValue = None
         self.lastActionA = None
         self.lastActionB = None
 
-    # TODO save trained net
-    def save_net(self):
-        pass
+    # TODO description
+    def build_model(self) -> Sequential:
+        model = Sequential()
+        model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
+        # tanh for output between -1 and +1
+        model.add(Dense(self.action_size, activation='tanh', kernel_initializer='he_uniform'))
+        # model.summary()
+        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+        return model
 
-    # TODO get action from model using epsilon-greedy policy
+    # TODO description
+    def save_model(self):
+        model_json = self.model.to_json()
+        with open("rnn_trader.json", "w") as json_file:
+            json_file.write(model_json)
+        self.model.save_weights("rnn_trader.h5")
+
+    # TODO description
+    def load_model(self) -> Sequential:
+        json_file = open('rnn_trader.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+        model.load_weights('rnn_trader.h5')
+        return model
+
+    # Get best action for current state, either randomly or predicted from neural network
+    # Choice between random and neural network solely depends on epsilon
+    # Epsilon is the probability of a random action
+    # Return value is two floats between -1.0 and +1.0
+    # First float is for action on stock A, second float is for action on stock B
+    # Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
+    # Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
     def get_action(self, state: State):
         if np.random.rand() <= self.epsilon:
-            return random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)  # two random floats, each between -1 and 1
-        else:  # TODO get actions from net
-            input = np.array(state[1:])  # cut out date information, it's no input for the net
-            # state = np.reshape(state, [1, state_size])
-            input = np.reshape(input, [1, self.state_size])
-            q_values = self.model.predict(input)
-            return np.argmax(q_values[0]), np.argmax(q_values[1])
+            # generate two random floats, each between -1 and +1
+            return random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
+        else:
+            # call neural network with current state
+            actions = self.model.predict(state.input_array())
+            return actions[0][0], actions[0][1]
 
     # TODO save sample <s,a,r,s'> to the replay memory
     def append_sample(self, state: State, actionA: float, actionB: float, reward, next_state, done):
@@ -203,9 +227,9 @@ if __name__ == "__main__":
     trader = RnnTrader(SimplePredictor(), SimplePredictor())
 
     # Start evaluation and thereby learn training data
-    evaluator = PortfolioEvaluator(trader)
+    evaluator = PortfolioEvaluator(trader, False)
     for i in range(EPISODES):
-        evaluator.inspect_over_time(100, training_data, [initial_portfolio]) # TODO loop over total data
+        evaluator.inspect_over_time(training_data, [initial_portfolio])
 
     # Save trained neural network
     trader.save_net()
