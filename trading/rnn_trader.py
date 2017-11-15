@@ -20,6 +20,8 @@ from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import CompanyEnum
 from trading.trader_interface import SharesOfCompany
 
+# Define possible actions per stock
+STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
 
 # Define state from the trader's viewpoint
 class State:
@@ -59,9 +61,12 @@ class RnnTrader(ITrader):
         self.stockBPredictor = stockBPredictor
 
         # Hyperparameters for neural network
-        self.state_size = 7 # TODO: infer from...
-        self.action_size = 2 # TODO: infer from ...
-        self.hidden_size = 24
+        self.state_size = 7 # TODO: infer from...?
+        # Discretization of actions as list of (+1.0,+1.0), (+1.0, +0.5), (+1.0, 0.0), ..., (-1.0, -1.0)
+        # We have 5 actions per stock (+1.0, +0.5, 0.0, -0.5, -1.0)
+        # Means 25 actions for our two stocks
+        self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS) # TODO: infer from ...?
+        self.hidden_size = 50
 
         # These are hyper parameters for the DQN
         self.discount_factor = 0.99
@@ -94,8 +99,8 @@ class RnnTrader(ITrader):
         model = Sequential()
         model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
-        # tanh for output between -1 and +1
-        model.add(Dense(self.action_size, activation='tanh', kernel_initializer='he_uniform'))
+        # activation=tanh for output between -1 and +1
+        model.add(Dense(self.action_size, activation='relu', kernel_initializer='he_uniform'))
         # model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -129,14 +134,26 @@ class RnnTrader(ITrader):
     # which in turn means there is no cash left to buy stock B (the action +0.2)
     def get_action(self, state: State):
         if np.random.rand() <= self.epsilon:
-            # generate two random floats, each between -1 and +1
-            return random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
+            # generate two random actions
+            return random.choice(STOCKACTIONS), random.choice(STOCKACTIONS)
         else:
-            # call neural network with current state
-            actions = self.model.predict(state.input_array())
-            return actions[0][0], actions[0][1]
+            # generate values per action by calling neural network with current state
+            actionValues = self.model.predict(state.input_array())
+            # Get index with highest value and return corresponding actions
+            index = np.argmax(actionValues[0]) # TODO what if there are more actions with the same values?
+            return self.get_actions_from_index(index)
+
+    def get_actions_from_index(self, index: int):
+        assert 0 <= index < self.action_size
+        return STOCKACTIONS[index // len(STOCKACTIONS)], STOCKACTIONS[index % len(STOCKACTIONS)]
+
+    def get_index_from_actions(self, actionA: float, actionB: float):
+        assert actionA in STOCKACTIONS
+        assert actionB in STOCKACTIONS
+        return STOCKACTIONS.index(actionA) * len(STOCKACTIONS) + STOCKACTIONS.index(actionB)
 
     # TODO save sample <s,a,r,s'> to the replay memory
+    # TODO do we really need this function?
     def append_sample(self, state: State, actionA: float, actionB: float, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
@@ -146,10 +163,10 @@ class RnnTrader(ITrader):
 
     # TODO description
     # Implements rewards function
+    # TODO implement reward using discounted future values as well
     def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
-
-        if lastPortfolioValue is None or currentPortfolioValue is None:
-            return 0
+        assert lastPortfolioValue is not None
+        assert currentPortfolioValue is not None
 
         if (currentPortfolioValue > lastPortfolioValue):
             return 1
@@ -207,6 +224,8 @@ class RnnTrader(ITrader):
         # loss = self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=1)
 
     # TODO why company names as parameters? we don't use them
+    # TODO let ILSE give us information whether both (all) previous trades succeeded
+    # TODO maybe get rid of currentPortfolioValue, because this is easily computable from the portfolio
     def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData,
                 company_a_name=CompanyEnum.COMPANY_A.value,
                 company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
