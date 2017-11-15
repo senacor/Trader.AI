@@ -4,12 +4,13 @@ Created on 08.11.2017
 @author: rmueller
 '''
 from predicting.predictor_interface import IPredictor
-from keras.models import model_from_json
 import numpy as np
 
 import os
-from definitions import ROOT_DIR
 from definitions import DATASETS_DIR
+from utils import load_keras_sequential, save_keras_sequential
+
+MODEL_FILE_NAME = 'perfect_stock_a_predictor'
 
 
 class PerfectStockAPredictor(IPredictor):
@@ -21,12 +22,7 @@ class PerfectStockAPredictor(IPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        # TODO use other concept for paths
-        json_file = open(os.path.join(ROOT_DIR, 'predicting', 'perfect_stock_a_predictor.json'), 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        self.network = model_from_json(loaded_model_json)
-        self.network.load_weights(os.path.join(ROOT_DIR, 'predicting', 'perfect_stock_a_predictor.h5'))
+        self.network = load_keras_sequential('predicting', MODEL_FILE_NAME)
         
     def doPredict(self, data:list) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
@@ -113,6 +109,5 @@ if __name__ == "__main__":
     plt.show()
 
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
-    with open("perfect_stock_a_predictor.json", "w") as json_file:
-        json_file.write(network.to_json())
-    network.save_weights("perfect_stock_a_predictor.h5")
+    save_keras_sequential(network, 'predicting', MODEL_FILE_NAME)
+
