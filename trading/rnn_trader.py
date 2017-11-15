@@ -57,13 +57,13 @@ class RnnTrader(ITrader):
     '''
     MODEL_FILE_NAME = 'rnn_trader'
 
-    def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor):
+    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor):
         '''
         Constructor
         '''
         # Save predictors
-        self.stockAPredictor = stockAPredictor
-        self.stockBPredictor = stockBPredictor
+        self.stock_a_predictor = stock_a_predictor
+        self.stock_b_predictor = stock_b_predictor
 
         # Hyperparameters for neural network
         self.state_size = 7  # TODO: infer from...?
@@ -227,34 +227,34 @@ class RnnTrader(ITrader):
     # TODO why company names as parameters? we don't use them
     # TODO let ILSE give us information whether both (all) previous trades succeeded
     # TODO maybe get rid of currentPortfolioValue, because this is easily computable from the portfolio
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
-                stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
+                stock_market_data: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
-          currentPortfolioValue : value of Portfolio at given Momemnt
-          stockMarketData : StockMarketData for evaluation
+          current_portfolio_value : value of Portfolio at given Momemnt
+          stock_market_data : StockMarketData for evaluation
         Returns:
           A TradingActionList instance, may be empty never None
         """
         # build current state object
-        predictedValueStockA = self.stockAPredictor.doPredict(
-            stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_A))
-        predictedValueStockB = self.stockBPredictor.doPredict(
-            stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_B))
+        predictedValueStockA = self.stock_a_predictor.doPredict(
+            stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A))
+        predictedValueStockB = self.stock_b_predictor.doPredict(
+            stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B))
         current_state = State(portfolio.cash,
                               portfolio.get_amount(CompanyEnum.COMPANY_A.value),
                               portfolio.get_amount(CompanyEnum.COMPANY_B.value),
-                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value),
-                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value),
+                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A.value),
+                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B.value),
                               predictedValueStockA,
                               predictedValueStockB)
 
         if self.lastState is not None:  # doTrade was called before at least once
             assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None
             # baue memory tuple auf
-            reward = self.calculateReward(self.lastPortfolioValue, currentPortfolioValue)
+            reward = self.calculateReward(self.lastPortfolioValue, current_portfolio_value)
             memoryTuple = (self.lastState, self.lastActionA, self.lastActionB, reward, current_state)
             # memory tuple speichern
             self.memory.append(memoryTuple)
@@ -268,9 +268,9 @@ class RnnTrader(ITrader):
         # Save created actions for the next call of doTrade
         self.lastActionA = actionA
         self.lastActionB = actionB
-        self.lastPortfolioValue = currentPortfolioValue
+        self.lastPortfolioValue = current_portfolio_value
         self.lastState = current_state
-        return self.create_TradingActionList(actionA, actionB, portfolio, stockMarketData)
+        return self.create_TradingActionList(actionA, actionB, portfolio, stock_market_data)
 
     def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio,
                                  stockMarketData: StockMarketData) -> TradingActionList:
@@ -337,72 +337,6 @@ class RnnTrader(ITrader):
             print(f"!!!! RnnTrader - INFO: Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
 
         return None
-
-    def isTradingActionListValid(self, tradingActionList: TradingActionList, currentPortfolio: Portfolio,
-                                 stockMarketData: StockMarketData) -> bool:
-        """
-        Validates if generated TradingActionList is valid in comparison to current Portfolio
-        Args:
-          tradingActionList : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
-          currentPortfolio : current Portfolio of this Trader
-          stockMarketData: StockMarketData containing date for all companies 
-        Returns:
-          A True if given TradingActionList is valid in comparison to current Portfolio, False otherwise, never None
-        """
-
-        currentCash = currentPortfolio.cash
-
-        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
-        tradingActionForCompanyA = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
-
-        isValid, currentCash = self.isTradingActionValid(currentCash, CompanyEnum.COMPANY_A.value,
-                                                         tradingActionForCompanyA, mostRecentPriceCompanyA,
-                                                         currentPortfolio)
-        if (isValid is False):
-            return False
-
-        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
-        tradingActionForCompanyB = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
-
-        isValid, currentCash = self.isTradingActionValid(currentCash, CompanyEnum.COMPANY_B.value,
-                                                         tradingActionForCompanyB, mostRecentPriceCompanyB,
-                                                         currentPortfolio)
-        if (isValid is False):
-            return False
-
-        return True
-
-    def isTradingActionValid(self, currentCash: float, companyName: str, tradingActionForCompany: TradingAction,
-                             mostRecentPriceCompany: float, currentPortfolio: Portfolio):
-        """
-        Validates if given TradingAction is valid
-        Args:
-          currentCash : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
-          companyName : Company name as String
-          tradingActionForCompany: TradingAction
-          mostRecentPriceCompany: most recent price of company as float 
-          currentPortfolio: current Portfolio
-        Returns:
-          A True if given TradingAction is valid in comparison to current Portfolio and Cash, False otherwise, never None
-        """
-        if (tradingActionForCompany is not None):
-            if (tradingActionForCompany.action == TradingActionEnum.BUY):
-                priceToPay = mostRecentPriceCompany * tradingActionForCompany.shares
-
-                currentCash = currentCash - priceToPay
-                if (currentCash < 0):
-                    # TODO: use Logging!!!
-                    print(
-                        f"!!!! RnnTrader - WARNING: Not enough money to pay! tradingActionForCompany: {tradingActionForCompany}, Portfolio: {currentPortfolio}")
-                    return False, currentCash
-
-            elif (tradingActionForCompany.action == TradingActionEnum.SELL):
-                if (tradingActionForCompany.shares > currentPortfolio.get_amount(companyName)):
-                    return False
-            else:
-                raise ValueError(f'Action for tradingActionForCompanyB is not valid: {tradingActionForCompany}')
-
-        return True, currentCash
 
 
 # Train the trader and its respective neural network(s)

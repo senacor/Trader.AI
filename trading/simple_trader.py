@@ -18,100 +18,100 @@ class SimpleTrader(ITrader):
     Simple Trader generates TradingAction based on simple logic, input data and prediction from NN-Engine
     '''
 
-    def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor):
+    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor):
         '''
         Constructor
         '''
-        self.stockAPredictor = stockAPredictor
-        self.stockBPredictor = stockBPredictor
+        self.stock_a_predictor = stock_a_predictor
+        self.stock_b_predictor = stock_b_predictor
 
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
-                stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
+                stock_market_data: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
-          currentPortfolioValue : value of Portfolio at given Momemnt
-          stockMarketData : StockMarketData for evaluation
+          current_portfolio_value : value of Portfolio at given Momemnt
+          stock_market_data : StockMarketData for evaluation
         Returns:
           A TradingActionList instance, may be empty never None
         """
 
-        localPortfolio = copy.deepcopy(portfolio)
+        local_portfolio = copy.deepcopy(portfolio)
 
         result = TradingActionList()
 
-        companyAData = stockMarketData.market_data.get(CompanyEnum.COMPANY_A.value)
-        if (self.stockAPredictor is not None and companyAData is not None):
-            self.tradeForCompany(CompanyEnum.COMPANY_A.value, companyAData, self.stockAPredictor, localPortfolio,
+        company_a_data = stock_market_data.market_data.get(CompanyEnum.COMPANY_A.value)
+        if (self.stock_a_predictor is not None and company_a_data is not None):
+            self.__trade_for_company(CompanyEnum.COMPANY_A.value, company_a_data, self.stock_a_predictor, local_portfolio,
                                  result)
         else:
             # TODO: use Logging!!!
-            print("!!!! SimpleTrader: stockAPredictor or companyAData is None -> No prediction for Company A")
+            print("!!!! SimpleTrader: stock_a_predictor or company_a_data is None -> No prediction for Company A")
 
-        companyBData = stockMarketData.market_data.get(CompanyEnum.COMPANY_B.value)
-        if (self.stockBPredictor is not None and companyBData is not None):
-            self.tradeForCompany(CompanyEnum.COMPANY_B.value, companyBData, self.stockBPredictor, localPortfolio,
+        company_b_data = stock_market_data.market_data.get(CompanyEnum.COMPANY_B.value)
+        if (self.stock_b_predictor is not None and company_b_data is not None):
+            self.__trade_for_company(CompanyEnum.COMPANY_B.value, company_b_data, self.stock_b_predictor, local_portfolio,
                                  result)
         else:
             # TODO: use Logging!!!
-            print("!!!! SimpleTrader: stockBPredictor or companyBData is None -> No prediction for Company B")
+            print("!!!! SimpleTrader: stock_b_predictor or company_b_data is None -> No prediction for Company B")
 
         return result
 
-    def tradeForCompany(self, companyName: str, companyData: list, predictor: IPredictor, portfolio: Portfolio,
-                        resultTradingActionList: TradingActionList):
+    def __trade_for_company(self, company_name: str, company_data: list, predictor: IPredictor, portfolio: Portfolio,
+                        result_trading_action_list: TradingActionList):
 
-        lastValue = companyData[-1][-1]
+        lastValue = company_data[-1][-1]
 
         # This determines the trade action to apply
-        tradingAction = self.determine_action(companyData, predictor, lastValue)
+        trading_action = self.__determine_action(company_data, predictor, lastValue)
 
-        if tradingAction == TradingActionEnum.BUY:
+        if trading_action == TradingActionEnum.BUY:
             if (portfolio.cash > lastValue):
                 # We can buy something
-                amountOfUnitsToBuy = int(portfolio.cash // lastValue)
-                sharesOfCompany = SharesOfCompany(companyName, amountOfUnitsToBuy);
-                resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
+                amount_of_units_to_buy = int(portfolio.cash // lastValue)
+                shares_of_company = SharesOfCompany(company_name, amount_of_units_to_buy);
+                result_trading_action_list.addTradingAction(TradingAction(trading_action, shares_of_company))
 
                 # Update Cash in portfolio
-                portfolio.cash = portfolio.cash - (amountOfUnitsToBuy * lastValue)
+                portfolio.cash = portfolio.cash - (amount_of_units_to_buy * lastValue)
 
-        elif tradingAction == TradingActionEnum.SELL:
+        elif trading_action == TradingActionEnum.SELL:
             # Check if something can be selled
-            sharesOfAppleInPortfolio = self.findSharesOfCompany(companyName, portfolio.shares)
-            if (sharesOfAppleInPortfolio is not None):
+            shares_of_apple_in_portfolio = self.__find_shares_of_company(company_name, portfolio.shares)
+            if (shares_of_apple_in_portfolio is not None):
                 # Sell everything
-                sharesOfCompany = SharesOfCompany(companyName, sharesOfAppleInPortfolio.amount);
-                resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
+                shares_of_company = SharesOfCompany(company_name, shares_of_apple_in_portfolio.amount);
+                result_trading_action_list.addTradingAction(TradingAction(trading_action, shares_of_company))
 
-    def determine_action(self, companyData, predictor, last_value):
-        predictedNextAppleValue = predictor.doPredict(companyData)
+    def __determine_action(self, company_data, predictor, last_value):
+        predicted_next_apple_value = predictor.doPredict(company_data)
 
         action = None
-        if predictedNextAppleValue > last_value:
+        if predicted_next_apple_value > last_value:
             action = TradingActionEnum.BUY
-        elif predictedNextAppleValue < last_value:
+        elif predicted_next_apple_value < last_value:
             action = TradingActionEnum.SELL
 
         return action
 
-    def findSharesOfCompany(self, companyName: str, shares: list) -> SharesOfCompany:
+    def __find_shares_of_company(self, company_name: str, shares: list) -> SharesOfCompany:
         """ Finds SharesOfCompany in list by company name
     
         Args:
-          companyName : company to find
+          company_name : company to find
           list : list with SharesOfCompany
         Returns:
           SharesOfCompany for given company or None 
         """
-        for sharesOfCompany in shares:
-            if (isinstance(sharesOfCompany, SharesOfCompany) and sharesOfCompany.name == companyName):
-                return sharesOfCompany
+        for shares_of_company in shares:
+            if (isinstance(shares_of_company, SharesOfCompany) and shares_of_company.name == company_name):
+                return shares_of_company
 
         return None
 
 
 class AlwaysBuyingTrader(SimpleTrader):
-    def determine_action(self, companyData, predictor, last_value):
+    def determine_action(self, company_data, predictor, last_value):
         return TradingActionEnum.BUY

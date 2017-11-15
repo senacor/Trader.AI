@@ -16,20 +16,20 @@ from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 class Predictors(containers.DeclarativeContainer):
     """IoC container of predictor providers."""
  
-    simplePredictor = providers.Factory(SimplePredictor)
-    perfectStockAPredictor = providers.Factory(PerfectStockAPredictor)
+    simple_predictor = providers.Factory(SimplePredictor)
+    perfect_stock_a_predictor = providers.Factory(PerfectStockAPredictor)
 
  
 class Traders(containers.DeclarativeContainer):
     """IoC container of trader providers."""
     
-    simpleTraderForTest = providers.Factory(SimpleTrader, stockAPredictor=Predictors.perfectStockAPredictor, stockBPredictor=None)
-    simpleTraderWithPerfectStockAPrediction = providers.Factory(SimpleTrader, stockAPredictor=Predictors.perfectStockAPredictor, stockBPredictor=Predictors.simplePredictor)
-    simpleTraderWithSimplePredictors = providers.Factory(SimpleTrader, stockAPredictor=Predictors.simplePredictor, stockBPredictor=Predictors.simplePredictor)
+    simple_trader_for_test = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=None)
+    simple_trader_with_perfect_stock_aprediction = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=Predictors.simple_predictor)
+    simple_trader_with_simple_predictors = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
 
-    rnnTraderWithSimplePredictors = providers.Factory(RnnTrader, stockAPredictor=Predictors.simplePredictor, stockBPredictor=Predictors.simplePredictor)
+    rnn_trader_with_simple_predictors = providers.Factory(RnnTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
     
-    randomTrader = providers.Factory(RandomTrader)
+    random_trader = providers.Factory(RandomTrader)
 
     
 

@@ -21,19 +21,19 @@ class RandomTrader(ITrader):
         Constructor
         '''
 
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, current_portfolio_value: float, stock_market_data: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
-          currentPortfolioValue : value of Portfolio at given Momemnt
-          stockMarketData : StockMarketData for evaluation
+          current_portfolio_value : value of Portfolio at given Momemnt
+          stock_market_data : StockMarketData for evaluation
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        sharesOfCompany = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10);
+        shares_of_company = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10);
 
         result = TradingActionList()
-        result.addTradingAction(TradingAction(TradingActionEnum.BUY, sharesOfCompany))
+        result.addTradingAction(TradingAction(TradingActionEnum.BUY, shares_of_company))
 
         return result

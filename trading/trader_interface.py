@@ -69,27 +69,27 @@ class TradingActionList:
         """ 
         Constructor
         """
-        self.tradingActionList = list()
+        self.trading_action_list = list()
 
-    def addTradingAction(self, tradingAction: TradingAction):
-        self.tradingActionList.append(tradingAction)
+    def addTradingAction(self, trading_action: TradingAction):
+        self.trading_action_list.append(trading_action)
 
     def len(self) -> int:
-        return len(self.tradingActionList)
+        return len(self.trading_action_list)
 
     def get(self, index: int) -> TradingAction:
-        return self.tradingActionList[index]
+        return self.trading_action_list[index]
 
-    def get_by_CompanyEnum(self, companyEnum: CompanyEnum) -> TradingAction:
+    def get_by_CompanyEnum(self, company_enum: CompanyEnum) -> TradingAction:
         """
         Returns TradingAction for given CompanyEnum, or None if nothing found
         """
         return next(
-            (tradingAction for tradingAction in self.tradingActionList if tradingAction.companyEnum == companyEnum),
+            (trading_action for trading_action in self.trading_action_list if trading_action.shares.name == company_enum.value),
             None)
 
     def isEmpty(self):
-        return len(self.tradingActionList) == 0
+        return len(self.trading_action_list) == 0
 
 
 class StockMarketData:
@@ -114,11 +114,11 @@ class StockMarketData:
     def get_row_count(self):
         return len(next(iter(self.market_data.values())))
 
-    def get_stock_data_for_company(self, companyEnum: CompanyEnum):
+    def get_stock_data_for_company(self, company_enum: CompanyEnum):
         """
         Delivers data for given CompanyEnum, or None if nothing found
         """
-        return self.market_data.get(companyEnum.value)
+        return self.market_data.get(company_enum.value)
 
 
 class Portfolio:
@@ -165,8 +165,8 @@ class Portfolio:
 
     # Return the amount of shares we hold from the given company.
     # If we don't hold any shares of this company, we return 0.
-    def get_amount(self, companyName: str) -> int:
-        share = self.get_by_name(companyName)
+    def get_amount(self, company_name: str) -> int:
+        share = self.get_by_name(company_name)
         if share is not None:
             return share.amount
         else:
@@ -188,7 +188,7 @@ class Portfolio:
             print("No action this time")
             return updated_portfolio
 
-        for trade_action in trade_action_list.tradingActionList:
+        for trade_action in trade_action_list.trading_action_list:
             shares_name = trade_action.shares.name
 
             current_date = stock_market_data.get_most_recent_trade_day()
@@ -227,6 +227,65 @@ class Portfolio:
             print(f"Total portfolio value after trade: {total_portfolio_value}")
 
         return updated_portfolio
+    
+    def isTradingActionListValid(self, tradingActionList : TradingActionList, stockMarketData: StockMarketData) -> bool:
+        """
+        Validates if generated TradingActionList is valid in comparison to current Portfolio
+        Args:
+          trading_action_list : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          stockMarketData: StockMarketData containing date for all companies 
+        Returns:
+          A True if given TradingActionList is valid in comparison to current Portfolio, False otherwise, never None
+        """
+        
+        current_cash = self.cash
+
+        most_recent_price_company_a = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        trading_action_for_company_a = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
+        
+        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_A.value, trading_action_for_company_a, most_recent_price_company_a)
+        if(is_valid is False):
+            return False
+        
+        most_recent_price_company_b = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
+        trading_action_for_company_b = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
+        
+        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_B.value, trading_action_for_company_b, most_recent_price_company_b)
+        if(is_valid is False):
+            return False
+        
+        return True
+
+    def __isTradingActionValid(self, current_cash: float, company_name: str, trading_action_for_company: TradingAction, most_recent_price_company: float):
+        """
+        Validates if given TradingAction is valid
+        Args:
+          current_cash : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          company_name : Company name as String
+          trading_action_for_company: TradingAction
+          most_recent_price_company: most recent price of company as float 
+        Returns:
+          A True if given TradingAction is valid in comparison to current Portfolio and Cash, False otherwise, never None
+        """
+        if(trading_action_for_company is not None):
+            if(trading_action_for_company.action == TradingActionEnum.BUY):
+                price_to_pay = most_recent_price_company * trading_action_for_company.shares
+                
+                current_cash = current_cash - price_to_pay
+                if(current_cash < 0):
+                    # TODO: use Logging!!!
+                    print(f"!!!! RnnTrader - WARNING: Not enough money to pay! tradingActionForCompany: {trading_action_for_company}, Portfolio: {self}")
+                    return False, current_cash
+                
+            elif (trading_action_for_company.action == TradingActionEnum.SELL):
+                if (trading_action_for_company.shares > self.get_amount(company_name)):
+                    return False
+            else:
+                raise ValueError(f'Action for tradingActionForCompanyB is not valid: {trading_action_for_company}') 
+            
+        return True, current_cash
+
+
 
 
 class ITrader(metaclass=abc.ABCMeta):
@@ -235,14 +294,14 @@ class ITrader(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
-                stockMarketData: StockMarketData) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
+                stock_market_data: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
-          currentPortfolioValue : value of Portfolio at given Momemnt
-          stockMarketData : StockMarketData for evaluation
+          current_portfolio_value : value of Portfolio at given Momemnt
+          stock_market_data : StockMarketData for evaluation
         Returns:
           A TradingActionList instance, may be empty never None
         """

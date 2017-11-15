@@ -38,11 +38,11 @@ class PerfectStockAPredictor(IPredictor):
         assert isinstance(data[0][1], float)
 
         # Extract last 100 floats (here: stock values) as input for neural network (format: numpy array of arrays)
-        inputValues = np.array([[x[1] for x in data[-100:]]])
+        input_values = np.array([[x[1] for x in data[-100:]]])
 
         try:
             # Let network predict the next stock value based on last 100 stock values
-            return self.network.predict(inputValues)
+            return self.network.predict(input_values)
         except:
             print("Error in predicting next stock value.")
             assert False
