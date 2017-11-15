@@ -41,7 +41,7 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
     :param path: The path from which to read. Default: "../json/"
     :return: The created `Portfolio` object
     """
-    file = open(path + name + ".json")
+    file = open(os.path.join(path, name + ".json"))
     data = json.loads(file.read())
     file.close()
 

@@ -9,17 +9,14 @@ import unittest
 
 import datetime as dt
 
+from definitions import DATASETS_DIR, JSON_DIR
 from evaluating.evaluator import read_portfolio, read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, StockMarketData, \
-    TradingActionList, Portfolio,CompanyEnum
-    
-
-PATH_DATASETS = "../../datasets/"
-PATH_JSON = "../../json/"
+    TradingActionList, Portfolio, CompanyEnum
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -29,7 +26,7 @@ class EvaluatorTest(unittest.TestCase):
 
         Read "../json/portfolio.json" and check if that happens correctly
         """
-        portfolio = read_portfolio(path=PATH_JSON)
+        portfolio = read_portfolio(path=JSON_DIR)
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
@@ -44,7 +41,8 @@ class EvaluatorTest(unittest.TestCase):
         apple = 'AAPL'
         google = 'GOOG'
 
-        stock_market_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], PATH_DATASETS)
+        stock_market_data = read_stock_market_data(
+            [[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], DATASETS_DIR)
 
         self.assertGreater(len(stock_market_data.market_data), 0)
         self.assertTrue(CompanyEnum.COMPANY_A.value in stock_market_data.market_data)
@@ -59,9 +57,11 @@ class EvaluatorTest(unittest.TestCase):
         apple = 'AAPL'
         google = 'GOOG'
 
-        stock_market_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], PATH_DATASETS)
+        stock_market_data = read_stock_market_data(
+            [[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], DATASETS_DIR)
 
-        self.assertEqual(stock_market_data.get_most_recent_trade_day(), stock_market_data.market_data[CompanyEnum.COMPANY_A.value][-1][0])
+        self.assertEqual(stock_market_data.get_most_recent_trade_day(),
+                         stock_market_data.market_data[CompanyEnum.COMPANY_A.value][-1][0])
 
     def testDoTrade(self):
         """
@@ -74,9 +74,10 @@ class EvaluatorTest(unittest.TestCase):
 
         trader = SimpleTrader(PerfectStockAPredictor(), None)
         current_portfolio_value = 0.0  # Dummy value
-        portfolio= read_portfolio(path=PATH_JSON)
+        portfolio = read_portfolio(path=JSON_DIR)
         trading_action_list = trader.doTrade(portfolio, current_portfolio_value,
-                                             read_stock_market_data([[CompanyEnum.COMPANY_A.value, symbol]], PATH_DATASETS))
+                                             read_stock_market_data([[CompanyEnum.COMPANY_A.value, symbol]],
+                                                                    DATASETS_DIR))
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)
@@ -174,10 +175,10 @@ class EvaluatorTest(unittest.TestCase):
         period2 = '2012-2017'
 
         # Reading in *all* available data
-        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period1))]], PATH_DATASETS)
-        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period2))]], PATH_DATASETS)
-        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period1))]], PATH_DATASETS)
-        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period2))]], PATH_DATASETS)
+        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
+        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
+        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
+        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
 
         # Combine both datasets to one StockMarketData object
         old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A.value]
