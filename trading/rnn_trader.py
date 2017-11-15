@@ -87,6 +87,7 @@ class RnnTrader(ITrader):
         self.lastPortfolioValue = None
         self.lastActionA = None
         self.lastActionB = None
+        self.lastState = None
 
     # TODO description
     def build_model(self) -> Sequential:
@@ -122,6 +123,10 @@ class RnnTrader(ITrader):
     # First float is for action on stock A, second float is for action on stock B
     # Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
     # Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
+    # ATTENTION: if sum of action over all stocks is greater than 1.0, then not all stocks can be bought!
+    # Example: action stock A = +1.0 and action stock B = +0.2
+    # This leads to all cash to be spent on buying stock A (because of action +1.0),
+    # which in turn means there is no cash left to buy stock B (the action +0.2)
     def get_action(self, state: State):
         if np.random.rand() <= self.epsilon:
             # generate two random floats, each between -1 and +1
@@ -138,6 +143,20 @@ class RnnTrader(ITrader):
     # decreases epsilon by one step (decay), but not lower than its defined minimum
     def decrease_epsilon(self):
         self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
+
+    # TODO description
+    # Implements rewards function
+    def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
+
+        if lastPortfolioValue is None or currentPortfolioValue is None:
+            return 0
+
+        if (currentPortfolioValue > lastPortfolioValue):
+            return 1
+        elif (currentPortfolioValue < lastPortfolioValue):
+            return -1
+        else:
+            return 0
 
     # TODO pick samples randomly from replay memory (with batch_size)
     def train_model(self):
@@ -187,19 +206,31 @@ class RnnTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-       
         # build current state object
-        current_state = None
-        if self.lastPortfolioValue is not None: # doTrade was called before at least once
-            assert self.lastActionA is not None and self.lastActionB is not None
+        predictedValueStockA = self.stockAPredictor.doPredict(stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_A))
+        predictedValueStockB = self.stockBPredictor.doPredict(stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_B))
+        current_state = State(portfolio.cash,
+                              portfolio.get_amount(CompanyEnum.COMPANY_A.value),
+                              portfolio.get_amount(CompanyEnum.COMPANY_B.value),
+                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value),
+                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value),
+                              predictedValueStockA,
+                              predictedValueStockB)
+
+        if self.lastState is not None: # doTrade was called before at least once
+            assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None
             # baue memory tuple auf
+            reward = self.calculateReward(self.lastPortfolioValue, currentPortfolioValue)
+            memoryTuple = (self.lastState, self.lastActionA, self.lastActionB, reward, current_state)
             # memory tuple speichern
-            # nehmen zufällige Teilmenge von memory
-            # trainieren model mit obiger Teilmenge
+            self.memory.append(memoryTuple)
+            # wir nehmen zufällige Teilmenge von memory und trainieren model mit obiger Teilmenge
+            self.train_model()
 
         # Create actions for current state and save them for the next call of doTrade
         self.lastActionA, self.lastActionB = self.get_action(current_state)
         self.lastPortfolioValue = currentPortfolioValue
+        self.lastState = current_state
         return self.create_TradingActionList(self.lastActionA, self.lastActionB, portfolio, stockMarketData)
 
     def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
@@ -250,18 +281,14 @@ class RnnTrader(ITrader):
             return TradingAction(TradingActionEnum.BUY, sharesOfCompanyToBuy)
                 
         elif (action < 0.0):
-            sharesOfCompany = currentPortfolio.get_by_name(companyEnum.value)
-            if(sharesOfCompany is not None):
-                # Percent of actions to sell/buy multiply by number of owned actions
-                amountOfSharesOfComapanyToSell = abs(int(action * sharesOfCompany.amount))
-                
-                sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesOfComapanyToSell)
-                
-                return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
-            else:
-                # TODO: use Logging!!!
-                print(f"!!!! RnnTrader - WARNING: sharesOfCompany {companyEnum.value} NOT found in Portfolio {currentPortfolio}")
-        
+            # Get amount of shares we own; it may be 0
+            amountOfSharesWeOwn = currentPortfolio.get_amount(companyEnum.value)
+            assert amountOfSharesWeOwn >= 0
+            # Percent of shares to sell multiply by number of owned actions
+            amountOfSharesToSell = int(abs(action) * amountOfSharesWeOwn)
+            # Wrap into SharesOfCompany object TODO do we need this?
+            sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesToSell)
+            return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
         else:
             # TODO: use Logging!!!
             print(f"!!!! RnnTrader - INFO: Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
@@ -320,25 +347,13 @@ class RnnTrader(ITrader):
                     return False, currentCash
                 
             elif (tradingActionForCompany.action == TradingActionEnum.SELL):
-                if (tradingActionForCompany.shares > currentPortfolio.get_by_name(companyName).amount):
+                if (tradingActionForCompany.shares > currentPortfolio.get_amount(companyName)):
                     return False
             else:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {tradingActionForCompany}') 
             
         return True, currentCash
 
-    # TODO remove?
-    def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
-        
-        if lastPortfolioValue is None or currentPortfolioValue is None:
-            return 0
-        
-        if(currentPortfolioValue > lastPortfolioValue):
-            return 1
-        elif(currentPortfolioValue < lastPortfolioValue):
-            return -1
-        else:
-            return 0   
 
 
 # Train the trader and its respective neural network(s)
