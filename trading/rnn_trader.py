@@ -335,7 +335,7 @@ class RnnTrader(ITrader):
         if(isValid is False):
             return False
         
-        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
         tradingActionForCompanyB = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
         
         isValid, currentCash = self.isTradingActionValid(currentCash, CompanyEnum.COMPANY_B.value, tradingActionForCompanyB, mostRecentPriceCompanyB, currentPortfolio)
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     trader = RnnTrader(SimplePredictor(), SimplePredictor())
 
     # Start evaluation and thereby learn training data
-    evaluator = PortfolioEvaluator([trader], False)
+    evaluator = PortfolioEvaluator([trader], True)
     for i in range(EPISODES):
         evaluator.inspect_over_time(training_data, [initial_portfolio])
 
