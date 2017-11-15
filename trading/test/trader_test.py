@@ -120,18 +120,6 @@ class TraderTest(unittest.TestCase):
         trader = Traders.rnn_trader_with_simple_predictors()
         self.assertTrue(isinstance(trader, ITrader))
 
-    def testRnnTraderSaveAndLoad(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
-        old_model = trader.model
-        trader.save_model()
-        new_model = trader.load_model()
-        # Check equal structure
-        self.assertEqual(old_model.to_json(), new_model.to_json())
-        # Check equal weights TODO I have no idea why this fails ... the weights should be _exactly_ alike
-        # old_weights = np.array(old_model.get_weights())
-        # new_weights = np.array(new_model.get_weights())
-        # self.assertTrue(np.all(old_weights == new_weights))
-
     def testRnnTraderGetAction(self):
         trader = Traders.rnn_trader_with_simple_predictors()
         from trading.rnn_trader import State

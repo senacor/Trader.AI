@@ -46,9 +46,10 @@ class State:
     def deepcopy(self):
         return State(self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB)
 
-    def input_array(self):
+    def get_input_array(self):
         return np.array(
             [[self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB]])
+
 
 
 class RnnTrader(ITrader):
@@ -119,7 +120,7 @@ class RnnTrader(ITrader):
     # TODO remove this method?
     def load_model(self) -> Sequential:
         """
-        Load model from Fflesystem 
+        Load model from file system
         """
         return load_keras_sequential('trading', self.MODEL_FILE_NAME)
 
@@ -140,7 +141,7 @@ class RnnTrader(ITrader):
             return random.choice(STOCKACTIONS), random.choice(STOCKACTIONS)
         else:
             # generate values per action by calling neural network with current state
-            actionValues = self.model.predict(state.input_array())
+            actionValues = self.model.predict(state.get_input_array())
             # Get index with highest value and return corresponding actions
             index = np.argmax(actionValues[0])  # TODO what if there are more actions with the same values?
             return self.get_actions_from_index(index)
@@ -182,48 +183,20 @@ class RnnTrader(ITrader):
         if len(self.memory) < self.train_start:  # TODO check whether train_start is necessary
             return
         batch_size = min(self.batch_size, len(self.memory))  # TODO check with train_start
-        minibatch = random.sample(self.memory, batch_size)
+        batch = random.sample(self.memory, batch_size)
 
-        for state, actionA, actionB, reward, nextState in minibatch:
+        for state, actionA, actionB, reward, nextState in batch:
             assert isinstance(state, State)
             state.print()
             target = reward  # TODO also take future rewards into account using gamma
 
-            self.model.fit(state.input_array(), target, epochs=1, verbose=1)
+            # build target action values and exchange value for the choosen actions
+            target_action_values = self.model.predict(state.get_input_array())
+            index = self.get_index_from_actions(actionA, actionB)
+            target_action_values[0][index] = target
 
-            # transform input data to input of neural network
-            # input_values = []
-            # for tuple in minibatch:
-            #     input_values.append([tuple[i]])
-            #
-            # # calculate target values for neural network
-            #
-            # update_input = np.zeros((batch_size, self.state_size))
-            # update_target = np.zeros((batch_size, self.state_size))
-            # action, reward, done = [], [], []
-            #
-            # for i in range(self.batch_size):
-            #     update_input[i] = mini_batch[i][0]
-            #     action.append(mini_batch[i][1])
-            #     reward.append(mini_batch[i][2])
-            #     update_target[i] = mini_batch[i][3]
-            #     done.append(mini_batch[i][4])
-            #
-            # target = self.model.predict(update_input)
-
-
-            # target_val = self.target_model.predict(update_target)
-
-            # for i in range(self.batch_size):
-            #     # Q Learning: get maximum Q value at s' from target model
-            #     if done[i]:
-            #         target[i][action[i]] = reward[i]
-            #     else:
-            #         target[i][action[i]] = reward[i] + self.discount_factor * (
-            #             np.amax(target_val[i]))
-
-            # and do the model fit!
-            # loss = self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=1)
+            # finally train the model for one epoch
+            self.model.fit(state.get_input_array(), target_action_values, batch_size=self.batch_size, epochs=1, verbose=1)
 
     # TODO why company names as parameters? we don't use them
     # TODO let ILSE give us information whether both (all) previous trades succeeded
