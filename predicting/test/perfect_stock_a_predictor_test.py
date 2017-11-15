@@ -22,7 +22,7 @@ class PerfectStockAPredictorTest(unittest.TestCase):
        
     def testPerfectStockAPredictor(self):
         # Load predictor
-        predictor = Predictors.perfectStockAPredictor()
+        predictor = Predictors.perfect_stock_a_predictor()
 
 
         # Get stock data from Apple stock

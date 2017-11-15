@@ -57,20 +57,21 @@ class RnnTrader(ITrader):
     '''
     MODEL_FILE_NAME = 'rnn_trader'
 
-    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor):
+    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor, learnFromTrades: bool = False):
         '''
         Constructor
         '''
-        # Save predictors
+        # Save predictors and whether we learn from subsequent trades
         self.stock_a_predictor = stock_a_predictor
         self.stock_b_predictor = stock_b_predictor
+        self.learnFromTrades = learnFromTrades
 
         # Hyperparameters for neural network
         self.state_size = 7  # TODO: infer from...?
         # Discretization of actions as list of (+1.0,+1.0), (+1.0, +0.5), (+1.0, 0.0), ..., (-1.0, -1.0)
         # We have 5 actions per stock (+1.0, +0.5, 0.0, -0.5, -1.0)
         # Means 25 actions for our two stocks
-        self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS)  # TODO: infer from ...?
+        self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS)
         self.hidden_size = 50
 
         # These are hyper parameters for the DQN
@@ -98,6 +99,11 @@ class RnnTrader(ITrader):
         self.lastActionB = None
         self.lastState = None
 
+    # Destructor
+    def __del__(self):
+        if self.learnFromTrades:
+            save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
+
     # TODO description
     def build_model(self) -> Sequential:
         model = Sequential()
@@ -110,12 +116,7 @@ class RnnTrader(ITrader):
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
-    def save_model(self):
-        """
-        Saves model in file system
-        """
-        save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
-
+    # TODO remove this method?
     def load_model(self) -> Sequential:
         """
         Load model from Fflesystem 
