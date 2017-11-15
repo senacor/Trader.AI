@@ -69,7 +69,7 @@ class RnnTrader(ITrader):
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
-        self.batch_size = 64
+        self.batch_size = 2 # TODO war mal 64
         self.train_start = 1000
         # create replay memory using deque
         self.memory = deque(maxlen=2000)
@@ -160,36 +160,51 @@ class RnnTrader(ITrader):
 
     # TODO pick samples randomly from replay memory (with batch_size)
     def train_model(self):
-        if len(self.memory) < self.train_start:
+        if len(self.memory) < self.train_start: # TODO check whether train_start is necessary
             return
-        batch_size = min(self.batch_size, len(self.memory))
-        mini_batch = random.sample(self.memory, batch_size)
+        batch_size = min(self.batch_size, len(self.memory)) # TODO check with train_start
+        minibatch = random.sample(self.memory, batch_size)
 
-        update_input = np.zeros((batch_size, self.state_size))
-        update_target = np.zeros((batch_size, self.state_size))
-        action, reward, done = [], [], []
+        for state, actionA, actionB, reward, nextState in minibatch:
+            assert isinstance(state, State)
+            state.print()
+            target = reward # TODO also take future rewards into account using gamma
 
-        for i in range(self.batch_size):
-            update_input[i] = mini_batch[i][0]
-            action.append(mini_batch[i][1])
-            reward.append(mini_batch[i][2])
-            update_target[i] = mini_batch[i][3]
-            done.append(mini_batch[i][4])
+            self.model.fit(state.input_array(), target, epochs=1, verbose=1)
 
-        target = self.model.predict(update_input)
-        target_val = self.target_model.predict(update_target)
+        # transform input data to input of neural network
+        # input_values = []
+        # for tuple in minibatch:
+        #     input_values.append([tuple[i]])
+        #
+        # # calculate target values for neural network
+        #
+        # update_input = np.zeros((batch_size, self.state_size))
+        # update_target = np.zeros((batch_size, self.state_size))
+        # action, reward, done = [], [], []
+        #
+        # for i in range(self.batch_size):
+        #     update_input[i] = mini_batch[i][0]
+        #     action.append(mini_batch[i][1])
+        #     reward.append(mini_batch[i][2])
+        #     update_target[i] = mini_batch[i][3]
+        #     done.append(mini_batch[i][4])
+        #
+        # target = self.model.predict(update_input)
 
-        for i in range(self.batch_size):
-            # Q Learning: get maximum Q value at s' from target model
-            if done[i]:
-                target[i][action[i]] = reward[i]
-            else:
-                target[i][action[i]] = reward[i] + self.discount_factor * (
-                    np.amax(target_val[i]))
+
+        # target_val = self.target_model.predict(update_target)
+
+        # for i in range(self.batch_size):
+        #     # Q Learning: get maximum Q value at s' from target model
+        #     if done[i]:
+        #         target[i][action[i]] = reward[i]
+        #     else:
+        #         target[i][action[i]] = reward[i] + self.discount_factor * (
+        #             np.amax(target_val[i]))
 
         # and do the model fit!
-        self.model.fit(update_input, target, batch_size=self.batch_size,
-                       epochs=1, verbose=0)
+        # loss = self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=1)
 
     # TODO why company names as parameters? we don't use them
     def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData,
@@ -227,11 +242,16 @@ class RnnTrader(ITrader):
             # wir nehmen zufällige Teilmenge von memory und trainieren model mit obiger Teilmenge
             self.train_model()
 
-        # Create actions for current state and save them for the next call of doTrade
-        self.lastActionA, self.lastActionB = self.get_action(current_state)
+        # Create actions for current state
+        actionA, actionB = self.get_action(current_state)
+        # Decrease epsilon for fewer random actions
+        self.decrease_epsilon()
+        # Save created actions for the next call of doTrade
+        self.lastActionA = actionA
+        self.lastActionB = actionB
         self.lastPortfolioValue = currentPortfolioValue
         self.lastState = current_state
-        return self.create_TradingActionList(self.lastActionA, self.lastActionB, portfolio, stockMarketData)
+        return self.create_TradingActionList(actionA, actionB, portfolio, stockMarketData)
 
     def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
         """
