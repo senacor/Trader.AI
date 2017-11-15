@@ -26,6 +26,7 @@ STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
 
 # Define state from the trader's viewpoint
 class State:
+    # Constructor
     def __init__(self, cash: float, stockA: int, stockB: int, priceA: float, priceB: float, predictedA: float, predictedB: float):
         self.cash = cash
         self.stockA = stockA
@@ -54,20 +55,22 @@ class RnnTrader(ITrader):
     '''
     MODEL_FILE_NAME='rnn_trader'
 
-    def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor):
+    # Constructor
+    def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor, learnFromTrades: bool = False):
         '''
         Constructor
         '''
-        # Save predictors
+        # Save predictors and whether we learn from subsequent trades
         self.stockAPredictor = stockAPredictor
         self.stockBPredictor = stockBPredictor
+        self.learnFromTrades = learnFromTrades
 
         # Hyperparameters for neural network
         self.state_size = 7 # TODO: infer from...?
         # Discretization of actions as list of (+1.0,+1.0), (+1.0, +0.5), (+1.0, 0.0), ..., (-1.0, -1.0)
         # We have 5 actions per stock (+1.0, +0.5, 0.0, -0.5, -1.0)
         # Means 25 actions for our two stocks
-        self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS) # TODO: infer from ...?
+        self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS)
         self.hidden_size = 50
 
         # These are hyper parameters for the DQN
@@ -95,6 +98,11 @@ class RnnTrader(ITrader):
         self.lastActionB = None
         self.lastState = None
 
+    # Destructor
+    def __del__(self):
+        if self.learnFromTrades:
+            save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
+
     # TODO description
     def build_model(self) -> Sequential:
         model = Sequential()
@@ -106,12 +114,7 @@ class RnnTrader(ITrader):
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
-    def save_model(self):
-        """
-        Saves model in file system
-        """
-        save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
-
+    # TODO remove this method?
     def load_model(self) -> Sequential:
         """
         Load model from Fflesystem 
@@ -290,7 +293,7 @@ class RnnTrader(ITrader):
         mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
         tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio, mostRecentPriceCompanyB)        
         if(tradingActionB is not None):
-            result.addTradingAction(tradingActionB)  
+            result.addTradingAction(tradingActionB)
         
         return result
 
