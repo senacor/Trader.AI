@@ -87,6 +87,7 @@ class RnnTrader(ITrader):
         self.lastPortfolioValue = None
         self.lastActionA = None
         self.lastActionB = None
+        self.lastState = None
 
     # TODO description
     def build_model(self) -> Sequential:
@@ -143,6 +144,20 @@ class RnnTrader(ITrader):
     def decrease_epsilon(self):
         self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
 
+    # TODO description
+    # Implements rewards function
+    def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
+
+        if lastPortfolioValue is None or currentPortfolioValue is None:
+            return 0
+
+        if (currentPortfolioValue > lastPortfolioValue):
+            return 1
+        elif (currentPortfolioValue < lastPortfolioValue):
+            return -1
+        else:
+            return 0
+
     # TODO pick samples randomly from replay memory (with batch_size)
     def train_model(self):
         if len(self.memory) < self.train_start:
@@ -192,9 +207,8 @@ class RnnTrader(ITrader):
           A TradingActionList instance, may be empty never None
         """
         # build current state object
-        # TODO we need convinience method for stockMarketData
-        predictedValueStockA = self.stockAPredictor.doPredict(stockMarketData.market_data[CompanyEnum.COMPANY_A.value])
-        predictedValueStockB = self.stockBPredictor.doPredict(stockMarketData.market_data[CompanyEnum.COMPANY_B.value])
+        predictedValueStockA = self.stockAPredictor.doPredict(stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_A))
+        predictedValueStockB = self.stockBPredictor.doPredict(stockMarketData.get_stock_data_for_company(CompanyEnum.COMPANY_B))
         current_state = State(portfolio.cash,
                               portfolio.get_amount(CompanyEnum.COMPANY_A.value),
                               portfolio.get_amount(CompanyEnum.COMPANY_B.value),
@@ -202,19 +216,21 @@ class RnnTrader(ITrader):
                               stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value),
                               predictedValueStockA,
                               predictedValueStockB)
-        print(current_state)
 
-
-        if self.lastPortfolioValue is not None: # doTrade was called before at least once
-            assert self.lastActionA is not None and self.lastActionB is not None
+        if self.lastState is not None: # doTrade was called before at least once
+            assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None
             # baue memory tuple auf
+            reward = self.calculateReward(self.lastPortfolioValue, currentPortfolioValue)
+            memoryTuple = (self.lastState, self.lastActionA, self.lastActionB, reward, current_state)
             # memory tuple speichern
-            # nehmen zufällige Teilmenge von memory
-            # trainieren model mit obiger Teilmenge
+            self.memory.append(memoryTuple)
+            # wir nehmen zufällige Teilmenge von memory und trainieren model mit obiger Teilmenge
+            self.train_model()
 
         # Create actions for current state and save them for the next call of doTrade
         self.lastActionA, self.lastActionB = self.get_action(current_state)
         self.lastPortfolioValue = currentPortfolioValue
+        self.lastState = current_state
         return self.create_TradingActionList(self.lastActionA, self.lastActionB, portfolio, stockMarketData)
 
     def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio, stockMarketData: StockMarketData) -> TradingActionList:
@@ -338,18 +354,6 @@ class RnnTrader(ITrader):
             
         return True, currentCash
 
-    # TODO remove?
-    def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
-        
-        if lastPortfolioValue is None or currentPortfolioValue is None:
-            return 0
-        
-        if(currentPortfolioValue > lastPortfolioValue):
-            return 1
-        elif(currentPortfolioValue < lastPortfolioValue):
-            return -1
-        else:
-            return 0   
 
 
 # Train the trader and its respective neural network(s)

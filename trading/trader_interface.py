@@ -164,7 +164,7 @@ class Portfolio:
     # If we don't hold any shares of this company, we return 0.
     def get_amount(self, companyName: str) -> int:
         share = self.get_by_name(companyName)
-        if share is None:
+        if share is not None:
             return share.amount
         else:
             return 0
