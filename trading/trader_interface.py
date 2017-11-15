@@ -125,7 +125,7 @@ class Portfolio:
           cash : current cash level
           shares : list of SharesOfCompany, see SharesOfCompany
         """
-        self.name = name
+        self.name = name # TODO wo brauchen wir name?
         self.cash = cash
         self.shares = shares
 
@@ -146,12 +146,23 @@ class Portfolio:
             return share
 
         return next(share for share in self.shares if share.name == name)
-    
+
+    # TODO comment
+    # TODO refactor: get rid of SharesOfCompany? do we really use that object somewhere?
     def get_by_name(self, name: str) -> SharesOfCompany:
         """
             Returns SharesOfCompany for company name, or None if nothing found
         """
         return next((share for share in self.shares if share.name == name), None)
+
+    # Return the amount of shares we hold from the given company.
+    # If we don't hold any shares of this company, we return 0.
+    def get_amount(self, companyName: str) -> int:
+        share = self.get_by_name(companyName)
+        if share is None:
+            return share.amount
+        else:
+            return 0
 
     def update(self, stock_market_data: StockMarketData, trade_action_list: TradingActionList):
         """

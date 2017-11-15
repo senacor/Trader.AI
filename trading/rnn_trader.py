@@ -122,6 +122,10 @@ class RnnTrader(ITrader):
     # First float is for action on stock A, second float is for action on stock B
     # Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
     # Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
+    # ATTENTION: if sum of action over all stocks is greater than 1.0, then not all stocks can be bought!
+    # Example: action stock A = +1.0 and action stock B = +0.2
+    # This leads to all cash to be spent on buying stock A (because of action +1.0),
+    # which in turn means there is no cash left to buy stock B (the action +0.2)
     def get_action(self, state: State):
         if np.random.rand() <= self.epsilon:
             # generate two random floats, each between -1 and +1
@@ -187,9 +191,20 @@ class RnnTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-       
         # build current state object
-        current_state = None
+        # TODO we need convinience method for stockMarketData
+        predictedValueStockA = self.stockAPredictor.doPredict(stockMarketData.market_data[CompanyEnum.COMPANY_A.value])
+        predictedValueStockB = self.stockBPredictor.doPredict(stockMarketData.market_data[CompanyEnum.COMPANY_B.value])
+        current_state = State(portfolio.cash,
+                              portfolio.get_amount(CompanyEnum.COMPANY_A.value),
+                              portfolio.get_amount(CompanyEnum.COMPANY_B.value),
+                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value),
+                              stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value),
+                              predictedValueStockA,
+                              predictedValueStockB)
+        print(current_state)
+
+
         if self.lastPortfolioValue is not None: # doTrade was called before at least once
             assert self.lastActionA is not None and self.lastActionB is not None
             # baue memory tuple auf
@@ -220,7 +235,7 @@ class RnnTrader(ITrader):
         if(tradingActionA is not None):
             result.addTradingAction(tradingActionA)
             
-        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
         tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio, mostRecentPriceCompanyB)        
         if(tradingActionB is not None):
             result.addTradingAction(tradingActionB)  
@@ -250,18 +265,14 @@ class RnnTrader(ITrader):
             return TradingAction(TradingActionEnum.BUY, sharesOfCompanyToBuy)
                 
         elif (action < 0.0):
-            sharesOfCompany = currentPortfolio.get_by_name(companyEnum.value)
-            if(sharesOfCompany is not None):
-                # Percent of actions to sell/buy multiply by number of owned actions
-                amountOfSharesOfComapanyToSell = abs(int(action * sharesOfCompany.amount))
-                
-                sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesOfComapanyToSell)
-                
-                return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
-            else:
-                # TODO: use Logging!!!
-                print(f"!!!! RnnTrader - WARNING: sharesOfCompany {companyEnum.value} NOT found in Portfolio {currentPortfolio}")
-        
+            # Get amount of shares we own; it may be 0
+            amountOfSharesWeOwn = currentPortfolio.get_amount(companyEnum.value)
+            assert amountOfSharesWeOwn >= 0
+            # Percent of shares to sell multiply by number of owned actions
+            amountOfSharesToSell = int(abs(action) * amountOfSharesWeOwn)
+            # Wrap into SharesOfCompany object TODO do we need this?
+            sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesToSell)
+            return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
         else:
             # TODO: use Logging!!!
             print(f"!!!! RnnTrader - INFO: Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
@@ -320,7 +331,7 @@ class RnnTrader(ITrader):
                     return False, currentCash
                 
             elif (tradingActionForCompany.action == TradingActionEnum.SELL):
-                if (tradingActionForCompany.shares > currentPortfolio.get_by_name(companyName).amount):
+                if (tradingActionForCompany.shares > currentPortfolio.get_amount(companyName)):
                     return False
             else:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {tradingActionForCompany}') 
