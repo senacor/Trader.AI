@@ -28,8 +28,6 @@ class RandomTrader(ITrader):
           portfolio : current Portfolio of this trader
           currentPortfolioValue : value of Portfolio at given Momemnt
           stockMarketData : StockMarketData for evaluation
-          company_a_name : optional name of 1st company, or default
-          company_b_name : optional name of 2nd company, or default
         Returns:
           A TradingActionList instance, may be empty never None
         """

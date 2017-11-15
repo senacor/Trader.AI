@@ -81,8 +81,7 @@ class PortfolioEvaluator:
                                                                                 current_market_data.market_data)
 
                 # Ask the trader for its action
-                update = trader.doTrade(portfolio_to_update, current_total_portfolio_value, current_market_data,
-                                             *current_market_data.market_data.keys())
+                update = trader.doTrade(portfolio_to_update, current_total_portfolio_value, current_market_data)
 
                 # Update the portfolio that is saved at ILSE - The InnovationLab Stock Exchange ;-)
                 updated_portfolio = portfolio_to_update.update(current_market_data, update)

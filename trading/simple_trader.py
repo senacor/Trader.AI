@@ -25,17 +25,14 @@ class SimpleTrader(ITrader):
         self.stockAPredictor = stockAPredictor
         self.stockBPredictor = stockBPredictor
 
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData,
-                company_a_name=CompanyEnum.COMPANY_A.value,
-                company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
+                stockMarketData: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
           currentPortfolioValue : value of Portfolio at given Momemnt
           stockMarketData : StockMarketData for evaluation
-          company_a_name : optional name of 1st company, or default
-          company_b_name : optional name of 2nd company, or default
         Returns:
           A TradingActionList instance, may be empty never None
         """
@@ -46,14 +43,16 @@ class SimpleTrader(ITrader):
 
         companyAData = stockMarketData.market_data.get(CompanyEnum.COMPANY_A.value)
         if (self.stockAPredictor is not None and companyAData is not None):
-            self.tradeForCompany(CompanyEnum.COMPANY_A.value, companyAData, self.stockAPredictor, localPortfolio, result)
+            self.tradeForCompany(CompanyEnum.COMPANY_A.value, companyAData, self.stockAPredictor, localPortfolio,
+                                 result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockAPredictor or companyAData is None -> No prediction for Company A")
 
         companyBData = stockMarketData.market_data.get(CompanyEnum.COMPANY_B.value)
         if (self.stockBPredictor is not None and companyBData is not None):
-            self.tradeForCompany(CompanyEnum.COMPANY_B.value, companyBData, self.stockBPredictor, localPortfolio, result)
+            self.tradeForCompany(CompanyEnum.COMPANY_B.value, companyBData, self.stockBPredictor, localPortfolio,
+                                 result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockBPredictor or companyBData is None -> No prediction for Company B")
@@ -75,7 +74,7 @@ class SimpleTrader(ITrader):
                 sharesOfCompany = SharesOfCompany(companyName, amountOfUnitsToBuy);
                 resultTradingActionList.addTradingAction(TradingAction(tradingAction, sharesOfCompany))
 
-                #Update Cash in portfolio
+                # Update Cash in portfolio
                 portfolio.cash = portfolio.cash - (amountOfUnitsToBuy * lastValue)
 
         elif tradingAction == TradingActionEnum.SELL:

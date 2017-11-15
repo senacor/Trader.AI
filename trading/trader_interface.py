@@ -79,12 +79,14 @@ class TradingActionList:
 
     def get(self, index: int) -> TradingAction:
         return self.tradingActionList[index]
-    
+
     def get_by_CompanyEnum(self, companyEnum: CompanyEnum) -> TradingAction:
         """
         Returns TradingAction for given CompanyEnum, or None if nothing found
         """
-        return next((tradingAction for tradingAction in self.tradingActionList if tradingAction.companyEnum == companyEnum), None)
+        return next(
+            (tradingAction for tradingAction in self.tradingActionList if tradingAction.companyEnum == companyEnum),
+            None)
 
     def isEmpty(self):
         return len(self.tradingActionList) == 0
@@ -111,12 +113,13 @@ class StockMarketData:
 
     def get_row_count(self):
         return len(next(iter(self.market_data.values())))
-    
+
     def get_stock_data_for_company(self, companyEnum: CompanyEnum):
         """
         Delivers data for given CompanyEnum, or None if nothing found
         """
         return self.market_data.get(companyEnum.value)
+
 
 class Portfolio:
     """
@@ -130,7 +133,7 @@ class Portfolio:
           cash : current cash level
           shares : list of SharesOfCompany, see SharesOfCompany
         """
-        self.name = name # TODO wo brauchen wir name?
+        self.name = name  # TODO wo brauchen wir name?
         self.cash = cash
         self.shares = shares
 
@@ -232,17 +235,14 @@ class ITrader(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float, stockMarketData: StockMarketData,
-                company_a_name=CompanyEnum.COMPANY_A.value,
-                company_b_name=CompanyEnum.COMPANY_B.value) -> TradingActionList:
+    def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
+                stockMarketData: StockMarketData) -> TradingActionList:
         """ Generate action to be taken on the "stock market"
     
         Args:
           portfolio : current Portfolio of this trader
           currentPortfolioValue : value of Portfolio at given Momemnt
           stockMarketData : StockMarketData for evaluation
-          company_a_name : optional name of 1st company, or default
-          company_b_name : optional name of 2nd company, or default
         Returns:
           A TradingActionList instance, may be empty never None
         """
