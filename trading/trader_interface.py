@@ -111,7 +111,12 @@ class StockMarketData:
 
     def get_row_count(self):
         return len(next(iter(self.market_data.values())))
-
+    
+    def get_stock_data_for_company(self, companyEnum: CompanyEnum):
+        """
+        Delivers data for given CompanyEnum, or None if nothing found
+        """
+        return self.market_data.get(companyEnum.value)
 
 class Portfolio:
     """
