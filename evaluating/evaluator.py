@@ -60,9 +60,9 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
     :return: The created `StockMarketData` object
     """
     data = {}
-    for companyname_and_filename_tuple in companynames_and_filenames_tuples: 
+    for companyname, filename in companynames_and_filenames_tuples: 
         
-        filepath = os.path.join(path, companyname_and_filename_tuple[1] + '.csv')
+        filepath = os.path.join(path, filename + '.csv')
         na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
         dates = list()
@@ -70,7 +70,7 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
             date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
             dates.append((date, day[ADJ_CLOSE]))
 
-        data[companyname_and_filename_tuple[0]] = dates
+        data[companyname] = dates
 
     return StockMarketData(data)
 
