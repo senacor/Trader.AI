@@ -13,13 +13,14 @@ from trading.trader_interface import Portfolio, TradingAction
 from trading.trader_interface import ITrader
 from trading.trader_interface import StockMarketData
 from trading.trader_interface import TradingActionList
-from keras.models import Sequential, model_from_json
+from keras.models import Sequential
 from keras.layers import Dense
-from keras.optimizers import sgd, Adam
+from keras.optimizers import Adam
 from trading.trader_interface import TradingActionEnum
 from trading.trader_interface import CompanyEnum
 from trading.trader_interface import SharesOfCompany
 
+from utils import save_keras_sequential, load_keras_sequential
 # Define possible actions per stock
 STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
 
@@ -51,6 +52,7 @@ class RnnTrader(ITrader):
     '''
     Implementation of ITrader based on Reinforced Neural Network (RNN): doTrade generates TradingActionList according to last generated changes on Portfolio value.
     '''
+    MODEL_FILE_NAME='rnn_trader'
 
     def __init__(self, stockAPredictor: IPredictor, stockBPredictor: IPredictor):
         '''
@@ -80,9 +82,8 @@ class RnnTrader(ITrader):
         self.memory = deque(maxlen=2000)
 
         # create main model, either from file or (if not existent) from scratch
-        try:
-            self.model = self.load_model()
-        except:
+        self.model = self.load_model()
+        if(self.model is None):
             self.model = self.build_model()
 
         # create and initialize target model
@@ -105,21 +106,17 @@ class RnnTrader(ITrader):
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
-    # TODO description
     def save_model(self):
-        model_json = self.model.to_json()
-        with open("rnn_trader.json", "w") as json_file:
-            json_file.write(model_json)
-        self.model.save_weights("rnn_trader.h5")
+        """
+        Saves model in file system
+        """
+        save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
 
-    # TODO description
     def load_model(self) -> Sequential:
-        json_file = open('rnn_trader.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        model = model_from_json(loaded_model_json)
-        model.load_weights('rnn_trader.h5')
-        return model
+        """
+        Load model from Fflesystem 
+        """
+        return load_keras_sequential('trading', self.MODEL_FILE_NAME)
 
     # Get best action for current state, either randomly or predicted from neural network
     # Choice between random and neural network solely depends on epsilon

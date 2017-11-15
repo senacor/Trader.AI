@@ -20,6 +20,7 @@ from datetime import date
 
 import numpy as np
 from  definitions import DATASETS_DIR
+from evaluating.evaluator import read_stock_market_data
 
 
 class TraderTest(unittest.TestCase):
@@ -60,7 +61,7 @@ class TraderTest(unittest.TestCase):
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         currentPortfolioValue = 0.0 #Dummy value
         
-        tradingActionList = rt.doTrade(portfolio, currentPortfolioValue, evaluating.evaluator.read_stock_market_data([[CompanyEnum.COMPANY_A.value,'AAPL']], DATASETS_DIR))
+        tradingActionList = rt.doTrade(portfolio, currentPortfolioValue, read_stock_market_data([[CompanyEnum.COMPANY_A.value,'AAPL']], DATASETS_DIR))
         self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
         self.assertEqual(tradingActionList.len(), 1)
@@ -81,7 +82,7 @@ class TraderTest(unittest.TestCase):
         portfolio = Portfolio(1000.0, sharesOfCompanyList)   
         currentPortfolioValue = 0.0 #Dummy value
         
-        tradingActionList = st.doTrade(portfolio, currentPortfolioValue, evaluating.evaluator.read_stock_market_data([[CompanyEnum.COMPANY_A.value, 'AAPL']], DATASETS_DIR))
+        tradingActionList = st.doTrade(portfolio, currentPortfolioValue, read_stock_market_data([[CompanyEnum.COMPANY_A.value, 'AAPL']], DATASETS_DIR))
         self.assertTrue(isinstance(tradingActionList, TradingActionList))
         
         self.assertEqual(tradingActionList.len(), 1)
