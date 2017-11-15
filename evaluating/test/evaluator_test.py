@@ -15,7 +15,8 @@ from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
 from trading.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, StockMarketData, \
-    TradingActionList, Portfolio
+    TradingActionList, Portfolio,CompanyEnum
+    
 
 PATH_DATASETS = "../../datasets/"
 PATH_JSON = "../../json/"
@@ -32,7 +33,7 @@ class EvaluatorTest(unittest.TestCase):
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].name, 'GOOG')
+        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_B.value)
 
     def testReadStockMarketData(self):
         """
@@ -43,11 +44,11 @@ class EvaluatorTest(unittest.TestCase):
         apple = 'AAPL'
         google = 'GOOG'
 
-        stock_market_data = read_stock_market_data([apple, google], PATH_DATASETS)
+        stock_market_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], PATH_DATASETS)
 
         self.assertGreater(len(stock_market_data.market_data), 0)
-        self.assertTrue(apple in stock_market_data.market_data)
-        self.assertTrue(google in stock_market_data.market_data)
+        self.assertTrue(CompanyEnum.COMPANY_A.value in stock_market_data.market_data)
+        self.assertTrue(CompanyEnum.COMPANY_B.value in stock_market_data.market_data)
 
     def testGetMostRecentTradeDay(self):
         """
@@ -58,9 +59,9 @@ class EvaluatorTest(unittest.TestCase):
         apple = 'AAPL'
         google = 'GOOG'
 
-        stock_market_data = read_stock_market_data([apple, google], PATH_DATASETS)
+        stock_market_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], PATH_DATASETS)
 
-        self.assertEqual(stock_market_data.get_most_recent_trade_day(), stock_market_data.market_data[apple][-1][0])
+        self.assertEqual(stock_market_data.get_most_recent_trade_day(), stock_market_data.market_data[CompanyEnum.COMPANY_A.value][-1][0])
 
     def testDoTrade(self):
         """
@@ -73,13 +74,13 @@ class EvaluatorTest(unittest.TestCase):
 
         trader = SimpleTrader(PerfectStockAPredictor(), None)
         current_portfolio_value = 0.0  # Dummy value
-        trading_action_list = trader.doTrade(read_portfolio(path=PATH_JSON), current_portfolio_value,
-                                             read_stock_market_data([symbol], PATH_DATASETS),
-                                             company_a_name=symbol)
+        portfolio= read_portfolio(path=PATH_JSON)
+        trading_action_list = trader.doTrade(portfolio, current_portfolio_value,
+                                             read_stock_market_data([[CompanyEnum.COMPANY_A.value, symbol]], PATH_DATASETS))
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).shares.name, symbol)
+        self.assertEqual(trading_action_list.get(0).shares.name, CompanyEnum.COMPANY_A.value)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         """
@@ -173,16 +174,16 @@ class EvaluatorTest(unittest.TestCase):
         period2 = '2012-2017'
 
         # Reading in *all* available data
-        data_a1 = read_stock_market_data([('%s_%s' % (stock_a, period1))], PATH_DATASETS)
-        data_a2 = read_stock_market_data([('%s_%s' % (stock_a, period2))], PATH_DATASETS)
-        data_b1 = read_stock_market_data([('%s_%s' % (stock_b, period1))], PATH_DATASETS)
-        data_b2 = read_stock_market_data([('%s_%s' % (stock_b, period2))], PATH_DATASETS)
+        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period1))]], PATH_DATASETS)
+        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period2))]], PATH_DATASETS)
+        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period1))]], PATH_DATASETS)
+        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period2))]], PATH_DATASETS)
 
         # Combine both datasets to one StockMarketData object
-        old_data_a = data_a1.market_data[('%s_%s' % (stock_a, period1))]
-        new_data_a = data_a2.market_data[('%s_%s' % (stock_a, period2))]
-        old_data_b = data_b1.market_data[('%s_%s' % (stock_b, period1))]
-        new_data_b = data_b2.market_data[('%s_%s' % (stock_b, period2))]
+        old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A.value]
+        new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A.value]
+        old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B.value]
+        new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B.value]
 
         full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
 

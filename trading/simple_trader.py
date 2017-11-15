@@ -44,18 +44,16 @@ class SimpleTrader(ITrader):
 
         result = TradingActionList()
 
-        companyAName = company_a_name
-        companyAData = stockMarketData.market_data.get(companyAName)
+        companyAData = stockMarketData.market_data.get(CompanyEnum.COMPANY_A.value)
         if (self.stockAPredictor is not None and companyAData is not None):
-            self.tradeForCompany(companyAName, companyAData, self.stockAPredictor, localPortfolio, result)
+            self.tradeForCompany(CompanyEnum.COMPANY_A.value, companyAData, self.stockAPredictor, localPortfolio, result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockAPredictor or companyAData is None -> No prediction for Company A")
 
-        companyBName = company_b_name
-        companyBData = stockMarketData.market_data.get(companyBName)
+        companyBData = stockMarketData.market_data.get(CompanyEnum.COMPANY_B.value)
         if (self.stockBPredictor is not None and companyBData is not None):
-            self.tradeForCompany(companyBName, companyBData, self.stockBPredictor, localPortfolio, result)
+            self.tradeForCompany(CompanyEnum.COMPANY_B.value, companyBData, self.stockBPredictor, localPortfolio, result)
         else:
             # TODO: use Logging!!!
             print("!!!! SimpleTrader: stockBPredictor or companyBData is None -> No prediction for Company B")

@@ -1,12 +1,12 @@
 [
   {
     "action": "BUY",
-    "name": "GOOG",
+    "name": "stock_b",
     "amount": 50
   },
   {
     "action": "SELL",
-    "name": "AAPL",
+    "name": "stock_a",
     "amount": 50
   }
 ]

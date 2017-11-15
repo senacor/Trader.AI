@@ -2,11 +2,11 @@
   "cash": 10000.00,
   "shares": [
     {
-      "name": "GOOG",
+      "name": "stock_b",
       "amount": 100
     },
     {
-      "name": "AAPL",
+      "name": "stock_a",
       "amount": 200
     }
   ]
