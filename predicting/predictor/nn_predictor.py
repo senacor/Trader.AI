@@ -6,9 +6,8 @@ Created on 08.11.2017
 from predicting.model.IPredictor import IPredictor
 import numpy as np
 
-import os
-from definitions import DATASETS_DIR
-from utils import load_keras_sequential, save_keras_sequential
+from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data_conveniently
+from model.CompanyEnum import CompanyEnum
 
 MODEL_FILE_NAME_STOCK_A = 'stock_a_predictor'
 MODEL_FILE_NAME_STOCK_B = 'stock_b_predictor'
@@ -73,29 +72,8 @@ class StockBNnPredictor(BaseNnPredictor):
 # The following code trains and stores the corresponding neural network
 ###############################################################################
 
-
-if __name__ == "__main__":
-    # Necessary imports
-    import datetime as dt
-    from matplotlib import pyplot as plt
-    from keras.models import Sequential
-    from keras.layers import Dense
-
-    # Load the training data; here: complete data about stock A (Disney)
-    print("Data loading...")
-    dates, prices = [], []
-    f = open(os.path.join(DATASETS_DIR, 'DIS.csv'), 'r')
-    next(f)  # skip the header line
-    for line in f:
-        try:
-            dates.append(dt.datetime.strptime(line.split(',')[0], '%Y-%m-%d').date())  # save dates in datetime.date format
-            prices.append(float(line.split(',')[4]))  # save prices in float format
-        except:
-            print("Error in reading line", line)
-    f.close()
-    print("Data loaded:", len(prices), "prices and", len(dates), "dates read.")
-
-    # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
+def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
+        # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
     lastPrices, currentPrice = [], []
     for i in range(0, len(prices) - 100):
         lastPrices.append(prices[i:100 + i])
@@ -131,5 +109,30 @@ if __name__ == "__main__":
     plt.show()
 
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
-    save_keras_sequential(network, RELATIVE_PATH, MODEL_FILE_NAME_STOCK_A)
+    save_keras_sequential(network, RELATIVE_PATH, filename_to_save)
+
+
+if __name__ == "__main__":
+    # Necessary imports
+    from matplotlib import pyplot as plt
+    from keras.models import Sequential
+    from keras.layers import Dense
+
+    # Load the training data; here: complete data about stock A (Disney)
+    print("Data loading...")
+    full_stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
+    
+    company_a_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
+    datesA = np.array([[x[0] for x in company_a_stock_market_data]])[0].tolist()
+    pricesA = np.array([[x[1] for x in company_a_stock_market_data]])[0].tolist()
+    
+    print("Data for Stock A loaded:", len(pricesA), "prices and", len(datesA), "dates read.")
+    learnNnAndSave(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
+    
+    company_b_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B)
+    datesB = np.array([[x[0] for x in company_b_stock_market_data]])[0].tolist()
+    pricesB = np.array([[x[1] for x in company_b_stock_market_data]])[0].tolist()
+    print("Data for Stock B loaded:", len(pricesB), "prices and", len(datesB), "dates read.")
+    learnNnAndSave(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
+
 
