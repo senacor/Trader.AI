@@ -46,7 +46,7 @@ class TradingActionList:
         """
         self.trading_action_list = list()
 
-    def add_trading_action(self, action: TradingActionEnum, shares: SharesOfCompany):
+    def __add_trading_action(self, action: TradingActionEnum, shares: SharesOfCompany):
         self.addTradingAction(TradingAction(action, shares))
 
     # TODO snake_case
@@ -79,7 +79,7 @@ class TradingActionList:
             company:
             amount:
         """
-        self.add_trading_action(TradingActionEnum.BUY, SharesOfCompany(company, amount))
+        self.__add_trading_action(TradingActionEnum.BUY, SharesOfCompany(company, amount))
 
     def sell(self, company: CompanyEnum, amount: int):
         """
@@ -89,4 +89,4 @@ class TradingActionList:
             company:
             amount:
         """
-        self.add_trading_action(TradingActionEnum.SELL, SharesOfCompany(company, amount))
+        self.__add_trading_action(TradingActionEnum.SELL, SharesOfCompany(company, amount))
