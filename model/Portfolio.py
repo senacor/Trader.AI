@@ -70,11 +70,11 @@ class Portfolio:
 
         print(f"\nUpdate portfolio {self.name}")
 
-        if trade_action_list.isEmpty():
+        if trade_action_list.is_empty():
             print("No action this time")
             return updated_portfolio
 
-        for trade_action in trade_action_list.trading_action_list:
+        for trade_action in trade_action_list.iterator():
             company_enum = trade_action.shares.company_enum
 
             current_date = stock_market_data.get_most_recent_trade_day()

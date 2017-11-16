@@ -265,13 +265,13 @@ class RnnTrader(ITrader):
         tradingActionA = self.create_TradingAction(CompanyEnum.COMPANY_A, actionA, currentPortfolio,
                                                    mostRecentPriceCompanyA)
         if (tradingActionA is not None):
-            result.addTradingAction(tradingActionA)
+            result.add_trading_action(tradingActionA)
 
         mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
         tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio,
                                                    mostRecentPriceCompanyB)
         if (tradingActionB is not None):
-            result.addTradingAction(tradingActionB)
+            result.add_trading_action(tradingActionB)
 
         return result
 

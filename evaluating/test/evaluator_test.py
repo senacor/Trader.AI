@@ -102,7 +102,7 @@ class EvaluatorTest(unittest.TestCase):
 
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         trading_action_list = TradingActionList()
-        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(CompanyEnum.COMPANY_A, 100)))
+        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
 
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
@@ -130,7 +130,7 @@ class EvaluatorTest(unittest.TestCase):
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
         trading_action_list = TradingActionList()
-        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(CompanyEnum.COMPANY_A, 100)))
+        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
 
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 

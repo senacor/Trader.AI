@@ -44,32 +44,34 @@ class TradingActionList:
         """ 
         Constructor
         """
-        self.trading_action_list = list()
+        self.__trading_action_list = list()
 
     def __add_trading_action(self, action: TradingActionEnum, shares: SharesOfCompany):
-        self.addTradingAction(TradingAction(action, shares))
+        self.add_trading_action(TradingAction(action, shares))
 
-    # TODO snake_case
-    def addTradingAction(self, trading_action: TradingAction):
-        self.trading_action_list.append(trading_action)
+    def add_trading_action(self, trading_action: TradingAction):
+        self.__trading_action_list.append(trading_action)
 
     def len(self) -> int:
-        return len(self.trading_action_list)
+        return len(self.__trading_action_list)
 
     def get(self, index: int) -> TradingAction:
-        return self.trading_action_list[index]
+        return self.__trading_action_list[index]
 
     def get_by_CompanyEnum(self, company_enum: CompanyEnum) -> TradingAction:
         """
         Returns TradingAction for given CompanyEnum, or None if nothing found
         """
         return next(
-            (trading_action for trading_action in self.trading_action_list if
+            (trading_action for trading_action in self.__trading_action_list if
              trading_action.shares.company_enum == company_enum),
             None)
 
-    def isEmpty(self):
-        return len(self.trading_action_list) == 0
+    def is_empty(self):
+        return self.len() == 0
+
+    def iterator(self):
+        return iter(self.__trading_action_list)
 
     def buy(self, company: CompanyEnum, amount: int):
         """

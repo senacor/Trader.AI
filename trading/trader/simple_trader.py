@@ -74,7 +74,7 @@ class SimpleTrader(ITrader):
                 # We can buy something
                 amount_of_units_to_buy = int(portfolio.cash // lastValue)
                 shares_of_company = SharesOfCompany(company_enum, amount_of_units_to_buy);
-                result_trading_action_list.addTradingAction(TradingAction(trading_action, shares_of_company))
+                result_trading_action_list.add_trading_action(TradingAction(trading_action, shares_of_company))
 
                 # Update Cash in portfolio
                 portfolio.cash = portfolio.cash - (amount_of_units_to_buy * lastValue)
@@ -85,7 +85,7 @@ class SimpleTrader(ITrader):
             if (shares_of_apple_in_portfolio is not None):
                 # Sell everything
                 shares_of_company = SharesOfCompany(company_enum, shares_of_apple_in_portfolio.amount);
-                result_trading_action_list.addTradingAction(TradingAction(trading_action, shares_of_company))
+                result_trading_action_list.add_trading_action(TradingAction(trading_action, shares_of_company))
 
     def __determine_action(self, company_data, predictor, last_value):
         predicted_next_apple_value = predictor.doPredict(company_data)
