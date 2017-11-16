@@ -79,9 +79,13 @@ DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
 def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str='../datasets/') -> StockMarketData:
     """
     Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
-    :param name: The names of the files to read
-    :param path: The path from which to read. Default: "../datasets/"
-    :return: The created `StockMarketData` object
+
+    Args:
+        company_enums_and_filenames_tuples: Tuples of filenames and logical names used as dict keys
+        path: The path from which to read. Default: "../datasets/"
+
+    Returns:
+        The created `StockMarketData` object
     """
     data = {}
     for company_enum, filename in company_enums_and_filenames_tuples:
@@ -109,7 +113,7 @@ PeriodList = List[str]
 def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
     """
     Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
-    this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
+    this. For each defined stock in `stocks` the corresponding value from `CompanyEnum` is used as logical name. If
     there are `periods` provided those are each read.
 
     Args:
