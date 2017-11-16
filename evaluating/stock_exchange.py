@@ -1,6 +1,6 @@
 # Start evaluation rnn_trader:
 # Compare its performance over the testing period (2012-2017) against a buy-and-hold trader.
-from evaluating.evaluator_utils import read_stock_market_data_conveniently
+from utils import read_stock_market_data_conveniently
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio

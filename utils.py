@@ -13,6 +13,7 @@ from model.StockMarketData import StockMarketData
 import numpy
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
+from typing import List
 
 
 def save_keras_sequential(model: Sequential, relative_path: str, file_name_without_extension: str) -> bool:
@@ -69,12 +70,13 @@ def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
         print(f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
         return None
 
+
 """
 The csv's column keys
 """
 DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
     
-def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
+def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str='../datasets/') -> StockMarketData:
     """
     Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
     :param name: The names of the files to read
@@ -98,37 +100,59 @@ def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str =
         data[company_enum] = dates
 
     return StockMarketData(data)
-    
-def get_test_data(stock_a: str, stock_b: str) -> StockMarketData:
+
+
+StockList = List[CompanyEnum]
+PeriodList = List[str]  
+
+
+def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
     """
-    Loads data all data from 1962 till 2017 for given stock_a and stock_b filenames.
-    
-    It is expected that files in following Format are available in DATASETS_DIR:
-    <stock_a>_1962-2011.csv, <stock_a>_2012-2017.csv, <stock_b>_1962-2011.csv and  <stock_b>_2012-2017.csv
-    
+    Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
+    this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
+    there are `periods` provided those are each read.
+
     Args:
-        stock_a - filename for data of stock A
-        stock_a - filename for data of stock B
-    
+        stocks: The company names for which to read the stock data. *Important:* These values need to be stated in `CompanyEnum`
+        periods: The periods to read. If not empty each period is appended to the filename like this: `[stock_name]_[period].csv`
+
     Returns:
-        StockMarketData for given files, or Exception if wanted files weren't found, never None
-    
+        The created `StockMarketData` object
+
+    Examples:
+        * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
+        * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+            * 'stock_b_1962-2011.csv'
+            * 'stock_b_2012-2017.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+          into a dict with a key `CompanyEnum.COMPANY_A`
+        * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_b_1962-2011.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a', 'stock_b'], [])` reads:
+            * 'stock_a.csv'
+            * 'stock_b.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+
     """
-    period1 = '1962-2011'
-    period2 = '2012-2017'
+    data = dict()
 
-    # Reading in *all* available data
-    data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
-    data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
-    data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
-    data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
+    # Read *all* available data
+    for stock in stocks:
+        filename = stock.value
+        if len(periods) is 0:
+            data[stock] = read_stock_market_data([[stock, filename]], DATASETS_DIR)
+        else:
+            period_data = list()
+            for period in periods:
+                period_data.append(read_stock_market_data([[stock, ('%s_%s' % (filename, period))]], DATASETS_DIR))
+            data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
 
-    # Combine both datasets to one StockMarketData object
-    old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A]
-    new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A]
-    old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B]
-    new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B]
+    return StockMarketData(data)
 
-    full_stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: old_data_a + new_data_a, CompanyEnum.COMPANY_B: old_data_b + new_data_b})
-
-    return full_stock_market_data

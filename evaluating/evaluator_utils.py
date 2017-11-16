@@ -1,24 +1,19 @@
 import datetime as dt
 import json
-from typing import Dict, List
+from typing import Dict
 
 import random
 from matplotlib import pyplot as plt
 import os
 
-from definitions import DATASETS_DIR
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum#
-from utils import read_stock_market_data
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
 """
-
-StockList = List[CompanyEnum]
-PeriodList = List[str]
 
 """
 Some JSON keys
@@ -55,56 +50,6 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
 
     return Portfolio(data[JSON_KEY_CASH], shares_list)
 
-
-def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
-    """
-    Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
-    this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
-    there are `periods` provided those are each read.
-
-    Args:
-        stocks: The company names for which to read the stock data. *Important:* These values need to be stated in `CompanyEnum`
-        periods: The periods to read. If not empty each period is appended to the filename like this: `[stock_name]_[period].csv`
-
-    Returns:
-        The created `StockMarketData` object
-
-    Examples:
-        * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
-        * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
-            * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
-            * 'stock_b_1962-2011.csv'
-            * 'stock_b_2012-2017.csv'
-          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
-        * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
-            * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
-          into a dict with a key `CompanyEnum.COMPANY_A`
-        * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
-            * 'stock_a_1962-2011.csv'
-            * 'stock_b_1962-2011.csv'
-          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
-        * `(['stock_a', 'stock_b'], [])` reads:
-            * 'stock_a.csv'
-            * 'stock_b.csv'
-          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
-
-    """
-    data = dict()
-
-    # Read *all* available data
-    for stock in stocks:
-        filename = stock.value
-        if len(periods) is 0:
-            data[stock] = read_stock_market_data([[stock, filename]], DATASETS_DIR)
-        else:
-            period_data = list()
-            for period in periods:
-                period_data.append(read_stock_market_data([[stock, ('%s_%s' % (filename, period))]], DATASETS_DIR))
-            data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
-
-    return StockMarketData(data)
 
 
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):

@@ -10,7 +10,8 @@ import unittest
 import datetime as dt
 
 from definitions import DATASETS_DIR, JSON_DIR
-from evaluating.evaluator_utils import read_portfolio, read_stock_market_data_conveniently
+from evaluating.evaluator_utils import read_portfolio
+from utils import read_stock_market_data_conveniently
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
