@@ -12,13 +12,18 @@ from trading.trader.rnn_trader import RnnTrader
 from predicting.predictor.simple_predictor import SimplePredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from model.CompanyEnum import CompanyEnum
+from predicting.predictor.nn_predictor import StockBNnPredictor,\
+    StockANnPredictor
 
 
 class Predictors(containers.DeclarativeContainer):
     """IoC container of predictor providers."""
  
     simple_predictor = providers.Factory(SimplePredictor)
-    perfect_stock_a_predictor = providers.Factory(PerfectPredictor, company=CompanyEnum.COMPANY_A)
+    perfect_stock_a_predictor = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_A)
+    
+    nn_stock_a_predictor = providers.Factory(StockANnPredictor)
+    nn_stock_b_predictor = providers.Factory(StockBNnPredictor)
 
  
 class Traders(containers.DeclarativeContainer):

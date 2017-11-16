@@ -20,7 +20,7 @@ from datetime import date
 
 import numpy as np
 from  definitions import DATASETS_DIR
-from evaluating.evaluator_utils import read_stock_market_data
+from utils import read_stock_market_data
 
 
 class TraderTest(unittest.TestCase):

@@ -7,7 +7,7 @@ import random
 from collections import deque
 import numpy as np
 
-from evaluating.evaluator_utils import read_stock_market_data
+from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
 from predicting.model.IPredictor import IPredictor
@@ -276,14 +276,12 @@ class RnnTrader(ITrader):
         mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
         tradingActionA = self.create_TradingAction(CompanyEnum.COMPANY_A, actionA, currentPortfolio,
                                                    mostRecentPriceCompanyA)
-        if (tradingActionA is not None):
-            result.add_trading_action(tradingActionA)
+        result.add_trading_action(tradingActionA)
 
         mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
         tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio,
                                                    mostRecentPriceCompanyB)
-        if (tradingActionB is not None):
-            result.add_trading_action(tradingActionB)
+        result.add_trading_action(tradingActionB)
 
         return result
 

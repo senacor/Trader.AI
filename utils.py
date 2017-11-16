@@ -8,7 +8,12 @@ Utility functions
 import os
 from keras.models import Sequential
 from keras.models import model_from_json
-from definitions import ROOT_DIR
+from definitions import ROOT_DIR, DATASETS_DIR
+from model.StockMarketData import StockMarketData
+import numpy
+from model.CompanyEnum import CompanyEnum
+import datetime as dt
+from typing import List
 
 
 def save_keras_sequential(model: Sequential, relative_path: str, file_name_without_extension: str) -> bool:
@@ -60,7 +65,94 @@ def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
             return model
         except:
             print(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
-            return False   
+            return None   
     else:
         print(f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
         return None
+
+
+"""
+The csv's column keys
+"""
+DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
+    
+def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str='../datasets/') -> StockMarketData:
+    """
+    Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
+    :param name: The names of the files to read
+    :param path: The path from which to read. Default: "../datasets/"
+    :return: The created `StockMarketData` object
+    """
+    data = {}
+    for company_enum, filename in company_enums_and_filenames_tuples:
+
+        filepath = os.path.join(path, filename + '.csv')
+        
+        assert os.path.exists(filepath)
+        
+        na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
+                                     delimiter=',', comments="#", skiprows=1)
+        dates = list()
+        for day in na_portfolio:
+            date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
+            dates.append((date, day[ADJ_CLOSE]))
+
+        data[company_enum] = dates
+
+    return StockMarketData(data)
+
+
+StockList = List[CompanyEnum]
+PeriodList = List[str]  
+
+
+def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
+    """
+    Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
+    this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
+    there are `periods` provided those are each read.
+
+    Args:
+        stocks: The company names for which to read the stock data. *Important:* These values need to be stated in `CompanyEnum`
+        periods: The periods to read. If not empty each period is appended to the filename like this: `[stock_name]_[period].csv`
+
+    Returns:
+        The created `StockMarketData` object
+
+    Examples:
+        * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
+        * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+            * 'stock_b_1962-2011.csv'
+            * 'stock_b_2012-2017.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+          into a dict with a key `CompanyEnum.COMPANY_A`
+        * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_b_1962-2011.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a', 'stock_b'], [])` reads:
+            * 'stock_a.csv'
+            * 'stock_b.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+
+    """
+    data = dict()
+
+    # Read *all* available data
+    for stock in stocks:
+        filename = stock.value
+        if len(periods) is 0:
+            data[stock] = read_stock_market_data([[stock, filename]], DATASETS_DIR)
+        else:
+            period_data = list()
+            for period in periods:
+                period_data.append(read_stock_market_data([[stock, ('%s_%s' % (filename, period))]], DATASETS_DIR))
+            data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
+
+    return StockMarketData(data)
+

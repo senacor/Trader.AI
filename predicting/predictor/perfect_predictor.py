@@ -6,7 +6,17 @@ Created on 16.11.2017
 from model.CompanyEnum import CompanyEnum
 from predicting.model.IPredictor import IPredictor
 import datetime as dt
-from evaluating.evaluator_utils import read_stock_market_data_conveniently
+from utils import read_stock_market_data_conveniently
+
+from utils import read_stock_market_data
+
+import os
+from definitions import DATASETS_DIR
+from utils import load_keras_sequential, save_keras_sequential
+
+MODEL_FILE_NAME_STOCK_A = 'perfect_stock_a_predictor'
+
+from utils import read_stock_market_data
 
 class PerfectPredictor(IPredictor):
     '''
@@ -22,10 +32,10 @@ class PerfectPredictor(IPredictor):
             company: The company whose stock values we should predict.
         """
         if company == CompanyEnum.COMPANY_A:
-            stock_market_data = read_stock_market_data_conveniently(['stock_a'], ['1962-2011', '2012-2017'])
+            stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A], ['1962-2011', '2012-2017'])
             self.stock_values = stock_market_data.get_stock_data_for_company(company)
         elif company == CompanyEnum.COMPANY_B:
-            stock_market_data = read_stock_market_data_conveniently(['stock_b'], ['1962-2011', '2012-2017'])
+            stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
             self.stock_values = stock_market_data.get_stock_data_for_company(company)
         else:
             print(f"perfect_stock_predictor: Cannot handle company {company}")
