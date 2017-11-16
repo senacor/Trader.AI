@@ -3,12 +3,12 @@ Created on 15.11.2017
 
 @author: rmueller
 '''
-from trading.ITrader import ITrader, TradingActionList, Portfolio
-from trading.trader_interface import TradingAction
+from trading.model.ITrader import ITrader, TradingActionList, Portfolio
+from trading.model.trader_interface import TradingAction
 from model.StockMarketData import StockMarketData
-from trading.trader_interface import TradingActionEnum
-from trading.trader_interface import SharesOfCompany
-from trading.trader_interface import CompanyEnum
+from trading.model.trader_interface import TradingActionEnum
+from trading.model.trader_interface import SharesOfCompany
+from trading.model.trader_interface import CompanyEnum
 
 
 class BuyAndHoldTrader(ITrader):

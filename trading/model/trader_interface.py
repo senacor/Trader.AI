@@ -5,9 +5,6 @@ Module contains interfaces for trader implementations and model classes
 
 @author: jtymoszuk
 '''
-import copy
-
-import abc
 from enum import Enum
 
 from model.CompanyEnum import CompanyEnum

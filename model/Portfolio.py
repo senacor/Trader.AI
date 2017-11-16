@@ -4,7 +4,7 @@ import datetime
 from model import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum
-from trading.trader_interface import TradingActionList, TradingActionEnum, TradingAction
+from trading.model.trader_interface import TradingActionList, TradingActionEnum, TradingAction
 
 
 class Portfolio:

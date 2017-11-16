@@ -12,14 +12,14 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
 from predicting.predictor_interface import IPredictor
 from predicting.simple_predictor import SimplePredictor
-from trading.ITrader import ITrader
-from trading.trader_interface import TradingActionList, TradingAction
+from trading.model.ITrader import ITrader
+from trading.model.trader_interface import TradingActionList, TradingAction
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
-from trading.trader_interface import TradingActionEnum
-from trading.trader_interface import CompanyEnum
-from trading.trader_interface import SharesOfCompany
+from trading.model.trader_interface import TradingActionEnum
+from trading.model.trader_interface import CompanyEnum
+from trading.model.trader_interface import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential
 

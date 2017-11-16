@@ -9,7 +9,7 @@ import os
 
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.trader_interface import SharesOfCompany
+from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum
 
 """

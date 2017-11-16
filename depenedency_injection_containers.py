@@ -6,9 +6,9 @@ Created on 09.11.2017
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
-from trading.simple_trader import SimpleTrader
-from trading.random_trader import RandomTrader
-from trading.rnn_trader import RnnTrader
+from trading.trader.simple_trader import SimpleTrader
+from trading.trader.random_trader import RandomTrader
+from trading.trader.rnn_trader import RnnTrader
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 
