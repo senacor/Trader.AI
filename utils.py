@@ -85,6 +85,9 @@ def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str =
     for company_enum, filename in company_enums_and_filenames_tuples:
 
         filepath = os.path.join(path, filename + '.csv')
+        
+        assert os.path.exists(filepath)
+        
         na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
         dates = list()
@@ -96,7 +99,21 @@ def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str =
 
     return StockMarketData(data)
     
-def get_test_data(stock_a, stock_b):
+def get_test_data(stock_a: str, stock_b: str) -> StockMarketData:
+    """
+    Loads data all data from 1962 till 2017 for given stock_a and stock_b filenames.
+    
+    It is expected that files in following Format are available in DATASETS_DIR:
+    <stock_a>_1962-2011.csv, <stock_a>_2012-2017.csv, <stock_b>_1962-2011.csv and  <stock_b>_2012-2017.csv
+    
+    Args:
+        stock_a - filename for data of stock A
+        stock_a - filename for data of stock B
+    
+    Returns:
+        StockMarketData for given files, or Exception if wanted files weren't found, never None
+    
+    """
     period1 = '1962-2011'
     period2 = '2012-2017'
 
