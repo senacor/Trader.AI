@@ -82,8 +82,9 @@ class TraderTest(unittest.TestCase):
         portfolio = Portfolio(1000.0, shares_of_company_list)
         current_portfolio_value = 0.0  # Dummy value
 
+        # TODO: hier schlägt der Test fehlt, weil die geladenen Stockdata nicht stimmen
         trading_action_list = st.doTrade(portfolio, current_portfolio_value,
-                                         read_stock_market_data([[CompanyEnum.COMPANY_A, 'AAPL']], DATASETS_DIR))
+                                         read_stock_market_data([[CompanyEnum.COMPANY_A, 'stock_a_2012-2017']], DATASETS_DIR))
         self.assertTrue(isinstance(trading_action_list, TradingActionList))
 
         self.assertEqual(trading_action_list.len(), 1)

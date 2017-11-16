@@ -203,24 +203,15 @@ class EvaluatorTest(unittest.TestCase):
         test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], [period1, period2])
 
         self.assertEqual(len(test.market_data), 1)
+        self.assertFalse(CompanyEnum.COMPANY_A in test.market_data.keys())
         self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
 
     def testReadData_1stock_noPeriods(self):
         test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], [])
 
         self.assertEqual(len(test.market_data), 1)
+        self.assertFalse(CompanyEnum.COMPANY_A in test.market_data.keys())
         self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
-
-    def testWhyIsThisWorking(self):
-        # Load stock market data for stock B
-        stock_b_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
-        # Ask for stock market data for stock A
-        stock_a_market_data = stock_b_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
-        # TODO @Jonas
-        # Result should be none (because no data for stock A was loaded)
-        # instead, currently the data for stock B is returned
-        self.assertIsNone(stock_a_market_data)
-
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(EvaluatorTest)
