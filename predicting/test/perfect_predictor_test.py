@@ -8,6 +8,7 @@ Module for testing of PerfectPredictor
 import unittest
 
 from datetime import date
+import datetime as dt
 
 import predicting
 from model.CompanyEnum import CompanyEnum
@@ -36,9 +37,9 @@ class PerfectPredictorTest(unittest.TestCase):
        
     def testDoPredict(self):
         predictorA = PerfectPredictor(CompanyEnum.COMPANY_A)
-        # only one possible value
-        current_value = 35.554108 # value from 03.01.2012
-        future_value = 36.055264 # value from 04.01.2012
+        # only one possible value: take 03.01.2012 and predict 04.01.2012
+        current_value = [dt.date(2012, 1, 3), 35.554108]
+        future_value = 36.055264
         self.assertEqual(predictorA.doPredict([current_value]), future_value)
         # more than one possible values
         # TODO

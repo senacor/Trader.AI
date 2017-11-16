@@ -10,13 +10,14 @@ from model.StockMarketData import StockMarketData
 from predicting.model.IPredictor import IPredictor
 import numpy as np
 
+import datetime as dt
+
+from evaluating.evaluator_utils import read_stock_market_data
+
 import os
 from definitions import DATASETS_DIR
 from utils import load_keras_sequential, save_keras_sequential
 
-MODEL_FILE_NAME = 'perfect_stock_a_predictor'
-
-from evaluating.evaluator_utils import read_stock_market_data
 
 class PerfectPredictor(IPredictor):
     '''
@@ -32,30 +33,23 @@ class PerfectPredictor(IPredictor):
             company: The company which stock values we should predict
         """
         self.company = company
-        self.stock_values = []
+
         # TODO there is probably a more elegant way to load this data
+        self.stock_values = []
         if company == CompanyEnum.COMPANY_A:
-            file = open(os.path.join(DATASETS_DIR, 'stock_a_1962-2011.csv'), 'r')
-            next(file)
-            for line in file:
-                self.stock_values.append(float(line.split(',')[5]))
-            file.close()
-            file = open(os.path.join(DATASETS_DIR, 'stock_a_2012-2017.csv'), 'r')
-            next(file)
-            for line in file:
-                self.stock_values.append(float(line.split(',')[5]))
-            file.close()
+            old_values = read_stock_market_data([(company, 'stock_a_1962-2011')], DATASETS_DIR)
+            new_values = read_stock_market_data([(company, 'stock_a_2012-2017')], DATASETS_DIR)
+            for (_, value) in old_values.get_stock_data_for_company(company):
+                self.stock_values.append(value)
+            for (_, value) in new_values.get_stock_data_for_company(company):
+                self.stock_values.append(value)
         elif company == CompanyEnum.COMPANY_B:
-            file = open(os.path.join(DATASETS_DIR, 'stock_b_1962-2011.csv'), 'r')
-            next(file)
-            for line in file:
-                self.stock_values.append(float(line.split(',')[5]))
-            file.close()
-            file = open(os.path.join(DATASETS_DIR, 'stock_b_2012-2017.csv'), 'r')
-            next(file)
-            for line in file:
-                self.stock_values.append(float(line.split(',')[5]))
-            file.close()
+            old_values = read_stock_market_data([(company, 'stock_b_1962-2011')], DATASETS_DIR)
+            new_values = read_stock_market_data([(company, 'stock_b_2012-2017')], DATASETS_DIR)
+            for (_, value) in old_values.get_stock_data_for_company(company):
+                self.stock_values.append(value)
+            for (_, value) in new_values.get_stock_data_for_company(company):
+                self.stock_values.append(value)
         else:
             print(f"perfect_stock_predictor: Cannot handle company {company}")
             assert False
@@ -69,10 +63,12 @@ class PerfectPredictor(IPredictor):
           predicted next stock value for that company
         """
         assert data is not None and len(data) > 0
-        assert isinstance(data[0], float)
+        assert len(data[0]) == 2
+        assert isinstance(data[0][0], dt.date)
+        assert isinstance(data[0][1], float)
 
         # find all indices containing the current value
-        current_value = data[-1]
+        current_value = data[-1][1]
         print(current_value)
         indices = [i for i, x in enumerate(self.stock_values) if x == current_value]
         print(indices)
@@ -85,4 +81,4 @@ class PerfectPredictor(IPredictor):
             return self.stock_values[index + 1]
         else:
             print(f"perfect_stock_predictor: Could not find current stock value {current_value}")
-            assert False
+            return 0.0
