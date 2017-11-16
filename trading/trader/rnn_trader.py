@@ -27,8 +27,10 @@ from utils import save_keras_sequential, load_keras_sequential
 STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
 
 
-# Define state from the trader's viewpoint
 class State:
+    """
+    Represents state from the trader's viewpoint
+    """
     def __init__(self, cash: float, stockA: int, stockB: int, priceA: float, priceB: float, predictedA: float,
                  predictedB: float):
         self.cash = cash
@@ -125,18 +127,21 @@ class RnnTrader(ITrader):
         """
         return load_keras_sequential('trading', self.MODEL_FILE_NAME)
 
-    # Get best action for current state, either randomly or predicted from neural network
-    # Choice between random and neural network solely depends on epsilon
-    # Epsilon is the probability of a random action
-    # Return value is two floats between -1.0 and +1.0
-    # First float is for action on stock A, second float is for action on stock B
-    # Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
-    # Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
-    # ATTENTION: if sum of action over all stocks is greater than 1.0, then not all stocks can be bought!
-    # Example: action stock A = +1.0 and action stock B = +0.2
-    # This leads to all cash to be spent on buying stock A (because of action +1.0),
-    # which in turn means there is no cash left to buy stock B (the action +0.2)
+
     def get_action(self, state: State):
+        """
+        Get best action for current state, either randomly or predicted from neural network
+        Choice between random and neural network solely depends on epsilon
+        Epsilon is the probability of a random action
+        Return value is two floats between -1.0 and +1.0
+        First float is for action on stock A, second float is for action on stock B
+        Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
+        Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
+        ATTENTION: if sum of action over all stocks is greater than 1.0, then not all stocks can be bought!
+        Example: action stock A = +1.0 and action stock B = +0.2
+        This leads to all cash to be spent on buying stock A (because of action +1.0),
+        which in turn means there is no cash left to buy stock B (the action +0.2)
+        """
         if np.random.rand() <= self.epsilon:
             # generate two random actions
             return random.choice(STOCKACTIONS), random.choice(STOCKACTIONS)
@@ -161,20 +166,27 @@ class RnnTrader(ITrader):
     def append_sample(self, state: State, actionA: float, actionB: float, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    # decreases epsilon by one step (decay), but not lower than its defined minimum
     def decrease_epsilon(self):
+        """
+        Decreases epsilon by one step (decay), but not lower than its defined minimum
+        """
         self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
 
-    # TODO description
-    # Implements rewards function
     # TODO implement reward using discounted future values as well
-    def calculateReward(self, lastPortfolioValue: float, currentPortfolioValue: float) -> int:
-        assert lastPortfolioValue is not None
-        assert currentPortfolioValue is not None
+    def calculateReward(self, last_portfolio_value: float, current_portfolio_value: float) -> int:
+        """
+        Implements rewards function
+        
+        Args:
+            last_portfolio_value - last value of Portfolio
+            current_portfolio_value - current value of Portfolio
+        """
+        assert last_portfolio_value is not None
+        assert current_portfolio_value is not None
 
-        if (currentPortfolioValue > lastPortfolioValue):
+        if (current_portfolio_value > last_portfolio_value):
             return 1
-        elif (currentPortfolioValue < lastPortfolioValue):
+        elif (current_portfolio_value < last_portfolio_value):
             return -1
         else:
             return 0
