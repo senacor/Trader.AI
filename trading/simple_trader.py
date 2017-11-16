@@ -110,8 +110,3 @@ class SimpleTrader(ITrader):
                 return shares_of_company
 
         return None
-
-
-class AlwaysBuyingTrader(SimpleTrader):
-    def determine_action(self, company_data, predictor, last_value):
-        return TradingActionEnum.BUY
