@@ -46,6 +46,10 @@ class TradingActionList:
         """
         self.trading_action_list = list()
 
+    def add_trading_action(self, action: TradingActionEnum, shares: SharesOfCompany):
+        self.addTradingAction(TradingAction(action, shares))
+
+    # TODO snake_case
     def addTradingAction(self, trading_action: TradingAction):
         self.trading_action_list.append(trading_action)
 
@@ -66,3 +70,23 @@ class TradingActionList:
 
     def isEmpty(self):
         return len(self.trading_action_list) == 0
+
+    def buy(self, company: CompanyEnum, amount: int):
+        """
+        Adds a trading action BUY to the list
+
+        Args:
+            company:
+            amount:
+        """
+        self.add_trading_action(TradingActionEnum.BUY, SharesOfCompany(company, amount))
+
+    def sell(self, company: CompanyEnum, amount: int):
+        """
+        Adds a trading action SELL to the list
+
+        Args:
+            company:
+            amount:
+        """
+        self.add_trading_action(TradingActionEnum.SELL, SharesOfCompany(company, amount))

@@ -15,6 +15,7 @@ class BuyAndHoldTrader(ITrader):
     '''
     BuyAndHoldTrader buys 50% stock A and 50% stock B and holds them over time
     '''
+
     def __init__(self):
         '''
         Constructor
@@ -37,24 +38,14 @@ class BuyAndHoldTrader(ITrader):
         else:
             self.bought_stocks = True
             trading_actions = TradingActionList()
-            available_cash_per_stock = portfolio.cash / 2 # TODO can we infer the 2 from CompanyEnum?
 
-            # Invest 50% of cash into stock A
-            # TODO @janusz
-            # Das folgende Beispiel illustriert was ich meine mit "in zu vielen Objekte verpackt".
-            # Eigentlich möchte ich nur sowas schreiben wie:
-            #
-            # trading_actions.buy(stock, amount)
-            #
-            # Stattdessen muss ich folgendes schreiben:
-            amount_to_buy = available_cash_per_stock // stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
-            amount_to_buy_wrapped_in_object = SharesOfCompany(CompanyEnum.COMPANY_A, amount_to_buy)
-            amount_to_buy_wrapped_in_another_object = TradingAction(TradingActionEnum.BUY, amount_to_buy_wrapped_in_object)
-            trading_actions.addTradingAction(amount_to_buy_wrapped_in_another_object)
+            companies = list(CompanyEnum)
 
-            # Invest 50% of cash into stock B
-            amount_to_buy = available_cash_per_stock // stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
-            amount_to_buy_wrapped_in_object = SharesOfCompany(CompanyEnum.COMPANY_B, amount_to_buy)
-            amount_to_buy_wrapped_in_another_object = TradingAction(TradingActionEnum.BUY, amount_to_buy_wrapped_in_object)
-            trading_actions.addTradingAction(amount_to_buy_wrapped_in_another_object)
+            available_cash_per_stock = portfolio.cash / len(companies)
+
+            # Invest (100 // `len(companies)`)% of cash into each stock
+            for company in companies:
+                amount_to_buy = available_cash_per_stock // stockMarketData.get_most_recent_price(company)
+                trading_actions.buy(company, amount_to_buy)
+
         return trading_actions
