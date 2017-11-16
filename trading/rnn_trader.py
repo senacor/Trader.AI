@@ -219,10 +219,10 @@ class RnnTrader(ITrader):
         predictedValueStockB = self.stock_b_predictor.doPredict(
             stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B))
         current_state = State(portfolio.cash,
-                              portfolio.get_amount(CompanyEnum.COMPANY_A.value),
-                              portfolio.get_amount(CompanyEnum.COMPANY_B.value),
-                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A.value),
-                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B.value),
+                              portfolio.get_amount(CompanyEnum.COMPANY_A),
+                              portfolio.get_amount(CompanyEnum.COMPANY_B),
+                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A),
+                              stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B),
                               predictedValueStockA,
                               predictedValueStockB)
 
@@ -261,13 +261,13 @@ class RnnTrader(ITrader):
         """
         result = TradingActionList()
 
-        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
         tradingActionA = self.create_TradingAction(CompanyEnum.COMPANY_A, actionA, currentPortfolio,
                                                    mostRecentPriceCompanyA)
         if (tradingActionA is not None):
             result.addTradingAction(tradingActionA)
 
-        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
+        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
         tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio,
                                                    mostRecentPriceCompanyB)
         if (tradingActionB is not None):
@@ -294,18 +294,18 @@ class RnnTrader(ITrader):
 
             amountOfSharesOfComapanyToBuy = int(action * possibleAmountOfUnitsToBuy)
 
-            sharesOfCompanyToBuy = SharesOfCompany(companyEnum.value, amountOfSharesOfComapanyToBuy)
+            sharesOfCompanyToBuy = SharesOfCompany(companyEnum, amountOfSharesOfComapanyToBuy)
 
             return TradingAction(TradingActionEnum.BUY, sharesOfCompanyToBuy)
 
         elif (action < 0.0):
             # Get amount of shares we own; it may be 0
-            amountOfSharesWeOwn = currentPortfolio.get_amount(companyEnum.value)
+            amountOfSharesWeOwn = currentPortfolio.get_amount(companyEnum)
             assert amountOfSharesWeOwn >= 0
             # Percent of shares to sell multiply by number of owned actions
             amountOfSharesToSell = int(abs(action) * amountOfSharesWeOwn)
             # Wrap into SharesOfCompany object TODO do we need this?
-            sharesOfCompanyToSell = SharesOfCompany(companyEnum.value, amountOfSharesToSell)
+            sharesOfCompanyToSell = SharesOfCompany(companyEnum, amountOfSharesToSell)
             return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
         else:
             # TODO: use Logging!!!
@@ -317,8 +317,8 @@ class RnnTrader(ITrader):
 EPISODES = 2
 if __name__ == "__main__":
     # Reading training data
-    training_data = read_stock_market_data([[CompanyEnum.COMPANY_A.value, CompanyEnum.COMPANY_A.value + '_1962-2011'],
-                                            [CompanyEnum.COMPANY_B.value, CompanyEnum.COMPANY_B.value + '_1962-2011']])
+    training_data = read_stock_market_data([[CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_A.value + '_1962-2011'],
+                                            [CompanyEnum.COMPANY_B, CompanyEnum.COMPANY_B.value + '_1962-2011']])
 
     # Define initial portfolio
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')

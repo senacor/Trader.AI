@@ -64,7 +64,7 @@ class TradingActionList:
         """
         return next(
             (trading_action for trading_action in self.trading_action_list if
-             trading_action.shares.name == company_enum.value),
+             trading_action.shares.company_enum == company_enum),
             None)
 
     def isEmpty(self):

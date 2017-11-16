@@ -5,7 +5,7 @@ from evaluating.evaluator_utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from model.SharesOfCompany import CompanyEnum
+from model.CompanyEnum import CompanyEnum
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.rnn_trader import RnnTrader
 
@@ -16,15 +16,15 @@ if __name__ == "__main__":
     period1 = '1962-2011'
     period2 = '2012-2017'
     # Reading in *all* available data
-    data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
-    data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
-    data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
-    data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
+    data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
+    data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
+    data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
+    data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
     # Combine both datasets to one StockMarketData object
-    old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A.value]
-    new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A.value]
-    old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B.value]
-    new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B.value]
+    old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A]
+    new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A]
+    old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B]
+    new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B]
     full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
 
     # TODO @Jonas Kann man dieses Benchmark hier eleganter machen, z.B. dependency injection?

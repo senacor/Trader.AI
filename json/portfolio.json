@@ -2,11 +2,11 @@
   "cash": 10000.00,
   "shares": [
     {
-      "name": "stock_b",
+      "company_enum": "COMPANY_B",
       "amount": 100
     },
     {
-      "name": "stock_a",
+      "company_enum": "COMPANY_A",
       "amount": 200
     }
   ]

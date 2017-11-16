@@ -25,34 +25,34 @@ class Portfolio:
 
     def total_value(self, date: datetime.date, prices: dict):
         values = [share.amount *
-                  [price[1] for price in prices[share.name] if date == price[0]][0]
+                  [price[1] for price in prices[share.company_enum] if date == price[0]][0]
                   for share in self.shares]
 
         return sum(values) + self.cash
 
-    def has_stock(self, name: str):
-        return len(self.shares) != 0 and len([share for share in self.shares if share.name == name]) != 0
+    def has_stock(self, company_enum: CompanyEnum):
+        return len(self.shares) != 0 and len([share for share in self.shares if share.company_enum == company_enum]) != 0
 
-    def get_or_insert(self, name: str):
-        if not self.has_stock(name):
-            share = SharesOfCompany(name, 0)
+    def get_or_insert(self, company_enum: CompanyEnum):
+        if not self.has_stock(company_enum):
+            share = SharesOfCompany(company_enum, 0)
             self.shares.append(share)
             return share
 
-        return next(share for share in self.shares if share.name == name)
+        return next(share for share in self.shares if share.company_enum == company_enum)
 
     # TODO comment
     # TODO refactor: get rid of SharesOfCompany? do we really use that object somewhere?
-    def get_by_name(self, name: str) -> SharesOfCompany:
+    def get_by_name(self, company_enum: CompanyEnum) -> SharesOfCompany:
         """
             Returns SharesOfCompany for company name, or None if nothing found
         """
-        return next((share for share in self.shares if share.name == name), None)
+        return next((share for share in self.shares if share.company_enum == company_enum), None)
 
     # Return the amount of shares we hold from the given company.
     # If we don't hold any shares of this company, we return 0.
-    def get_amount(self, company_name: str) -> int:
-        share = self.get_by_name(company_name)
+    def get_amount(self, company_enum: CompanyEnum) -> int:
+        share = self.get_by_name(company_enum)
         if share is not None:
             return share.amount
         else:
@@ -75,20 +75,20 @@ class Portfolio:
             return updated_portfolio
 
         for trade_action in trade_action_list.trading_action_list:
-            shares_name = trade_action.shares.name
+            company_enum = trade_action.shares.company_enum
 
             current_date = stock_market_data.get_most_recent_trade_day()
-            current_price = stock_market_data.get_most_recent_price(shares_name)
+            current_price = stock_market_data.get_most_recent_price(company_enum)
 
             print(f"Available cash on {current_date}: {updated_portfolio.cash}")
             # for share in update.shares:
-            share = updated_portfolio.get_or_insert(shares_name)
+            share = updated_portfolio.get_or_insert(company_enum)
             # if share.name is update.shares.name:
             amount = trade_action.shares.amount
             trade_volume = amount * current_price
 
             if trade_action.action is TradingActionEnum.BUY:
-                print(f"  Buying {amount} shares of '{share.name}' with an individual value of {current_price}")
+                print(f"  Buying {amount} shares of '{share.company_enum}' with an individual value of {current_price}")
                 print(f"  Volume of this trade: {trade_volume}")
 
                 if trade_volume <= updated_portfolio.cash:
@@ -98,7 +98,7 @@ class Portfolio:
                     print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
                           f"volume of {trade_volume}")
             elif trade_action.action is TradingActionEnum.SELL:
-                print(f"  Selling {amount} shares of {share.name} with individual value of {current_price}")
+                print(f"  Selling {amount} shares of {share.company_enum} with individual value of {current_price}")
                 print(f"  Volume of this trade: {trade_volume}")
 
                 if share.amount > amount:
@@ -126,31 +126,31 @@ class Portfolio:
 
         current_cash = self.cash
 
-        most_recent_price_company_a = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A.value)
+        most_recent_price_company_a = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
         trading_action_for_company_a = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
 
-        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_A.value,
+        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_A,
                                                              trading_action_for_company_a, most_recent_price_company_a)
         if (is_valid is False):
             return False
 
-        most_recent_price_company_b = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B.value)
+        most_recent_price_company_b = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
         trading_action_for_company_b = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
 
-        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_B.value,
+        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_B,
                                                              trading_action_for_company_b, most_recent_price_company_b)
         if (is_valid is False):
             return False
 
         return True
 
-    def __isTradingActionValid(self, current_cash: float, company_name: str, trading_action_for_company: TradingAction,
+    def __isTradingActionValid(self, current_cash: float, company_enum: CompanyEnum, trading_action_for_company: TradingAction,
                                most_recent_price_company: float):
         """
         Validates if given TradingAction is valid
         Args:
           current_cash : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
-          company_name : Company name as String
+          company_enum : CCompanyEnum
           trading_action_for_company: TradingAction
           most_recent_price_company: most recent price of company as float
         Returns:
@@ -168,7 +168,7 @@ class Portfolio:
                     return False, current_cash
 
             elif (trading_action_for_company.action == TradingActionEnum.SELL):
-                if (trading_action_for_company.shares > self.get_amount(company_name)):
+                if (trading_action_for_company.shares > self.get_amount(company_enum)):
                     return False
             else:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {trading_action_for_company}')

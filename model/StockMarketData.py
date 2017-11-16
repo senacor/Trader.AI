@@ -17,8 +17,8 @@ class StockMarketData:
     def get_most_recent_trade_day(self):
         return next(iter(self.market_data.values()))[-1][0]
 
-    def get_most_recent_price(self, stock: str):
-        return self.market_data.get(stock)[-1][1]
+    def get_most_recent_price(self, company_enum: CompanyEnum):
+        return self.market_data.get(company_enum)[-1][1]
 
     def get_row_count(self):
         return len(next(iter(self.market_data.values())))
@@ -27,4 +27,4 @@ class StockMarketData:
         """
         Delivers data for given CompanyEnum, or None if nothing found
         """
-        return self.market_data.get(company_enum.value)
+        return self.market_data.get(company_enum)

@@ -36,10 +36,10 @@ class TraderTest(unittest.TestCase):
         today = date(2017, 11, 8)
         yesterday = date(2017, 11, 8)
         date_value_array_1 = np.array([[today, yesterday], [10.0, 20.0]])
-        companyName2DateValueArrayDict[CompanyEnum.COMPANY_A.value] = date_value_array_1
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_A] = date_value_array_1
 
         date_value_array_2 = np.array([[today, yesterday], [1.0, 2.0]])
-        companyName2DateValueArrayDict[CompanyEnum.COMPANY_B.value] = date_value_array_2
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_B] = date_value_array_2
 
         stock_market_data = StockMarketData(companyName2DateValueArrayDict)
         stock_market_data.market_data.items()
@@ -52,8 +52,8 @@ class TraderTest(unittest.TestCase):
         rt = Traders.random_trader()
 
         shares_of_company_list = list()
-        shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
-        shares_of_company_y = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
+        shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
+        shares_of_company_y = SharesOfCompany(CompanyEnum.COMPANY_B, 50)
         shares_of_company_list.append(shares_of_company_x)
         shares_of_company_list.append(shares_of_company_y)
 
@@ -61,21 +61,21 @@ class TraderTest(unittest.TestCase):
         current_portfolio_value = 0.0  # Dummy value
 
         trading_action_list = rt.doTrade(portfolio, current_portfolio_value,
-                                         read_stock_market_data([[CompanyEnum.COMPANY_A.value, 'AAPL']], DATASETS_DIR))
+                                         read_stock_market_data([[CompanyEnum.COMPANY_A, 'AAPL']], DATASETS_DIR))
         self.assertTrue(isinstance(trading_action_list, TradingActionList))
 
         self.assertEqual(trading_action_list.len(), 1)
         self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
         self.assertEqual(trading_action_list.get(0).shares.amount, 10)
-        self.assertEqual(trading_action_list.get(0).shares.name, CompanyEnum.COMPANY_A.value)
+        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
 
     def testSimpleTrader(self):
 
         st = Traders.simple_trader_for_test()
 
         shares_of_company_list = list()
-        shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
-        shares_of_company_y = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
+        shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
+        shares_of_company_y = SharesOfCompany(CompanyEnum.COMPANY_B, 50)
         shares_of_company_list.append(shares_of_company_x)
         shares_of_company_list.append(shares_of_company_y)
 
@@ -83,18 +83,18 @@ class TraderTest(unittest.TestCase):
         current_portfolio_value = 0.0  # Dummy value
 
         trading_action_list = st.doTrade(portfolio, current_portfolio_value,
-                                         read_stock_market_data([[CompanyEnum.COMPANY_A.value, 'AAPL']], DATASETS_DIR))
+                                         read_stock_market_data([[CompanyEnum.COMPANY_A, 'AAPL']], DATASETS_DIR))
         self.assertTrue(isinstance(trading_action_list, TradingActionList))
 
         self.assertEqual(trading_action_list.len(), 1)
         if (trading_action_list.get(0).action == TradingActionEnum.BUY):
             self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
             self.assertEqual(trading_action_list.get(0).shares.amount, 5)
-            self.assertEqual(trading_action_list.get(0).shares.name, CompanyEnum.COMPANY_A.value)
+            self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
         elif (trading_action_list.get(0).action, TradingActionEnum.SELL):
             self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.SELL)
             self.assertEqual(trading_action_list.get(0).shares.amount, 10)
-            self.assertEqual(trading_action_list.get(0).shares.name, CompanyEnum.COMPANY_A.value)
+            self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
 
     def testSimpleTraderConstruction(self):
         st = Traders.simple_trader_for_test()
@@ -102,8 +102,8 @@ class TraderTest(unittest.TestCase):
 
     def testPortfolioConstruction(self):
         shares_of_company_list = list()
-        shares_of_company_a = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10)
-        shares_of_company_b = SharesOfCompany(CompanyEnum.COMPANY_B.value, 50)
+        shares_of_company_a = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
+        shares_of_company_b = SharesOfCompany(CompanyEnum.COMPANY_B, 50)
         shares_of_company_list.append(shares_of_company_a)
         shares_of_company_list.append(shares_of_company_b)
 
@@ -111,10 +111,10 @@ class TraderTest(unittest.TestCase):
 
         self.assertEqual(portfolio.cash, 1000.0)
         self.assertEqual(len(portfolio.shares), 2)
-        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_A.value)
+        self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
         self.assertEqual(portfolio.shares[0].amount, 10)
 
-        self.assertEqual(portfolio.shares[1].name, CompanyEnum.COMPANY_B.value)
+        self.assertEqual(portfolio.shares[1].company_enum, CompanyEnum.COMPANY_B)
         self.assertEqual(portfolio.shares[1].amount, 50)
 
     def testRnnTraderConstruction(self):

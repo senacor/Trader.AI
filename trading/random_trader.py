@@ -33,7 +33,7 @@ class RandomTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        shares_of_company = SharesOfCompany(CompanyEnum.COMPANY_A.value, 10);
+        shares_of_company = SharesOfCompany(CompanyEnum.COMPANY_A, 10);
 
         result = TradingActionList()
         result.addTradingAction(TradingAction(TradingActionEnum.BUY, shares_of_company))

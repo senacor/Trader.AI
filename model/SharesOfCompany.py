@@ -1,14 +1,15 @@
+from model.CompanyEnum import CompanyEnum
 class SharesOfCompany:
     '''
     Represents number of owned shares of one type (company)
     '''
 
-    def __init__(self, name: str, amount: int):
+    def __init__(self, company_enum: CompanyEnum, amount: int):
         """ Constructor
 
         Args:
-          name : name of company
+          company_enum : CompanyEnum
           amount : amount of shares
         """
-        self.name = name
+        self.company_enum = company_enum
         self.amount = amount

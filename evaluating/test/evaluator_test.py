@@ -32,7 +32,7 @@ class EvaluatorTest(unittest.TestCase):
 
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].name, CompanyEnum.COMPANY_B.value)
+        self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_B)
 
     def testReadStockMarketData(self):
         """
@@ -44,11 +44,11 @@ class EvaluatorTest(unittest.TestCase):
         google = 'GOOG'
 
         stock_market_data = read_stock_market_data(
-            [[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], DATASETS_DIR)
+            [[CompanyEnum.COMPANY_A, apple], [CompanyEnum.COMPANY_B, google]], DATASETS_DIR)
 
         self.assertGreater(len(stock_market_data.market_data), 0)
-        self.assertTrue(CompanyEnum.COMPANY_A.value in stock_market_data.market_data)
-        self.assertTrue(CompanyEnum.COMPANY_B.value in stock_market_data.market_data)
+        self.assertTrue(CompanyEnum.COMPANY_A in stock_market_data.market_data)
+        self.assertTrue(CompanyEnum.COMPANY_B in stock_market_data.market_data)
 
     def testGetMostRecentTradeDay(self):
         """
@@ -60,10 +60,10 @@ class EvaluatorTest(unittest.TestCase):
         google = 'GOOG'
 
         stock_market_data = read_stock_market_data(
-            [[CompanyEnum.COMPANY_A.value, apple], [CompanyEnum.COMPANY_B.value, google]], DATASETS_DIR)
+            [[CompanyEnum.COMPANY_A, apple], [CompanyEnum.COMPANY_B, google]], DATASETS_DIR)
 
         self.assertEqual(stock_market_data.get_most_recent_trade_day(),
-                         stock_market_data.market_data[CompanyEnum.COMPANY_A.value][-1][0])
+                         stock_market_data.market_data[CompanyEnum.COMPANY_A][-1][0])
 
     def testDoTrade(self):
         """
@@ -78,12 +78,12 @@ class EvaluatorTest(unittest.TestCase):
         current_portfolio_value = 0.0  # Dummy value
         portfolio = read_portfolio(path=JSON_DIR)
         trading_action_list = trader.doTrade(portfolio, current_portfolio_value,
-                                             read_stock_market_data([[CompanyEnum.COMPANY_A.value, symbol]],
+                                             read_stock_market_data([[CompanyEnum.COMPANY_A, symbol]],
                                                                     DATASETS_DIR))
 
         self.assertTrue(trading_action_list is not None)
         self.assertTrue(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).shares.name, CompanyEnum.COMPANY_A.value)
+        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
 
     def testUpdatePortfolio_noSufficientCashReserve(self):
         """
@@ -95,22 +95,21 @@ class EvaluatorTest(unittest.TestCase):
         actions on the portfolio. Checks if those are applied correctly
         """
         cash_reserve = 10000.0
-        symbol = "AAPL"
 
         data = list()
         data.append(('2017-01-01', 150.0))
-        stock_market_data = StockMarketData({symbol: data})
+        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
 
-        portfolio = Portfolio(cash_reserve, [SharesOfCompany(symbol, 200)])
+        portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         trading_action_list = TradingActionList()
-        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
+        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(CompanyEnum.COMPANY_A, 100)))
 
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Trade volume is too high for current cash reserve. Nothing should happen
         self.assertEqual(updated_portfolio.cash, cash_reserve)
         self.assertEqual(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].name, symbol)
+        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
         self.assertEqual(updated_portfolio.shares[0].amount, 200)
 
     def testUpdatePortfolio_sufficientCashReserve(self):
@@ -123,23 +122,22 @@ class EvaluatorTest(unittest.TestCase):
         actions on the portfolio. Checks if those are applied correctly
         """
         cash_reserve = 20000.0
-        symbol = "AAPL"
 
         data = list()
         data.append(('2017-01-01', 150.0))
-        stock_market_data = StockMarketData({symbol: data})
+        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
 
-        portfolio = Portfolio(cash_reserve, [SharesOfCompany(symbol, 200)])
+        portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
         trading_action_list = TradingActionList()
-        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(symbol, 100)))
+        trading_action_list.addTradingAction(TradingAction(TradingActionEnum.BUY, SharesOfCompany(CompanyEnum.COMPANY_A, 100)))
 
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Current cash reserve is sufficient for trade volume. Trade should happen
         self.assertLess(updated_portfolio.cash, cash_reserve)
         self.assertLess(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].name, symbol)
+        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
         self.assertEqual(updated_portfolio.shares[0].amount, 300)
 
     def testUpdateAndDraw(self):
@@ -177,16 +175,16 @@ class EvaluatorTest(unittest.TestCase):
         period2 = '2012-2017'
 
         # Reading in *all* available data
-        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
-        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A.value, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
-        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
-        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B.value, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
+        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
+        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
+        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
+        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
 
         # Combine both datasets to one StockMarketData object
-        old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A.value]
-        new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A.value]
-        old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B.value]
-        new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B.value]
+        old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A]
+        new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A]
+        old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B]
+        new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B]
 
         full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
 

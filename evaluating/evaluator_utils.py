@@ -10,6 +10,7 @@ import os
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from trading.trader_interface import SharesOfCompany
+from model.CompanyEnum import CompanyEnum
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
@@ -19,7 +20,7 @@ This file comprises some helpful functions to work with `Portfolios` and `StockM
 Some JSON keys
 """
 JSON_KEY_SHARES = 'shares'
-JSON_KEY_NAME = 'name'
+JSON_KEY_COMPANY_ENUM = 'company_enum'
 JSON_KEY_AMOUNT = 'amount'
 JSON_KEY_CASH = 'cash'
 
@@ -47,12 +48,12 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
 
     shares_list = list()
     for share in data[JSON_KEY_SHARES]:
-        shares_list.append(SharesOfCompany(share[JSON_KEY_NAME], share[JSON_KEY_AMOUNT]))
+        shares_list.append(SharesOfCompany(CompanyEnum[share[JSON_KEY_COMPANY_ENUM]], share[JSON_KEY_AMOUNT]))
 
     return Portfolio(data[JSON_KEY_CASH], shares_list)
 
 
-def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
+def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
     """
     Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
     :param name: The names of the files to read
@@ -60,7 +61,7 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
     :return: The created `StockMarketData` object
     """
     data = {}
-    for companyname, filename in companynames_and_filenames_tuples:
+    for company_enum, filename in company_enums_and_filenames_tuples:
 
         filepath = os.path.join(path, filename + '.csv')
         na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
@@ -70,7 +71,7 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
             date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
             dates.append((date, day[ADJ_CLOSE]))
 
-        data[companyname] = dates
+        data[company_enum] = dates
 
     return StockMarketData(data)
 
