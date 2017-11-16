@@ -20,4 +20,3 @@ class IPredictor(metaclass=abc.ABCMeta):
           next predicted value of the company
         """
         pass
-        

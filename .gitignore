@@ -1,1 +1,6 @@
 .idea
+evaluating/__pycache__/evaluator_utils.cpython-36.pyc
+model/__pycache__/CompanyEnum.cpython-36.pyc
+model/__pycache__/Portfolio.cpython-36.pyc
+model/__pycache__/SharesOfCompany.cpython-36.pyc
+model/__pycache__/StockMarketData.cpython-36.pyc

@@ -20,6 +20,7 @@ class PredictingTest(unittest.TestCase):
         pass
        
     def testSimplePredictor(self):
+
         sp = Predictors.simple_predictor() 
         
         inputData = list()
