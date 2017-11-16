@@ -14,9 +14,9 @@ import os
 from definitions import DATASETS_DIR
 from utils import load_keras_sequential, save_keras_sequential
 
-MODEL_FILE_NAME = 'perfect_stock_a_predictor'
+MODEL_FILE_NAME_STOCK_A = 'perfect_stock_a_predictor'
 
-from evaluating.evaluator_utils import read_stock_market_data
+from utils import read_stock_market_data
 
 class PerfectPredictor(IPredictor):
     '''

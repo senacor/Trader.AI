@@ -2,7 +2,6 @@ import datetime as dt
 import json
 from typing import Dict
 
-import numpy
 import random
 from matplotlib import pyplot as plt
 import os
@@ -23,11 +22,6 @@ JSON_KEY_SHARES = 'shares'
 JSON_KEY_COMPANY_ENUM = 'company_enum'
 JSON_KEY_AMOUNT = 'amount'
 JSON_KEY_CASH = 'cash'
-
-"""
-The csv's column keys
-"""
-DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
 
 """
 Colors `matplotlib` chooses randomly from to create graphs
@@ -51,29 +45,6 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
         shares_list.append(SharesOfCompany(CompanyEnum[share[JSON_KEY_COMPANY_ENUM]], share[JSON_KEY_AMOUNT]))
 
     return Portfolio(data[JSON_KEY_CASH], shares_list)
-
-
-def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
-    """
-    Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
-    :param name: The names of the files to read
-    :param path: The path from which to read. Default: "../datasets/"
-    :return: The created `StockMarketData` object
-    """
-    data = {}
-    for company_enum, filename in company_enums_and_filenames_tuples:
-
-        filepath = os.path.join(path, filename + '.csv')
-        na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
-                                     delimiter=',', comments="#", skiprows=1)
-        dates = list()
-        for day in na_portfolio:
-            date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
-            dates.append((date, day[ADJ_CLOSE]))
-
-        data[company_enum] = dates
-
-    return StockMarketData(data)
 
 
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):

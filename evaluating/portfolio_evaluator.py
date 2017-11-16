@@ -4,7 +4,7 @@ import datetime
 
 from definitions import DATASETS_DIR
 
-from evaluating.evaluator_utils import draw, get_data_up_to_offset, check_data_length, read_stock_market_data
+from evaluating.evaluator_utils import draw, get_data_up_to_offset, check_data_length
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from trading.model.ITrader import ITrader

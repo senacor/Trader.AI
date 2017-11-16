@@ -11,6 +11,7 @@ import evaluating.evaluator_utils
 from depenedency_injection_containers import Predictors
 from definitions import DATASETS_DIR
 from trading.model.trader_interface import CompanyEnum
+from utils import read_stock_market_data
 
 class PerfectStockAPredictorTest(unittest.TestCase):
 
@@ -26,7 +27,7 @@ class PerfectStockAPredictorTest(unittest.TestCase):
 
 
         # Get stock data from Apple stock
-        input = evaluating.evaluator_utils.read_stock_market_data([[CompanyEnum.COMPANY_A, 'AAPL']], path=DATASETS_DIR).market_data[CompanyEnum.COMPANY_A]
+        input = read_stock_market_data([[CompanyEnum.COMPANY_A, 'AAPL']], path=DATASETS_DIR).market_data[CompanyEnum.COMPANY_A]
         self.assertTrue( len(input) >= 0)
 
         # Get a prediction

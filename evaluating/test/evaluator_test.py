@@ -10,7 +10,8 @@ import unittest
 import datetime as dt
 
 from definitions import DATASETS_DIR, JSON_DIR
-from evaluating.evaluator_utils import read_portfolio, read_stock_market_data
+from evaluating.evaluator_utils import read_portfolio
+from utils import read_stock_market_data, get_test_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
@@ -18,7 +19,7 @@ from model.StockMarketData import StockMarketData
 from predicting.predictor.simple_predictor import SimplePredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
-from trading.model.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, TradingActionList
+from trading.model.trader_interface import SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -153,7 +154,7 @@ class EvaluatorTest(unittest.TestCase):
         stock_a = 'stock_a'
         stock_b = 'stock_b'
 
-        full_stock_market_data = self.get_test_data(stock_a, stock_b)
+        full_stock_market_data = get_test_data(stock_a, stock_b)
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
         portfolio1 = Portfolio(50000.0, [], 'portfolio 1')
@@ -169,27 +170,6 @@ class EvaluatorTest(unittest.TestCase):
         data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
         self.assertEqual(len(data_row_lengths), 1)
         self.assertEqual(data_row_lengths.pop(), 100)
-
-    def get_test_data(self, stock_a, stock_b):
-        period1 = '1962-2011'
-        period2 = '2012-2017'
-
-        # Reading in *all* available data
-        data_a1 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period1))]], DATASETS_DIR)
-        data_a2 = read_stock_market_data([[CompanyEnum.COMPANY_A, ('%s_%s' % (stock_a, period2))]], DATASETS_DIR)
-        data_b1 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period1))]], DATASETS_DIR)
-        data_b2 = read_stock_market_data([[CompanyEnum.COMPANY_B, ('%s_%s' % (stock_b, period2))]], DATASETS_DIR)
-
-        # Combine both datasets to one StockMarketData object
-        old_data_a = data_a1.market_data[CompanyEnum.COMPANY_A]
-        new_data_a = data_a2.market_data[CompanyEnum.COMPANY_A]
-        old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B]
-        new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B]
-
-        full_stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: old_data_a + new_data_a, CompanyEnum.COMPANY_B: old_data_b + new_data_b})
-
-        return full_stock_market_data
-
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(EvaluatorTest)

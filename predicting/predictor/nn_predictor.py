@@ -3,26 +3,28 @@ Created on 08.11.2017
 
 @author: rmueller
 '''
-from predicting.predictor_interface import IPredictor
+from predicting.model.IPredictor import IPredictor
 import numpy as np
 
 import os
 from definitions import DATASETS_DIR
 from utils import load_keras_sequential, save_keras_sequential
 
-MODEL_FILE_NAME = 'stock_a_predictor'
+MODEL_FILE_NAME_STOCK_A = 'stock_a_predictor'
+MODEL_FILE_NAME_STOCK_B = 'stock_b_predictor'
+RELATIVE_PATH = 'predicting/predictor'
 
-
-class StockAPredictor(IPredictor):
+class BaseNnPredictor(IPredictor):
     '''
-    Perfect predictor for stock A based on an already trained neural network.
+    Perfect predictor based on an already trained neural network.
     '''
 
-    def __init__(self):
+    def __init__(self, nn_filename : str):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        self.network = load_keras_sequential('predicting', MODEL_FILE_NAME)
+        self.network = load_keras_sequential(RELATIVE_PATH, nn_filename)
+        assert self.network is not None
         
     def doPredict(self, data:list) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
@@ -46,6 +48,26 @@ class StockAPredictor(IPredictor):
         except:
             print("Error in predicting next stock value.")
             assert False
+            
+class StockANnPredictor(BaseNnPredictor):
+    '''
+    Perfect predictor for stock A based on an already trained neural network.
+    '''
+    def __init__(self):
+        '''
+        Constructor: Load the trained and stored neural network.
+        '''
+        BaseNnPredictor.__init(MODEL_FILE_NAME_STOCK_A)
+    
+class StockBNnPredictor(BaseNnPredictor):
+    '''
+    Perfect predictor for stock B based on an already trained neural network.
+    '''
+    def __init__(self):
+        '''
+        Constructor: Load the trained and stored neural network.
+        '''   
+        BaseNnPredictor.__init(MODEL_FILE_NAME_STOCK_B)     
 
 ###############################################################################
 # The following code trains and stores the corresponding neural network
@@ -109,5 +131,5 @@ if __name__ == "__main__":
     plt.show()
 
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
-    save_keras_sequential(network, 'predicting', MODEL_FILE_NAME)
+    save_keras_sequential(network, RELATIVE_PATH, MODEL_FILE_NAME_STOCK_A)
 

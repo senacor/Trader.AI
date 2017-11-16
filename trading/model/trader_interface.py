@@ -50,7 +50,14 @@ class TradingActionList:
         self.add_trading_action(TradingAction(action, shares))
 
     def add_trading_action(self, trading_action: TradingAction):
-        self.__trading_action_list.append(trading_action)
+        """
+        Adds given TradingAction to list, if not Nonen
+        
+        Args:
+            trading_action : see TradingAction
+        """
+        if (trading_action is not None):
+            self.__trading_action_list.append(trading_action)
 
     def len(self) -> int:
         return len(self.__trading_action_list)
