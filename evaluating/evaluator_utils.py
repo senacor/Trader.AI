@@ -17,7 +17,7 @@ from model.CompanyEnum import CompanyEnum
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
 """
 
-StockList = List[str]
+StockList = List[CompanyEnum]
 PeriodList = List[str]
 
 """
@@ -95,13 +95,14 @@ def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
     there are `periods` provided those are each read.
 
     Args:
-        stocks: The filenames from which to read the stock data
+        stocks: The company names for which to read the stock data. *Important:* These values need to be stated in `CompanyEnum`
         periods: The periods to read. If not empty each period is appended to the filename like this: `[stock_name]_[period].csv`
 
     Returns:
         The created `StockMarketData` object
 
     Examples:
+        * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
         * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
             * 'stock_a_1962-2011.csv'
             * 'stock_a_2012-2017.csv'
@@ -122,21 +123,18 @@ def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
           into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
 
     """
-    stock_names = iter(list(CompanyEnum))
-
     data = dict()
 
     # Read *all* available data
     for stock in stocks:
+        filename = stock.value
         if len(periods) is 0:
-            name = next(stock_names)
-            data[name] = read_stock_market_data([[name, stock]], DATASETS_DIR)
+            data[stock] = read_stock_market_data([[stock, filename]], DATASETS_DIR)
         else:
             period_data = list()
-            name = next(stock_names)
             for period in periods:
-                period_data.append(read_stock_market_data([[name, ('%s_%s' % (stock, period))]], DATASETS_DIR))
-            data[name] = [item for sublist in period_data for item in sublist.market_data[name]]
+                period_data.append(read_stock_market_data([[stock, ('%s_%s' % (filename, period))]], DATASETS_DIR))
+            data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
 
     return StockMarketData(data)
 

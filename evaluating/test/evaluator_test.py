@@ -150,7 +150,8 @@ class EvaluatorTest(unittest.TestCase):
 
         evaluator = PortfolioEvaluator([trader] * 3, draw_results=False)
 
-        full_stock_market_data = read_stock_market_data_conveniently(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])
+        full_stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
+                                                                     ['1962-2011', '2012-2017'])
 
         # Calculate and save the initial total portfolio value (i.e. the cash reserve)
         portfolio1 = Portfolio(50000.0, [], 'portfolio 1')
@@ -168,47 +169,45 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(data_row_lengths.pop(), 100)
 
     def testReadData_2stocks_2periods(self):
-        stock_a = 'stock_a'
-        stock_b = 'stock_b'
         period1 = '1962-2011'
         period2 = '2012-2017'
 
-        test = read_stock_market_data_conveniently([stock_a, stock_b], [period1, period2])
+        test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [period1, period2])
 
         self.assertEqual(len(test.market_data), 2)
         self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
         self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
 
     def testReadData_2stocks_1period(self):
-        stock_a = 'stock_a'
-        stock_b = 'stock_b'
         period1 = '1962-2011'
 
-        test = read_stock_market_data_conveniently([stock_a, stock_b], [period1])
+        test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [period1])
 
         self.assertEqual(len(test.market_data), 2)
         self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
         self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
 
     def testReadData_2stocks_noPeriods(self):
-        stock_a = 'AAPL'
-        stock_b = 'GOOG'
-
-        test = read_stock_market_data_conveniently([stock_a, stock_b], [])
+        test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [])
 
         self.assertEqual(len(test.market_data), 2)
         self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
         self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
 
     def testReadData_1stock_2periods(self):
-        stock_a = 'stock_a'
         period1 = '1962-2011'
         period2 = '2012-2017'
 
-        test = read_stock_market_data_conveniently([stock_a], [period1, period2])
+        test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], [period1, period2])
 
         self.assertEqual(len(test.market_data), 1)
-        self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+
+    def testReadData_1stock_noPeriods(self):
+        test = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], [])
+
+        self.assertEqual(len(test.market_data), 1)
+        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
 
 
 if __name__ == "__main__":
