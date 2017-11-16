@@ -88,7 +88,7 @@ def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str =
     return StockMarketData(data)
 
 
-def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
+def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList) -> StockMarketData:
     """
     Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
     this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
