@@ -7,12 +7,13 @@ import random
 from collections import deque
 import numpy as np
 
+from evaluating.evaluator_utils import read_stock_market_data
+from evaluating.portfolio_evaluator import PortfolioEvaluator
+from model import Portfolio, StockMarketData
 from predicting.predictor_interface import IPredictor
 from predicting.simple_predictor import SimplePredictor
-from trading.trader_interface import Portfolio, TradingAction
-from trading.trader_interface import ITrader
-from trading.trader_interface import StockMarketData
-from trading.trader_interface import TradingActionList
+from trading.ITrader import ITrader
+from trading.trader_interface import TradingActionList, TradingAction
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -312,10 +313,6 @@ class RnnTrader(ITrader):
 
         return None
 
-
-# Train the trader and its respective neural network(s)
-from evaluating.portfolio_evaluator import PortfolioEvaluator
-from evaluating.evaluator import read_stock_market_data
 
 EPISODES = 2
 if __name__ == "__main__":

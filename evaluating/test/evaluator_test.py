@@ -10,19 +10,21 @@ import unittest
 import datetime as dt
 
 from definitions import DATASETS_DIR, JSON_DIR
-from evaluating.evaluator import read_portfolio, read_stock_market_data
+from evaluating.evaluator_utils import read_portfolio, read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
+from model.CompanyEnum import CompanyEnum
+from model.Portfolio import Portfolio
+from model.StockMarketData import StockMarketData
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
 from trading.simple_trader import SimpleTrader
-from trading.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, StockMarketData, \
-    TradingActionList, Portfolio, CompanyEnum
+from trading.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
     def testReadPortfolio(self):
         """
-        Tests: evaluator.py/read_portfolio
+        Tests: evaluator_utils.py/read_portfolio
 
         Read "../json/portfolio.json" and check if that happens correctly
         """
@@ -34,7 +36,7 @@ class EvaluatorTest(unittest.TestCase):
 
     def testReadStockMarketData(self):
         """
-        Tests: evaluator.py/read_stock_market_data
+        Tests: evaluator_utils.py/read_stock_market_data
 
         Read "../datasets/[AAPL|GOOG].csv" and check if that happens correctly
         """

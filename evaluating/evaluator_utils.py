@@ -1,5 +1,3 @@
-# TODO Wo ist denn der Unterschied zwischen "evaluator.py" und "portfolio_evaluator.py"?
-
 import datetime as dt
 import json
 from typing import Dict
@@ -9,7 +7,9 @@ import random
 from matplotlib import pyplot as plt
 import os
 
-from trading.trader_interface import SharesOfCompany, StockMarketData, Portfolio
+from model.Portfolio import Portfolio
+from model.StockMarketData import StockMarketData
+from trading.trader_interface import SharesOfCompany
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
@@ -60,8 +60,8 @@ def read_stock_market_data(companynames_and_filenames_tuples: list, path: str = 
     :return: The created `StockMarketData` object
     """
     data = {}
-    for companyname, filename in companynames_and_filenames_tuples: 
-        
+    for companyname, filename in companynames_and_filenames_tuples:
+
         filepath = os.path.join(path, filename + '.csv')
         na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
