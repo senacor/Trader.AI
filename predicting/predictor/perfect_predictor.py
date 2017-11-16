@@ -7,7 +7,7 @@ import random
 
 from model.CompanyEnum import CompanyEnum
 from model.StockMarketData import StockMarketData
-from predicting.predictor_interface import IPredictor
+from predicting.model.IPredictor import IPredictor
 import numpy as np
 
 import os

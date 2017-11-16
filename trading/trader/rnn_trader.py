@@ -10,8 +10,8 @@ import numpy as np
 from evaluating.evaluator_utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
-from predicting.predictor_interface import IPredictor
-from predicting.simple_predictor import SimplePredictor
+from predicting.model.IPredictor import IPredictor
+from predicting.predictor.simple_predictor import SimplePredictor
 from trading.model.ITrader import ITrader
 from trading.model.trader_interface import TradingActionList, TradingAction
 from keras.models import Sequential

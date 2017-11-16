@@ -15,8 +15,8 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from predicting.simple_predictor import SimplePredictor
-from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
+from predicting.predictor.simple_predictor import SimplePredictor
+from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
 from trading.model.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, TradingActionList
 
@@ -74,7 +74,7 @@ class EvaluatorTest(unittest.TestCase):
         """
         symbol = 'AAPL'
 
-        trader = SimpleTrader(PerfectStockAPredictor(), None)
+        trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
         current_portfolio_value = 0.0  # Dummy value
         portfolio = read_portfolio(path=JSON_DIR)
         trading_action_list = trader.doTrade(portfolio, current_portfolio_value,

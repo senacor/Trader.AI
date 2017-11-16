@@ -9,15 +9,16 @@ import dependency_injector.providers as providers
 from trading.trader.simple_trader import SimpleTrader
 from trading.trader.random_trader import RandomTrader
 from trading.trader.rnn_trader import RnnTrader
-from predicting.simple_predictor import SimplePredictor
-from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
+from predicting.predictor.simple_predictor import SimplePredictor
+from predicting.predictor.perfect_predictor import PerfectPredictor
+from model.CompanyEnum import CompanyEnum
 
 
 class Predictors(containers.DeclarativeContainer):
     """IoC container of predictor providers."""
  
     simple_predictor = providers.Factory(SimplePredictor)
-    perfect_stock_a_predictor = providers.Factory(PerfectStockAPredictor)
+    perfect_stock_a_predictor = providers.Factory(PerfectPredictor, company=CompanyEnum.COMPANY_A)
 
  
 class Traders(containers.DeclarativeContainer):
@@ -30,6 +31,4 @@ class Traders(containers.DeclarativeContainer):
     rnn_trader_with_simple_predictors = providers.Factory(RnnTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
     
     random_trader = providers.Factory(RandomTrader)
-
-    
 

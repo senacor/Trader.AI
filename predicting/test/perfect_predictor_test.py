@@ -11,7 +11,7 @@ from datetime import date
 
 import predicting
 from model.CompanyEnum import CompanyEnum
-from predicting.perfect_predictor import PerfectPredictor
+from predicting.predictor.perfect_predictor import PerfectPredictor
 
 
 class PerfectPredictorTest(unittest.TestCase):

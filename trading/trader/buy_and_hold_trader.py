@@ -4,10 +4,7 @@ Created on 15.11.2017
 @author: rmueller
 '''
 from trading.model.ITrader import ITrader, TradingActionList, Portfolio
-from trading.model.trader_interface import TradingAction
 from model.StockMarketData import StockMarketData
-from trading.model.trader_interface import TradingActionEnum
-from trading.model.trader_interface import SharesOfCompany
 from trading.model.trader_interface import CompanyEnum
 
 

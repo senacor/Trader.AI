@@ -11,7 +11,7 @@ from trading.model.trader_interface import TradingAction
 from trading.model.trader_interface import TradingActionEnum
 from trading.model.trader_interface import SharesOfCompany
 from trading.model.trader_interface import CompanyEnum
-from predicting.predictor_interface import IPredictor
+from predicting.model.IPredictor import IPredictor
 import copy
 
 
