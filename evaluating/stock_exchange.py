@@ -7,8 +7,8 @@ from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.CompanyEnum import CompanyEnum
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
-from trading.buy_and_hold_trader import BuyAndHoldTrader
-from trading.rnn_trader import RnnTrader
+from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
+from trading.trader.rnn_trader import RnnTrader
 
 
 def read_data(stock_a, stock_b, period1, period2):

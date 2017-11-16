@@ -17,8 +17,8 @@ from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from predicting.simple_predictor import SimplePredictor
 from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
-from trading.simple_trader import SimpleTrader
-from trading.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, TradingActionList
+from trading.trader.simple_trader import SimpleTrader
+from trading.model.trader_interface import TradingAction, TradingActionEnum, SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 import abc
 
 from model import Portfolio, StockMarketData
-from trading.trader_interface import TradingActionList
+from trading.model.trader_interface import TradingActionList
 
 
 class ITrader(metaclass=abc.ABCMeta):

@@ -10,7 +10,7 @@ import unittest
 import evaluating.evaluator_utils
 from depenedency_injection_containers import Predictors
 from definitions import DATASETS_DIR
-from trading.trader_interface import CompanyEnum
+from trading.model.trader_interface import CompanyEnum
 
 class PerfectStockAPredictorTest(unittest.TestCase):
 
