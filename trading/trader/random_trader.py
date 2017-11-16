@@ -5,12 +5,12 @@ Created on 08.11.2017
 '''
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.ITrader import ITrader
-from trading.trader_interface import TradingActionList
-from trading.trader_interface import TradingAction
-from trading.trader_interface import TradingActionEnum
-from trading.trader_interface import SharesOfCompany
-from trading.trader_interface import CompanyEnum
+from trading.model.ITrader import ITrader
+from trading.model.trader_interface import TradingActionList
+from trading.model.trader_interface import TradingAction
+from trading.model.trader_interface import TradingActionEnum
+from trading.model.trader_interface import SharesOfCompany
+from trading.model.trader_interface import CompanyEnum
 
 
 class RandomTrader(ITrader):
@@ -33,9 +33,7 @@ class RandomTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-        shares_of_company = SharesOfCompany(CompanyEnum.COMPANY_A, 10);
-
         result = TradingActionList()
-        result.addTradingAction(TradingAction(TradingActionEnum.BUY, shares_of_company))
+        result.buy(CompanyEnum.COMPANY_A, 10)
 
         return result

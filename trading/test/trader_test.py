@@ -8,12 +8,12 @@ Module for testing of all trader components
 import unittest
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.ITrader import ITrader
+from trading.model.ITrader import ITrader
 
-from trading.trader_interface import SharesOfCompany
-from trading.trader_interface import TradingActionList
-from trading.trader_interface import TradingActionEnum
-from trading.trader_interface import CompanyEnum
+from trading.model.trader_interface import SharesOfCompany
+from trading.model.trader_interface import TradingActionList
+from trading.model.trader_interface import TradingActionEnum
+from trading.model.trader_interface import CompanyEnum
 from depenedency_injection_containers import Traders
 
 from datetime import date
@@ -123,7 +123,7 @@ class TraderTest(unittest.TestCase):
 
     def testRnnTraderGetAction(self):
         trader = Traders.rnn_trader_with_simple_predictors()
-        from trading.rnn_trader import State
+        from trading.trader.rnn_trader import State
         state = State(1000, 0, 0, 0, 0, 0, 0)
         # Check random actions because epsilon is 1.0
         trader.epsilon = 1.0
@@ -185,7 +185,7 @@ class TraderTest(unittest.TestCase):
             self.assertEqual(trader.get_index_from_actions(actionA, actionB), index)
 
     def testActionConversion(self):
-        from trading.rnn_trader import STOCKACTIONS
+        from trading.trader.rnn_trader import STOCKACTIONS
         trader = Traders.rnn_trader_with_simple_predictors()
         for actionA in STOCKACTIONS:
             for actionB in STOCKACTIONS:

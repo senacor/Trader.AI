@@ -5,9 +5,6 @@ Module contains interfaces for trader implementations and model classes
 
 @author: jtymoszuk
 '''
-import copy
-
-import abc
 from enum import Enum
 
 from model.CompanyEnum import CompanyEnum
@@ -47,25 +44,51 @@ class TradingActionList:
         """ 
         Constructor
         """
-        self.trading_action_list = list()
+        self.__trading_action_list = list()
 
-    def addTradingAction(self, trading_action: TradingAction):
-        self.trading_action_list.append(trading_action)
+    def __add_trading_action(self, action: TradingActionEnum, shares: SharesOfCompany):
+        self.add_trading_action(TradingAction(action, shares))
+
+    def add_trading_action(self, trading_action: TradingAction):
+        self.__trading_action_list.append(trading_action)
 
     def len(self) -> int:
-        return len(self.trading_action_list)
+        return len(self.__trading_action_list)
 
     def get(self, index: int) -> TradingAction:
-        return self.trading_action_list[index]
+        return self.__trading_action_list[index]
 
     def get_by_CompanyEnum(self, company_enum: CompanyEnum) -> TradingAction:
         """
         Returns TradingAction for given CompanyEnum, or None if nothing found
         """
         return next(
-            (trading_action for trading_action in self.trading_action_list if
+            (trading_action for trading_action in self.__trading_action_list if
              trading_action.shares.company_enum == company_enum),
             None)
 
-    def isEmpty(self):
-        return len(self.trading_action_list) == 0
+    def is_empty(self):
+        return self.len() == 0
+
+    def iterator(self):
+        return iter(self.__trading_action_list)
+
+    def buy(self, company: CompanyEnum, amount: int):
+        """
+        Adds a trading action BUY to the list
+
+        Args:
+            company:
+            amount:
+        """
+        self.__add_trading_action(TradingActionEnum.BUY, SharesOfCompany(company, amount))
+
+    def sell(self, company: CompanyEnum, amount: int):
+        """
+        Adds a trading action SELL to the list
+
+        Args:
+            company:
+            amount:
+        """
+        self.__add_trading_action(TradingActionEnum.SELL, SharesOfCompany(company, amount))
