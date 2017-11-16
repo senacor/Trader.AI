@@ -118,4 +118,4 @@ def check_data_length(market_data):
     :param market_data: The `market_data` to check
     :return: `True` if all value rows have the same length, `False` if not
     """
-    return len(set([len(key) for key in market_data.market_data.keys()])) == 1
+    return len(set([len(values) for values in market_data.market_data.values()])) == 1

@@ -186,7 +186,7 @@ class EvaluatorTest(unittest.TestCase):
         old_data_b = data_b1.market_data[CompanyEnum.COMPANY_B]
         new_data_b = data_b2.market_data[CompanyEnum.COMPANY_B]
 
-        full_stock_market_data = StockMarketData({stock_a: old_data_a + new_data_a, stock_b: old_data_b + new_data_b})
+        full_stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: old_data_a + new_data_a, CompanyEnum.COMPANY_B: old_data_b + new_data_b})
 
         return full_stock_market_data
 
