@@ -31,6 +31,8 @@ class PerfectPredictor(IPredictor):
         Args:
             company: The company whose stock values we should predict.
         """
+        # This predictor is for stock A or stock B only!
+        assert company.value == 'stock_a' or company.value == 'stock_b'
         if company == CompanyEnum.COMPANY_A:
             stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A], ['1962-2011', '2012-2017'])
             self.stock_values = stock_market_data.get_stock_data_for_company(company)

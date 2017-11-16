@@ -10,6 +10,7 @@ import unittest
 import evaluating.evaluator_utils
 from depenedency_injection_containers import Predictors
 from definitions import DATASETS_DIR
+from predicting.predictor.nn_predictor import StockANnPredictor
 from trading.model.trader_interface import CompanyEnum
 from utils import read_stock_market_data
 
@@ -23,7 +24,7 @@ class PerfectStockAPredictorTest(unittest.TestCase):
        
     def testPerfectStockAPredictor(self):
         # Load predictor
-        predictor = Predictors.nn_stock_a_predictor()
+        predictor = StockANnPredictor()
 
 
         # Get stock data from Apple stock

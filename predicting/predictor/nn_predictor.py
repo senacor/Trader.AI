@@ -56,7 +56,7 @@ class StockANnPredictor(BaseNnPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        BaseNnPredictor.__init(MODEL_FILE_NAME_STOCK_A)
+        BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_A)
     
 class StockBNnPredictor(BaseNnPredictor):
     '''
@@ -66,7 +66,7 @@ class StockBNnPredictor(BaseNnPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''   
-        BaseNnPredictor.__init(MODEL_FILE_NAME_STOCK_B)     
+        BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_B)
 
 ###############################################################################
 # The following code trains and stores the corresponding neural network

@@ -110,7 +110,7 @@ StockList = List[CompanyEnum]
 PeriodList = List[str]  
 
 
-def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
+def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList) -> StockMarketData:
     """
     Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
     this. For each defined stock in `stocks` the corresponding value from `CompanyEnum` is used as logical name. If

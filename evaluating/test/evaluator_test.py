@@ -71,16 +71,14 @@ class EvaluatorTest(unittest.TestCase):
         """
         Tests: SimpleTrader#doTrade
 
-        Reads the available portfolio and stock market data of AAPL and executes one trade. Checks if the action list
-        is not empty
+        Reads the available portfolio and stock market data of stock A and executes one trade.
+        Checks if the action list is not empty.
         """
-        symbol = 'AAPL'
-
         trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
         current_portfolio_value = 0.0  # Dummy value
         portfolio = read_portfolio(path=JSON_DIR)
         trading_action_list = trader.doTrade(portfolio, current_portfolio_value,
-                                             read_stock_market_data([[CompanyEnum.COMPANY_A, symbol]],
+                                             read_stock_market_data([[CompanyEnum.COMPANY_A, 'stock_a_1962-2011']],
                                                                     DATASETS_DIR))
 
         self.assertTrue(trading_action_list is not None)

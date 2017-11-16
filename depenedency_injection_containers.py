@@ -21,6 +21,7 @@ class Predictors(containers.DeclarativeContainer):
  
     simple_predictor = providers.Factory(SimplePredictor)
     perfect_stock_a_predictor = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_A)
+    perfect_stock_b_predictor = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_B)
     
     nn_stock_a_predictor = providers.Factory(StockANnPredictor)
     nn_stock_b_predictor = providers.Factory(StockBNnPredictor)
@@ -29,7 +30,7 @@ class Predictors(containers.DeclarativeContainer):
 class Traders(containers.DeclarativeContainer):
     """IoC container of trader providers."""
     
-    simple_trader_for_test = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=None)
+    simple_trader_for_test = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=Predictors.perfect_stock_b_predictor)
     simple_trader_with_perfect_stock_aprediction = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=Predictors.simple_predictor)
     simple_trader_with_simple_predictors = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
 

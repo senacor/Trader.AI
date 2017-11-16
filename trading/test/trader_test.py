@@ -21,6 +21,7 @@ from datetime import date
 import numpy as np
 from  definitions import DATASETS_DIR
 from utils import read_stock_market_data
+from utils import read_stock_market_data_conveniently
 
 
 class TraderTest(unittest.TestCase):
@@ -84,13 +85,15 @@ class TraderTest(unittest.TestCase):
 
         # TODO: hier schlägt der Test fehlt, weil die geladenen Stockdata nicht stimmen
         trading_action_list = st.doTrade(portfolio, current_portfolio_value,
-                                         read_stock_market_data([[CompanyEnum.COMPANY_A, 'stock_a_2012-2017']], DATASETS_DIR))
+                                         read_stock_market_data_conveniently(
+                                             [CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
+                                             ['1962-2011']))
         self.assertTrue(isinstance(trading_action_list, TradingActionList))
 
         self.assertEqual(trading_action_list.len(), 1)
         if (trading_action_list.get(0).action == TradingActionEnum.BUY):
             self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
-            self.assertEqual(trading_action_list.get(0).shares.amount, 5)
+            self.assertEqual(trading_action_list.get(0).shares.amount, 28)
             self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
         elif (trading_action_list.get(0).action, TradingActionEnum.SELL):
             self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.SELL)
