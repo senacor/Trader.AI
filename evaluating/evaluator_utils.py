@@ -1,12 +1,13 @@
 import datetime as dt
 import json
-from typing import Dict
+from typing import Dict, List
 
 import numpy
 import random
 from matplotlib import pyplot as plt
 import os
 
+from definitions import DATASETS_DIR
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
@@ -15,6 +16,9 @@ from model.CompanyEnum import CompanyEnum
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
 """
+
+StockList = List[str]
+PeriodList = List[str]
 
 """
 Some JSON keys
@@ -38,9 +42,13 @@ COLORS = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
 def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
     """
     Reads the JSON file from "../json/`name`.json" and creates a `Portfolio` object from this
-    :param name: The filename to read
-    :param path: The path from which to read. Default: "../json/"
-    :return: The created `Portfolio` object
+
+    Args:
+        name: The filename to read
+        path: The path from which to read. Default: "../json/"
+
+    Returns:
+        The created `Portfolio` object
     """
     file = open(os.path.join(path, name + ".json"))
     data = json.loads(file.read())
@@ -56,9 +64,13 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
 def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str = '../datasets/') -> StockMarketData:
     """
     Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
-    :param name: The names of the files to read
-    :param path: The path from which to read. Default: "../datasets/"
-    :return: The created `StockMarketData` object
+
+    Args:
+        company_enums_and_filenames_tuples: Tuples of filenames and logical names used as dict keys
+        path: The path from which to read. Default: "../datasets/"
+
+    Returns:
+        The created `StockMarketData` object
     """
     data = {}
     for company_enum, filename in company_enums_and_filenames_tuples:
@@ -76,11 +88,66 @@ def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str =
     return StockMarketData(data)
 
 
+def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList):
+    """
+    Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
+    this. For each defined stock in `stocks` the next available value from `CompanyEnum` is used as logical name. If
+    there are `periods` provided those are each read.
+
+    Args:
+        stocks: The filenames from which to read the stock data
+        periods: The periods to read. If not empty each period is appended to the filename like this: `[stock_name]_[period].csv`
+
+    Returns:
+        The created `StockMarketData` object
+
+    Examples:
+        * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+            * 'stock_b_1962-2011.csv'
+            * 'stock_b_2012-2017.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_a_2012-2017.csv'
+          into a dict with a key `CompanyEnum.COMPANY_A`
+        * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
+            * 'stock_a_1962-2011.csv'
+            * 'stock_b_1962-2011.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+        * `(['stock_a', 'stock_b'], [])` reads:
+            * 'stock_a.csv'
+            * 'stock_b.csv'
+          into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
+
+    """
+    stock_names = iter(list(CompanyEnum))
+
+    data = dict()
+
+    # Read *all* available data
+    for stock in stocks:
+        if len(periods) is 0:
+            name = next(stock_names)
+            data[name] = read_stock_market_data([[name, stock]], DATASETS_DIR)
+        else:
+            period_data = list()
+            name = next(stock_names)
+            for period in periods:
+                period_data.append(read_stock_market_data([[name, ('%s_%s' % (stock, period))]], DATASETS_DIR))
+            data[name] = [item for sublist in period_data for item in sublist.market_data[name]]
+
+    return StockMarketData(data)
+
+
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
     """
     Draws all given `Portfolios` based on the given `prices`
-    :param portfolio_over_time:
-    :param prices:
+
+    Args:
+        portfolio_over_time:
+        prices:
     """
     plt.figure()
 
@@ -97,9 +164,13 @@ def get_data_up_to_offset(stock_market_data: StockMarketData, offset: int):
     """
     Removes all data items *behind* the given `offset` - this emulates going through history in a list of
     date->price items
-    :param stock_market_data: The `market_data` to step through
-    :param offset: The offset to apply
-    :return: A copied `StockMarketData` object which only reaches to position `offset`
+
+    Args:
+        stock_market_data: The `market_data` to step through
+        offset: The offset to apply
+
+    Returns:
+        A copied `StockMarketData` object which only reaches to position `offset`
     """
     if offset == 0:
         return stock_market_data
@@ -115,7 +186,11 @@ def check_data_length(market_data):
     """
     Checks if the value rows of all keys inside `market_data` have the same count. Does this by extracting every
     row count, inserting those numbers into a set and checking if this set has the length of 1
-    :param market_data: The `market_data` to check
-    :return: `True` if all value rows have the same length, `False` if not
+
+    Args:
+        market_data: The `market_data` to check
+
+    Returns:
+        `True` if all value rows have the same length, `False` if not
     """
     return len(set([len(values) for values in market_data.market_data.values()])) == 1
