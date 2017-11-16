@@ -30,29 +30,29 @@ class Portfolio:
 
         return sum(values) + self.cash
 
-    def has_stock(self, company_enum: CompanyEnum):
+    def __has_stock(self, company_enum: CompanyEnum):
         return len(self.shares) != 0 and len([share for share in self.shares if share.company_enum == company_enum]) != 0
 
     def get_or_insert(self, company_enum: CompanyEnum):
-        if not self.has_stock(company_enum):
+        if not self.__has_stock(company_enum):
             share = SharesOfCompany(company_enum, 0)
             self.shares.append(share)
             return share
 
         return next(share for share in self.shares if share.company_enum == company_enum)
 
-    # TODO comment
-    # TODO refactor: get rid of SharesOfCompany? do we really use that object somewhere?
-    def get_by_name(self, company_enum: CompanyEnum) -> SharesOfCompany:
+    def __get_by_name(self, company_enum: CompanyEnum) -> SharesOfCompany:
         """
-            Returns SharesOfCompany for company name, or None if nothing found
+        Returns SharesOfCompany for company name, or None if nothing found
         """
         return next((share for share in self.shares if share.company_enum == company_enum), None)
 
-    # Return the amount of shares we hold from the given company.
-    # If we don't hold any shares of this company, we return 0.
     def get_amount(self, company_enum: CompanyEnum) -> int:
-        share = self.get_by_name(company_enum)
+        """
+        Return the amount of shares we hold from the given company.
+         If we don't hold any shares of this company, we return 0.
+        """
+        share = self.__get_by_name(company_enum)
         if share is not None:
             return share.amount
         else:

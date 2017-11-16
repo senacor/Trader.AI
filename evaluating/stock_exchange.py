@@ -6,7 +6,7 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.CompanyEnum import CompanyEnum
-from predicting.perfect_stock_a_predictor import PerfectStockAPredictor
+from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
 from trading.trader.rnn_trader import RnnTrader
 
@@ -41,8 +41,8 @@ if __name__ == "__main__":
 
     # TODO @Jonas Kann man dieses Benchmark hier eleganter machen, z.B. dependency injection?
     benchmark = BuyAndHoldTrader()
-    trader_under_test = RnnTrader(PerfectStockAPredictor(),
-                                  PerfectStockAPredictor())  # TODO implement PerfectStockBPredictor
+    trader_under_test = RnnTrader(PerfectPredictor(),
+                                  PerfectPredictor())  # TODO implement PerfectStockBPredictor
     benchmark_portfolio = Portfolio(10000, [], 'Benchmark')
     trader_under_test_portfolio = Portfolio(10000, [], 'RNN Trader')
     evaluator = PortfolioEvaluator([benchmark, trader_under_test], True)
