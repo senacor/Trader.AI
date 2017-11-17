@@ -26,7 +26,7 @@ JSON_KEY_CASH = 'cash'
 """
 Colors `matplotlib` chooses randomly from to create graphs
 """
-COLORS = ["red", "green", "blue", "orange", "purple", "pink", "yellow"]
+COLORS = ["red", "blue", "green", "orange", "purple", "pink", "yellow"]
 
 
 def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
@@ -64,8 +64,11 @@ def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], pric
 
     for name, portfolio in portfolio_over_time.items():
         values = [pf.total_value(date, prices.market_data) for date, pf in portfolio.items()]
-
-        plt.plot(portfolio.keys(), values, label=name, color=random.choice(COLORS))
+        # TODO @jonas plot wählt schon zufällige Farben aus. Warum also selbst nochchmal zufällig auwählen?
+        # TODO Ausserdem sorgt color=random.choice(COLORS) dafür, dass zweimal dieselbe Farbe ausgewählt werden kann
+        # TODO Das macht eine Auswertung unmöglich
+        #plt.plot(portfolio.keys(), values, label=name, color=random.choice(COLORS))
+        plt.plot(portfolio.keys(), values, label=name)
 
     plt.legend(portfolio_over_time.keys())
     plt.show()
