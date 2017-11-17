@@ -4,15 +4,16 @@ from matplotlib import pyplot as plt
 import datetime as dt
 # For loading the trained neural network
 from keras.models import model_from_json
+from logger import logger
 
 # Load the network structure (JSON file) and the trained weights (HDF5 file)
-print("Model loading...")
+logger.debug("Model loading...")
 json_file = open('prediction1_structure.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 network = model_from_json(loaded_model_json)
 network.load_weights('prediction1_weights.h5')
-print("Model loaded.")
+logger.debug("Model loaded.")
 
 # Load the input data and split into chunks of 100 days
 dates, prices = [], []
@@ -23,7 +24,7 @@ for line in f:
         dates.append(dt.datetime.strptime(line.split(',')[0], '%Y-%m-%d').date()) # save dates in datetime.date format
         prices.append(float(line.split(',')[4])) # save prices in float format
     except:
-        print("Error in reading line", line)
+        logger.error("Error in reading line", line)
 f.close()
 
 lastPrices, currentPrice = [], []

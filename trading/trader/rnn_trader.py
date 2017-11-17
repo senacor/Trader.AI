@@ -22,6 +22,7 @@ from trading.model.trader_interface import CompanyEnum
 from trading.model.trader_interface import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential
+from logger import logger
 
 # Define possible actions per stock
 STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
@@ -318,8 +319,7 @@ class RnnTrader(ITrader):
             sharesOfCompanyToSell = SharesOfCompany(companyEnum, amountOfSharesToSell)
             return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
         else:
-            # TODO: use Logging!!!
-            print(f"!!!! RnnTrader - INFO: Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
+            logger.info(f"Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
 
         return None
 

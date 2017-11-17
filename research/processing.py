@@ -1,10 +1,7 @@
 import numpy as np
 from sklearn import preprocessing
 from sklearn.metrics import mean_squared_error, classification_report
-import matplotlib.pylab as plt
-import datetime as dt
-import time
-
+from logger import logger
 
 def load_snp_returns():
     f = open('datasets/GSPC.csv', 'rb').readlines()[1:]
@@ -83,8 +80,7 @@ def shuffle_in_unison(a, b):
 
 
 def create_Xt_Yt(X, y, percentage=0.8):
-    print("lenght of X:")
-    print(X)
+    logger.debug(f"Length of X: {X}")
     X_train = X[0:int(len(X) * percentage)]
     Y_train = y[0:int(len(y) * percentage)]
 

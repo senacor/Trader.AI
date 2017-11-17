@@ -5,7 +5,7 @@ from model import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum
 from trading.model.trader_interface import TradingActionList, TradingActionEnum, TradingAction
-
+from logger import logger
 
 class Portfolio:
     """
@@ -68,10 +68,10 @@ class Portfolio:
         """
         updated_portfolio = copy.deepcopy(self)
 
-        print(f"\nUpdate portfolio {self.name}")
+        logger.debug(f"\nUpdate portfolio {self.name}")
 
         if trade_action_list.is_empty():
-            print("No action this time")
+            logger.info("trade_action_list.is_empty -> No action this time")
             return updated_portfolio
 
         for trade_action in trade_action_list.iterator():
@@ -80,7 +80,7 @@ class Portfolio:
             current_date = stock_market_data.get_most_recent_trade_day()
             current_price = stock_market_data.get_most_recent_price(company_enum)
 
-            print(f"Available cash on {current_date}: {updated_portfolio.cash}")
+            logger.debug(f"Available cash on {current_date}: {updated_portfolio.cash}")
             # for share in update.shares:
             share = updated_portfolio.get_or_insert(company_enum)
             # if share.name is update.shares.name:
@@ -88,29 +88,29 @@ class Portfolio:
             trade_volume = amount * current_price
 
             if trade_action.action is TradingActionEnum.BUY:
-                print(f"  Buying {amount} shares of '{share.company_enum}' with an individual value of {current_price}")
-                print(f"  Volume of this trade: {trade_volume}")
+                logger.debug(f"  Buying {amount} shares of '{share.company_enum}' with an individual value of {current_price}")
+                logger.debug(f"  Volume of this trade: {trade_volume}")
 
                 if trade_volume <= updated_portfolio.cash:
                     share.amount += amount
                     updated_portfolio.cash -= trade_volume
                 else:
-                    print(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
+                    logger.warning(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
                           f"volume of {trade_volume}")
             elif trade_action.action is TradingActionEnum.SELL:
-                print(f"  Selling {amount} shares of {share.company_enum} with individual value of {current_price}")
-                print(f"  Volume of this trade: {trade_volume}")
+                logger.debug(f"  Selling {amount} shares of {share.company_enum} with individual value of {current_price}")
+                logger.debug(f"  Volume of this trade: {trade_volume}")
 
                 if share.amount > amount:
                     share.amount -= amount
                     updated_portfolio.cash += trade_volume
                 else:
-                    print(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
+                    logger.warning(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
 
-            print(f"Resulting available cash after trade: {updated_portfolio.cash}")
+            logger.debug(f"Resulting available cash after trade: {updated_portfolio.cash}")
 
             total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
-            print(f"Total portfolio value after trade: {total_portfolio_value}")
+            logger.debug(f"Total portfolio value after trade: {total_portfolio_value}")
 
         return updated_portfolio
 
@@ -162,9 +162,8 @@ class Portfolio:
 
                 current_cash = current_cash - price_to_pay
                 if (current_cash < 0):
-                    # TODO: use Logging!!!
-                    print(
-                        f"!!!! RnnTrader - WARNING: Not enough money to pay! tradingActionForCompany: {trading_action_for_company}, Portfolio: {self}")
+                    logger.warning(
+                        f"Not enough money to pay! tradingActionForCompany: {trading_action_for_company}, Portfolio: {self}")
                     return False, current_cash
 
             elif (trading_action_for_company.action == TradingActionEnum.SELL):

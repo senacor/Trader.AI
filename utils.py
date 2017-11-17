@@ -14,6 +14,7 @@ import numpy
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
 from typing import List
+from logger import logger
 
 
 def save_keras_sequential(model: Sequential, relative_path: str, file_name_without_extension: str) -> bool:
@@ -37,7 +38,7 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
         model.save_weights(os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.h5'))
         return True
     except:
-        print(f"save_keras_sequential: Writing of Sequential as file failed")
+        logger.error(f"save_keras_sequential: Writing of Sequential as file failed")
         return False
 
 
@@ -64,10 +65,10 @@ def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
             model.load_weights(weights_filenme_with_path)
             return model
         except:
-            print(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
+            logger.error(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
             return None   
     else:
-        print(f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
+        logger.error(f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
         return None
 
 

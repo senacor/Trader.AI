@@ -2,6 +2,7 @@ import numpy as np
 from keras.models import Sequential, model_from_json
 from keras.layers import Dense
 from keras.optimizers import Adam
+from logger import logger
 
 state_size = 2
 action_size = 1
@@ -28,14 +29,14 @@ new_model.compile(loss='mse', optimizer=Adam(lr=learning_rate))
 
 # Compare weights
 old_weights = np.array(old_model.get_weights())
-print(old_weights)
-print(old_weights.shape)
+logger.debug(old_weights)
+logger.debug(old_weights.shape)
 new_weights = np.array(new_model.get_weights())
-print(new_weights)
-print(new_weights.shape)
+logger.debug(new_weights)
+logger.debug(new_weights.shape)
 
-print(f"compare all dimensions: {np.all(old_weights == new_weights)}")
+logger.debug(f"compare all dimensions: {np.all(old_weights == new_weights)}")
 for i in range(len(old_weights)):
-    print(f"compare first dimensions: {np.all(old_weights[i] == new_weights[i])}")
+    logger.debug(f"compare first dimensions: {np.all(old_weights[i] == new_weights[i])}")
     for j in range(len(old_weights[i])):
-        print(f"compare second dimensions: {np.all(old_weights[i][j] == new_weights[i][j])}")
+        logger.debug(f"compare second dimensions: {np.all(old_weights[i][j] == new_weights[i][j])}")

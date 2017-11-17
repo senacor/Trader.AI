@@ -3,7 +3,7 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.metrics import mean_squared_error, classification_report
 import matplotlib.pylab as plt
-
+from logger import logger
 import time
 
 import datetime
@@ -33,7 +33,7 @@ class TrainingHistory(Callback):
             self.predictions.append(pred)
 
 
-print('Data loading...')
+logger.debug('Data loading...')
 timeseries, dates = load_snp_close()
 dates = [datetime.datetime.strptime(d, '%Y-%m-%d').date() for d in dates]
 plt.plot(dates, timeseries)
@@ -51,7 +51,7 @@ Xp, Yp = split_into_chunks(timeseries, TRAIN_SIZE, TARGET_TIME, LAG_SIZE, binary
 Xp, Yp = np.array(Xp), np.array(Yp)
 X_trainp, X_testp, Y_trainp, Y_testp = create_Xt_Yt(Xp, Yp, percentage=0.9)
 
-print('Building model...')
+logger.debug('Building model...')
 model = Sequential()
 model.add(Dense(500, input_shape=(TRAIN_SIZE,)))
 model.add(Activation('relu'))
@@ -62,16 +62,13 @@ model.add(Dense(1))
 model.add(Activation('linear'))
 model.compile(optimizer='adam', loss='mse')
 
-print("X_train.shape: ")
-print(X_train.shape)
-print("Y_train.shape: ")
-print(Y_train.shape)
+logger.debug(f"X_train.shape: {X_train.shape}")
+logger.debug(f"Y_train.shape: {Y_train.shape}")
 
-print("Training......")
+logger.debug("Training......")
 model.fit(X_train, Y_train, nb_epoch=5, batch_size=128, verbose=1, validation_split=0.1)
 score = model.evaluate(X_test, Y_test, batch_size=128)
-print("Score:")
-print(score)
+logger.debug(f"Score: {score}")
 
 params = []
 for xt in X_testp:
@@ -89,8 +86,7 @@ for pred, par in zip(predicted, params):
     new_predicted.append(a)
 
 mse = mean_squared_error(predicted, new_predicted)
-print("mean_squared_error:")
-print(mse)
+logger.debug(f"mean_squared_error: {mse}")
 
 try:
     fig = plt.figure()
@@ -101,6 +97,6 @@ try:
     plt.show()
     
 except Exception as e:
-    print(str(e))
+    logger.error(str(e))
     
 plot_model(model, to_file='model.png', show_shapes=True)
