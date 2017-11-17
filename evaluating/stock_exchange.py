@@ -15,12 +15,12 @@ if __name__ == "__main__":
     stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
                                                [training_period, testing_period])
 
-    # Define benchmark and trader
+    # Define traders
     buy_and_hold_trader = BuyAndHoldTrader()
     simple_trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
     rnn_trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
 
-    # Define identical portfolio for benchmark and trader
+    # Define portfolios for the traders
     benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')
     simple_trader_portfolio = Portfolio(10000, [], 'SimpleTrader')
     rnn_trader_portfolio = Portfolio(10000, [], 'RnnTrader')
@@ -31,7 +31,4 @@ if __name__ == "__main__":
     # TODO kriegen wir das eleganter hin?
     stock_data_testing_period = read_stock_market_data([CompanyEnum.COMPANY_A], [testing_period])
     days_of_testing_period = len(stock_data_testing_period.get_stock_data_for_company(CompanyEnum.COMPANY_A))
-    # TODO @jonas das ist ziemlich häßlich jedesmal ein anderes Portfolio zu übergeben, obwohl ich nur
-    # TODO "portfolio * 3" schreiben will
-    # TODO lohnt es, den Namen aus dem Portfolio zu entfernen und das z.B. in den Trader zu packen?
     evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, rnn_trader_portfolio], 100)
