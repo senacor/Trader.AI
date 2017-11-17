@@ -21,7 +21,7 @@ class SimplePredictorTest(unittest.TestCase):
        
     def testSimplePredictor(self):
 
-        sp = Predictors.simple_predictor() 
+        sp = Predictors.RandomPredictor() 
         
         inputData = list()
         

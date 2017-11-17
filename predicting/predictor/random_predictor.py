@@ -7,7 +7,7 @@ import random
 from model.IPredictor import IPredictor
 
 
-class SimplePredictor(IPredictor):
+class RandomPredictor(IPredictor):
     '''
     Simple Predicator always returning last value form given input vector.
     '''
