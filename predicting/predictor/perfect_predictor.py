@@ -44,6 +44,9 @@ class PerfectPredictor(IPredictor):
 
         (current_date, current_value) = data[-1]
         index = self.stock_values.index((current_date, current_value))
-        assert index is not None and index < len(self.stock_values) -1
-        (_, next_value) = self.stock_values[index +1 ]
-        return next_value
+        if index is not None and index < len(self.stock_values) - 1:
+            (_, next_value) = self.stock_values[index + 1]
+            return next_value
+        else:
+            print(f"Couldn't make a perfect prediction for the day after {current_date}")
+            assert False

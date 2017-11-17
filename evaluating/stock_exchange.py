@@ -9,17 +9,21 @@ from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
 from trading.trader.rnn_trader import RnnTrader
 
 if __name__ == "__main__":
-    period1 = '1962-2011'
-    period2 = '2012-2017'
-
+    # Load stock market data for training and testing period
+    training_period, testing_period = '1962-2011', '2012-2017'
     stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                                            [period1, period2])
+                                                            [training_period, testing_period])
 
-    # TODO @Jonas Kann man dieses Benchmark hier eleganter machen, z.B. dependency injection?
+    # Define benchmark and trader
     benchmark = BuyAndHoldTrader()
-    trader_under_test = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A),
-                                  PerfectPredictor(CompanyEnum.COMPANY_B))  # TODO implement PerfectStockBPredictor
+    trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
+
+    # Define identical portfolio for benchmark and trader
     benchmark_portfolio = Portfolio(10000, [], 'Benchmark')
-    trader_under_test_portfolio = Portfolio(10000, [], 'RNN Trader')
-    evaluator = PortfolioEvaluator([benchmark, trader_under_test], True)
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, trader_under_test_portfolio], 1000)
+    trader_portfolio = Portfolio(10000, [], 'RNN Trader')
+
+    # Evaluate their performance over the testing period
+    evaluator = PortfolioEvaluator([benchmark, trader], True)
+    # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen übergeben
+    # TODO kriegen wir das eleganter hin?
+    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, trader_portfolio], 1000)

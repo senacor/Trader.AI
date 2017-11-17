@@ -33,6 +33,7 @@ class BaseNnPredictor(IPredictor):
         Returns:
           predicted next stock value for that company
         """
+        # TODO diese Assumptions hier sind Mist, da fehlt uns eine Klasse für
         # Assumptions about data: at least 100 pairs of type (_, float)
         assert len(data) >= 100
         assert len(data[0]) == 2

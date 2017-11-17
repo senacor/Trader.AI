@@ -30,6 +30,7 @@ class RandomTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
+        # TODO das ist nicht random
         result = TradingActionList()
         result.buy(CompanyEnum.COMPANY_A, 10)
 
