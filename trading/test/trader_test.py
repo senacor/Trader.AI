@@ -44,31 +44,6 @@ class TraderTest(unittest.TestCase):
         stock_market_data = StockMarketData(companyName2DateValueArrayDict)
         stock_market_data.market_data.items()
 
-    def testRandomTraderConstruction(self):
-        rt = Traders.random_trader()
-        self.assertTrue(isinstance(rt, ITrader))
-
-    def testRandomTrader(self):
-        rt = Traders.random_trader()
-
-        shares_of_company_list = list()
-        shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
-        shares_of_company_y = SharesOfCompany(CompanyEnum.COMPANY_B, 50)
-        shares_of_company_list.append(shares_of_company_x)
-        shares_of_company_list.append(shares_of_company_y)
-
-        portfolio = Portfolio(1000.0, shares_of_company_list)
-        current_portfolio_value = 0.0  # Dummy value
-
-        trading_action_list = rt.doTrade(portfolio, current_portfolio_value,
-                                         read_stock_market_data([CompanyEnum.COMPANY_A], ['2012-2017']))
-        self.assertTrue(isinstance(trading_action_list, TradingActionList))
-
-        self.assertEqual(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
-        self.assertEqual(trading_action_list.get(0).shares.amount, 10)
-        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
-
     def testSimpleTrader(self):
 
         st = Traders.simple_trader_for_test()

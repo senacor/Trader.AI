@@ -1,5 +1,6 @@
 # Start evaluation rnn_trader:
 # Compare its performance over the testing period (2012-2017) against a buy-and-hold trader.
+from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
@@ -15,17 +16,22 @@ if __name__ == "__main__":
                                                [training_period, testing_period])
 
     # Define benchmark and trader
-    benchmark = BuyAndHoldTrader()
-    trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
+    buy_and_hold_trader = BuyAndHoldTrader()
+    simple_trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
+    rnn_trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
 
     # Define identical portfolio for benchmark and trader
-    benchmark_portfolio = Portfolio(10000, [], 'Benchmark')
-    trader_portfolio = Portfolio(10000, [], 'RNN Trader')
+    benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')
+    simple_trader_portfolio = Portfolio(10000, [], 'SimpleTrader')
+    rnn_trader_portfolio = Portfolio(10000, [], 'RnnTrader')
 
     # Evaluate their performance over the testing period
-    evaluator = PortfolioEvaluator([benchmark, trader], True)
+    evaluator = PortfolioEvaluator([buy_and_hold_trader, simple_trader, rnn_trader], True)
     # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen berechnen
     # TODO kriegen wir das eleganter hin?
     stock_data_testing_period = read_stock_market_data([CompanyEnum.COMPANY_A], [testing_period])
     days_of_testing_period = len(stock_data_testing_period.get_stock_data_for_company(CompanyEnum.COMPANY_A))
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, trader_portfolio], days_of_testing_period)
+    # TODO @jonas das ist ziemlich häßlich jedesmal ein anderes Portfolio zu übergeben, obwohl ich nur
+    # TODO "portfolio * 3" schreiben will
+    # TODO lohnt es, den Namen aus dem Portfolio zu entfernen und das z.B. in den Trader zu packen?
+    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, rnn_trader_portfolio], 100)
