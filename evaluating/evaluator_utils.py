@@ -2,14 +2,13 @@ import datetime as dt
 import json
 from typing import Dict
 
-import random
 from matplotlib import pyplot as plt
 import os
 
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
-from model.CompanyEnum import CompanyEnum#
+from model.CompanyEnum import CompanyEnum
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
@@ -22,11 +21,6 @@ JSON_KEY_SHARES = 'shares'
 JSON_KEY_COMPANY_ENUM = 'company_enum'
 JSON_KEY_AMOUNT = 'amount'
 JSON_KEY_CASH = 'cash'
-
-"""
-Colors `matplotlib` chooses randomly from to create graphs
-"""
-COLORS = ["red", "blue", "green", "orange", "purple", "pink", "yellow"]
 
 
 def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
@@ -51,7 +45,6 @@ def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
     return Portfolio(data[JSON_KEY_CASH], shares_list)
 
 
-
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
     """
     Draws all given `Portfolios` based on the given `prices`
@@ -64,10 +57,6 @@ def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], pric
 
     for name, portfolio in portfolio_over_time.items():
         values = [pf.total_value(date, prices.market_data) for date, pf in portfolio.items()]
-        # TODO @jonas plot wählt schon zufällige Farben aus. Warum also selbst nochchmal zufällig auwählen?
-        # TODO Ausserdem sorgt color=random.choice(COLORS) dafür, dass zweimal dieselbe Farbe ausgewählt werden kann
-        # TODO Das macht eine Auswertung unmöglich
-        #plt.plot(portfolio.keys(), values, label=name, color=random.choice(COLORS))
         plt.plot(portfolio.keys(), values, label=name)
 
     plt.legend(portfolio_over_time.keys())
