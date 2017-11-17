@@ -46,7 +46,7 @@ class TraderTest(unittest.TestCase):
 
     def testSimpleTrader(self):
 
-        st = Traders.simple_trader_for_test()
+        st = Traders.SimpleTrader_with_perfect_prediction()
 
         shares_of_company_list = list()
         shares_of_company_x = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
@@ -75,7 +75,7 @@ class TraderTest(unittest.TestCase):
             self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
 
     def testSimpleTraderConstruction(self):
-        st = Traders.simple_trader_for_test()
+        st = Traders.SimpleTrader_with_perfect_prediction()
         self.assertTrue(isinstance(st, ITrader))
 
     def testPortfolioConstruction(self):
@@ -96,11 +96,11 @@ class TraderTest(unittest.TestCase):
         self.assertEqual(portfolio.shares[1].amount, 50)
 
     def testRnnTraderConstruction(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         self.assertTrue(isinstance(trader, ITrader))
 
     def testRnnTraderGetAction(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         from trading.trader.rnn_trader import State
         state = State(1000, 0, 0, 0, 0, 0, 0)
         # Check random actions because epsilon is 1.0
@@ -121,7 +121,7 @@ class TraderTest(unittest.TestCase):
             self.assertLessEqual(actionB, 1.0)
 
     def testGet_actions_from_index(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         self.assertEqual(trader.get_actions_from_index(0), (+1.0, +1.0))
         self.assertEqual(trader.get_actions_from_index(1), (+1.0, +0.5))
         self.assertEqual(trader.get_actions_from_index(2), (+1.0, 0.0))
@@ -139,7 +139,7 @@ class TraderTest(unittest.TestCase):
         self.assertEqual(trader.get_actions_from_index(14), (0.0, -1.0))
 
     def testGet_index_from_actions(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         self.assertEqual(trader.get_index_from_actions(+1.0, +1.0), 0)
         self.assertEqual(trader.get_index_from_actions(+1.0, +0.5), 1)
         self.assertEqual(trader.get_index_from_actions(+1.0, 0.0), 2)
@@ -157,21 +157,21 @@ class TraderTest(unittest.TestCase):
         self.assertEqual(trader.get_index_from_actions(0.0, -1.0), 14)
 
     def testIndexConversion(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         for index in range(25):
             actionA, actionB = trader.get_actions_from_index(index)
             self.assertEqual(trader.get_index_from_actions(actionA, actionB), index)
 
     def testActionConversion(self):
         from trading.trader.rnn_trader import STOCKACTIONS
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         for actionA in STOCKACTIONS:
             for actionB in STOCKACTIONS:
                 index = trader.get_index_from_actions(actionA, actionB)
                 self.assertEqual(trader.get_actions_from_index(index), (actionA, actionB))
 
     def testRnnTraderDecreaseEpsilon(self):
-        trader = Traders.rnn_trader_with_simple_predictors()
+        trader = Traders.RnnTrader_with_random_prediction()
         trader.epsilon = 1.0
         trader.epsilon_min = 0.1
         trader.epsilon_decay = 0.9

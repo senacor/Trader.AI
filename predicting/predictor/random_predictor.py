@@ -8,7 +8,7 @@ from model.IPredictor import IPredictor
 from model.StockData import StockData
 
 
-class SimplePredictor(IPredictor):
+class RandomPredictor(IPredictor):
     '''
     Simple Predicator always returning last value form given input vector.
     '''

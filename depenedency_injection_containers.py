@@ -8,29 +8,69 @@ import dependency_injector.providers as providers
 
 from trading.trader.simple_trader import SimpleTrader
 from trading.trader.rnn_trader import RnnTrader
-from predicting.predictor.simple_predictor import SimplePredictor
+from predicting.predictor.random_predictor import RandomPredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from model.CompanyEnum import CompanyEnum
+from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
 from predicting.predictor.nn_predictor import StockBNnPredictor,\
     StockANnPredictor
+
 
 
 class Predictors(containers.DeclarativeContainer):
     """IoC container of predictor providers."""
  
-    simple_predictor = providers.Factory(SimplePredictor)
-    perfect_stock_a_predictor = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_A)
-    perfect_stock_b_predictor = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_B)
+    RandomPredictor = providers.Factory(RandomPredictor)
     
-    nn_stock_a_predictor = providers.Factory(StockANnPredictor)
-    nn_stock_b_predictor = providers.Factory(StockBNnPredictor)
+    PerfectPredictor_stock_a = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_A)    
+    PerfectPredictor_stock_b = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_B)
+    
+    StockANnPredictor = providers.Factory(StockANnPredictor)
+    StockBNnPredictor = providers.Factory(StockBNnPredictor)
 
  
 class Traders(containers.DeclarativeContainer):
     """IoC container of trader providers."""
     
-    simple_trader_for_test = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=Predictors.perfect_stock_b_predictor)
-    simple_trader_with_perfect_stock_aprediction = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.perfect_stock_a_predictor, stock_b_predictor=Predictors.simple_predictor)
-    simple_trader_with_simple_predictors = providers.Factory(SimpleTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
+    """Simple Trader"""
+    SimpleTrader_with_perfect_prediction = providers.Factory(
+        SimpleTrader, 
+        stock_a_predictor=Predictors.PerfectPredictor_stock_a, 
+        stock_b_predictor=Predictors.PerfectPredictor_stock_b
+        )
+    
+    SimpleTrader_with_random_prediction = providers.Factory(
+        SimpleTrader, 
+        stock_a_predictor=Predictors.RandomPredictor, 
+        stock_b_predictor=Predictors.RandomPredictor
+        )
+    
+    SimpleTrader_with_nn_prediction = providers.Factory(
+        SimpleTrader, 
+        stock_a_predictor=Predictors.StockANnPredictor, 
+        stock_b_predictor=Predictors.StockBNnPredictor
+        )
 
-    rnn_trader_with_simple_predictors = providers.Factory(RnnTrader, stock_a_predictor=Predictors.simple_predictor, stock_b_predictor=Predictors.simple_predictor)
+    """Buy and Hold Trader"""
+    BuyAndHoldTrader = providers.Factory(
+        BuyAndHoldTrader
+        )
+   
+    """RNN Trader"""
+    RnnTraderr_with_perfect_prediction = providers.Factory(
+        RnnTrader, 
+        stock_a_predictor=Predictors.PerfectPredictor_stock_a, 
+        stock_b_predictor=Predictors.PerfectPredictor_stock_b
+        )
+    
+    RnnTrader_with_random_prediction = providers.Factory(
+        RnnTrader, 
+        stock_a_predictor=Predictors.RandomPredictor, 
+        stock_b_predictor=Predictors.RandomPredictor
+        )
+    
+    RnnTrader_with_nn_prediction = providers.Factory(
+        RnnTrader, 
+        stock_a_predictor=Predictors.StockANnPredictor, 
+        stock_b_predictor=Predictors.StockBNnPredictor
+        )

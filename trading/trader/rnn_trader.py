@@ -10,7 +10,7 @@ import numpy as np
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
 from model.IPredictor import IPredictor
-from predicting.predictor.simple_predictor import SimplePredictor
+from predicting.predictor.random_predictor import RandomPredictor
 from model.ITrader import ITrader
 from model.trader_actions import TradingActionList, TradingAction
 from keras.models import Sequential
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
 
     # Define this trader, thereby loading trained networks
-    trader = RnnTrader(SimplePredictor(), SimplePredictor())
+    trader = RnnTrader(RandomPredictor(), RandomPredictor())
 
     # Start evaluation and thereby learn training data
     evaluator = PortfolioEvaluator([trader], True)

@@ -15,7 +15,7 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from predicting.predictor.simple_predictor import SimplePredictor
+from predicting.predictor.random_predictor import RandomPredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
 from model.trader_actions import SharesOfCompany, TradingActionList
@@ -111,7 +111,7 @@ class EvaluatorTest(unittest.TestCase):
 
         Creates a portfolio, a stock market data object
         """
-        trader = SimpleTrader(SimplePredictor(), SimplePredictor())
+        trader = SimpleTrader(RandomPredictor(), RandomPredictor())
 
         evaluator = PortfolioEvaluator([trader] * 3, draw_results=False)
 
