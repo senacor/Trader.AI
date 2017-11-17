@@ -2,7 +2,7 @@ from typing import List
 
 import datetime
 
-from evaluating.evaluator_utils import draw, get_data_up_to_offset, check_data_length
+from evaluating.evaluator_utils import draw, get_data_up_to_offset
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.ITrader import ITrader
@@ -50,7 +50,7 @@ class PortfolioEvaluator:
         # Cache that holds the latest object of each portfolio. Structure: {portfolio_name => portfolio}
         portfolio_cache = {}
 
-        if not check_data_length(market_data):
+        if not market_data.check_data_length():
             # Checks whether all data series are of the same length (i.e. have an equal count of date->price items)
             return
 
@@ -84,8 +84,7 @@ class PortfolioEvaluator:
                 portfolio_to_update = portfolio_cache[portfolio.name]
 
                 # Determine the total portfolio value at this time
-                current_total_portfolio_value = portfolio_to_update.total_value(current_date,
-                                                                                current_market_data.market_data)
+                current_total_portfolio_value = portfolio_to_update.total_value(current_date, current_market_data)
 
                 # Ask the trader for its action
                 update = trader.doTrade(portfolio_to_update, current_total_portfolio_value, current_market_data)

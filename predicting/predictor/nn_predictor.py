@@ -6,6 +6,7 @@ Created on 08.11.2017
 from model.IPredictor import IPredictor
 import numpy as np
 
+from model.StockData import StockData
 from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data
 from model.CompanyEnum import CompanyEnum
 from logger import logger
@@ -39,7 +40,7 @@ class BaseNnPredictor(IPredictor):
             self.model.add(Dense(1, activation='linear'))
         self.model.compile(loss='mean_squared_error', optimizer='adam')
         
-    def doPredict(self, data:list) -> float:
+    def doPredict(self, data: StockData) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
     
         Args:
@@ -49,12 +50,12 @@ class BaseNnPredictor(IPredictor):
         """
         # TODO diese Assumptions hier sind Mist, da fehlt uns eine Klasse für
         # Assumptions about data: at least 100 pairs of type (_, float)
-        assert len(data) >= 100
-        assert len(data[0]) == 2
-        assert isinstance(data[0][1], float)
+        assert data.get_row_count() >= 100
+        assert len(data.get_first()) == 2
+        assert isinstance(data.get_first()[1], float)
 
         # Extract last 100 floats (here: stock values) as input for neural network (format: numpy array of arrays)
-        input_values = np.array([[x[1] for x in data[-100:]]])
+        input_values = np.array([[x[1] for x in data.get_from_offset(-100)]])
 
         try:
             # Let network predict the next stock value based on last 100 stock values

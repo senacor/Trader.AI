@@ -29,7 +29,7 @@ class Portfolio:
         self.shares = shares
         self.name = name
 
-    def total_value(self, date: datetime.date, prices: dict):
+    def total_value(self, date: datetime.date, prices: StockMarketData):
         """
         Calculates the portfolio's total value based on the held shares multiplied by their current value added to the
         cash level.
@@ -38,7 +38,7 @@ class Portfolio:
             The portfolio's total value
         """
         values = [share.amount *
-                  [price[1] for price in prices[share.company_enum] if date == price[0]][0]
+                  [price[1] for price in prices.get_for_company(share.company_enum).iter() if date == price[0]][0]
                   for share in self.shares]
 
         return sum(values) + self.cash
@@ -149,7 +149,7 @@ class Portfolio:
 
             logger.debug(f"Resulting available cash after trade: {updated_portfolio.cash}")
 
-            total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data.market_data)
+            total_portfolio_value = updated_portfolio.total_value(current_date, stock_market_data)
             logger.debug(f"Total portfolio value after trade: {total_portfolio_value}")
 
         return updated_portfolio
