@@ -9,6 +9,9 @@ import numpy as np
 from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data_conveniently
 from model.CompanyEnum import CompanyEnum
 from logger import logger
+from matplotlib import pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
 
 MODEL_FILE_NAME_STOCK_A = 'stock_a_predictor'
 MODEL_FILE_NAME_STOCK_B = 'stock_b_predictor'
@@ -23,8 +26,18 @@ class BaseNnPredictor(IPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        self.network = load_keras_sequential(RELATIVE_PATH, nn_filename)
-        assert self.network is not None
+        # Try loading a stored trained neural network...
+        self.trained = True
+        self.model = load_keras_sequential(RELATIVE_PATH, nn_filename)
+        # ... if that wasn't possible, then create a new untrained one
+        if self.model is None:
+            logger.debug(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
+            self.trained = False
+            self.model = Sequential()
+            self.model.add(Dense(500, activation='relu', input_dim=100))
+            self.model.add(Dense(500, activation='relu'))
+            self.model.add(Dense(1, activation='linear'))
+        self.model.compile(loss='mean_squared_error', optimizer='adam')
         
     def doPredict(self, data:list) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
@@ -45,11 +58,11 @@ class BaseNnPredictor(IPredictor):
 
         try:
             # Let network predict the next stock value based on last 100 stock values
-            return self.network.predict(input_values)
+            return self.model.predict(input_values)
         except:
             logger.error("Error in predicting next stock value.")
             assert False
-            
+
 class StockANnPredictor(BaseNnPredictor):
     '''
     Perfect predictor for stock A based on an already trained neural network.
@@ -59,7 +72,7 @@ class StockANnPredictor(BaseNnPredictor):
         Constructor: Load the trained and stored neural network.
         '''
         BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_A)
-    
+
 class StockBNnPredictor(BaseNnPredictor):
     '''
     Perfect predictor for stock B based on an already trained neural network.
@@ -67,7 +80,7 @@ class StockBNnPredictor(BaseNnPredictor):
     def __init__(self):
         '''
         Constructor: Load the trained and stored neural network.
-        '''   
+        '''
         BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_B)
 
 ###############################################################################
@@ -75,20 +88,19 @@ class StockBNnPredictor(BaseNnPredictor):
 ###############################################################################
 
 def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
-        # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
+    # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
     lastPrices, currentPrice = [], []
     for i in range(0, len(prices) - 100):
         lastPrices.append(prices[i:100 + i])
         currentPrice.append(prices[100 + i])
 
-    # Building a neural network
     network = Sequential()
     network.add(Dense(500, activation='relu', input_dim=100))
     network.add(Dense(500, activation='relu'))
     network.add(Dense(1, activation='linear'))
-
-    # Configure and train the neural network
     network.compile(loss='mean_squared_error', optimizer='adam')
+
+    # Train the neural network
     history = network.fit(lastPrices, currentPrice, epochs=10, batch_size=128, verbose=1)
 
     # Evaluate the trained neural network and plot results
@@ -115,11 +127,6 @@ def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
 
 
 if __name__ == "__main__":
-    # Necessary imports
-    from matplotlib import pyplot as plt
-    from keras.models import Sequential
-    from keras.layers import Dense
-
     # Load the training data; here: complete data about stock A (Disney)
     logger.debug("Data loading...")
     full_stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])

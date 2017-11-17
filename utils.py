@@ -44,7 +44,7 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
 
 def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
     """
-    Loads a Keras Sequential from File System
+    Loads a Keras Sequential neural network from file system
     
     Args:
         model : Sequential to save
