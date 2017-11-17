@@ -30,11 +30,11 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
     """
     try:
         model_as_json = model.to_json()
-        
+
         json_file = open(os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.json'), "w")
         json_file.write(model_as_json)
         json_file.close()
-        
+
         model.save_weights(os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.h5'))
         return True
     except:
@@ -52,12 +52,12 @@ def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
     Returns:
         Sequential, or None if nothing found or error
     """
-   
+
     model_filename_with_path = os.path.join(ROOT_DIR, relative_path, filename + '.json')
     weights_filenme_with_path = os.path.join(ROOT_DIR, relative_path, filename + '.h5')
-    
+
     if os.path.exists(model_filename_with_path) and os.path.exists(weights_filenme_with_path):
-        try:             
+        try:
             json_file = open(model_filename_with_path, 'r')
             loaded_model_json = json_file.read()
             json_file.close()
@@ -66,52 +66,18 @@ def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
             return model
         except:
             logger.error(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
-            return None   
+            return None
     else:
-        logger.error(f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
+        logger.error(
+            f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
         return None
 
 
-"""
-The csv's column keys
-"""
-DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
-    
-def read_stock_market_data(company_enums_and_filenames_tuples: list, path: str='../datasets/') -> StockMarketData:
-    """
-    Reads CSV files from "../`path`/`name`.csv" and creates a `StockMarketData` object from this
-
-    Args:
-        company_enums_and_filenames_tuples: Tuples of filenames and logical names used as dict keys
-        path: The path from which to read. Default: "../datasets/"
-
-    Returns:
-        The created `StockMarketData` object
-    """
-    data = {}
-    for company_enum, filename in company_enums_and_filenames_tuples:
-
-        filepath = os.path.join(path, filename + '.csv')
-        
-        assert os.path.exists(filepath)
-        
-        na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
-                                     delimiter=',', comments="#", skiprows=1)
-        dates = list()
-        for day in na_portfolio:
-            date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
-            dates.append((date, day[ADJ_CLOSE]))
-
-        data[company_enum] = dates
-
-    return StockMarketData(data)
-
-
 StockList = List[CompanyEnum]
-PeriodList = List[str]  
+PeriodList = List[str]
 
 
-def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList) -> StockMarketData:
+def read_stock_market_data(stocks: StockList, periods: PeriodList) -> StockMarketData:
     """
     Reads the "cross product" from `stocks` and `periods` from CSV files and creates a `StockMarketData` object from
     this. For each defined stock in `stocks` the corresponding value from `CompanyEnum` is used as logical name. If
@@ -152,12 +118,45 @@ def read_stock_market_data_conveniently(stocks: StockList, periods: PeriodList) 
     for stock in stocks:
         filename = stock.value
         if len(periods) is 0:
-            data[stock] = read_stock_market_data([[stock, filename]], DATASETS_DIR)
+            data[stock] = __read_stock_market_data([[stock, filename]])
         else:
             period_data = list()
             for period in periods:
-                period_data.append(read_stock_market_data([[stock, ('%s_%s' % (filename, period))]], DATASETS_DIR))
+                period_data.append(__read_stock_market_data([[stock, ('%s_%s' % (filename, period))]]))
             data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
 
     return StockMarketData(data)
 
+
+"""
+The csv's column keys
+"""
+DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
+
+
+def __read_stock_market_data(names_and_filenames: list) -> StockMarketData:
+    """
+    Reads CSV files from "../`DATASETS_DIR`/`name`.csv" and creates a `StockMarketData` object from this
+
+    Args:
+        names_and_filenames: Tuples of filenames and logical names used as dict keys
+
+    Returns:
+        The created `StockMarketData` object
+    """
+    data = {}
+    for company_enum, filename in names_and_filenames:
+        filepath = os.path.join(DATASETS_DIR, filename + '.csv')
+
+        assert os.path.exists(filepath)
+
+        na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
+                                     delimiter=',', comments="#", skiprows=1)
+        dates = list()
+        for day in na_portfolio:
+            date = dt.datetime.strptime(day[DATE].decode('UTF-8'), '%Y-%m-%d').date()
+            dates.append((date, day[ADJ_CLOSE]))
+
+        data[company_enum] = dates
+
+    return StockMarketData(data)
