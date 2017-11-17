@@ -10,16 +10,16 @@ import numpy as np
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
-from predicting.model.IPredictor import IPredictor
+from model.IPredictor import IPredictor
 from predicting.predictor.simple_predictor import SimplePredictor
-from trading.model.ITrader import ITrader
-from trading.model.trader_interface import TradingActionList, TradingAction
+from model.ITrader import ITrader
+from model.trader_actions import TradingActionList, TradingAction
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
-from trading.model.trader_interface import TradingActionEnum
-from trading.model.trader_interface import CompanyEnum
-from trading.model.trader_interface import SharesOfCompany
+from model.trader_actions import TradingActionEnum
+from model.trader_actions import CompanyEnum
+from model.trader_actions import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential
 from logger import logger

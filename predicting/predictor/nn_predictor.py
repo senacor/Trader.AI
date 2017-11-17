@@ -3,7 +3,7 @@ Created on 08.11.2017
 
 @author: rmueller
 '''
-from predicting.model.IPredictor import IPredictor
+from model.IPredictor import IPredictor
 import numpy as np
 
 from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data_conveniently

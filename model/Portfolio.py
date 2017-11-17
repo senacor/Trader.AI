@@ -6,7 +6,7 @@ import datetime
 from model import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum
-from trading.model.trader_interface import TradingActionList, TradingActionEnum, TradingAction
+from model.trader_actions import TradingActionList, TradingActionEnum, TradingAction
 from logger import logger
 
 SharesList = List[SharesOfCompany]

@@ -7,11 +7,9 @@ Module for testing of all predicting components
 '''
 import unittest
 
-import evaluating.evaluator_utils
-from depenedency_injection_containers import Predictors
 from definitions import DATASETS_DIR
 from predicting.predictor.nn_predictor import StockANnPredictor
-from trading.model.trader_interface import CompanyEnum
+from model.trader_actions import CompanyEnum
 from utils import read_stock_market_data
 
 class PerfectStockAPredictorTest(unittest.TestCase):

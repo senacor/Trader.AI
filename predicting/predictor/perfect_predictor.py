@@ -3,7 +3,7 @@ Created on 16.11.2017
 
 @author: rmueller
 '''
-from predicting.model.IPredictor import IPredictor
+from model.IPredictor import IPredictor
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
 from utils import read_stock_market_data_conveniently

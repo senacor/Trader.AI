@@ -5,7 +5,7 @@ import datetime
 from evaluating.evaluator_utils import draw, get_data_up_to_offset, check_data_length
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.model.ITrader import ITrader
+from model.ITrader import ITrader
 
 PortfolioList = List[Portfolio]
 TraderList = List[ITrader]

@@ -3,9 +3,9 @@ Created on 15.11.2017
 
 @author: rmueller
 '''
-from trading.model.ITrader import ITrader, TradingActionList, Portfolio
+from model.ITrader import ITrader, TradingActionList, Portfolio
 from model.StockMarketData import StockMarketData
-from trading.model.trader_interface import CompanyEnum
+from model.trader_actions import CompanyEnum
 
 
 class BuyAndHoldTrader(ITrader):

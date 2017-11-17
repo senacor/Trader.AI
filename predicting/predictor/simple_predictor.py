@@ -4,7 +4,7 @@ Created on 08.11.2017
 @author: jtymoszuk
 '''
 import random
-from predicting.model.IPredictor import IPredictor
+from model.IPredictor import IPredictor
 
 
 class SimplePredictor(IPredictor):
