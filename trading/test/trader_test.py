@@ -8,12 +8,12 @@ Module for testing of all trader components
 import unittest
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.model.ITrader import ITrader
+from model.ITrader import ITrader
 
-from trading.model.trader_interface import SharesOfCompany
-from trading.model.trader_interface import TradingActionList
-from trading.model.trader_interface import TradingActionEnum
-from trading.model.trader_interface import CompanyEnum
+from model.trader_actions import SharesOfCompany
+from model.trader_actions import TradingActionList
+from model.trader_actions import TradingActionEnum
+from model.trader_actions import CompanyEnum
 from depenedency_injection_containers import Traders
 
 from datetime import date

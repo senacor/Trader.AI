@@ -5,9 +5,9 @@ Created on 08.11.2017
 '''
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.model.ITrader import ITrader
-from trading.model.trader_interface import TradingActionList
-from trading.model.trader_interface import CompanyEnum
+from model.ITrader import ITrader
+from model.trader_actions import TradingActionList
+from model.trader_actions import CompanyEnum
 
 
 class RandomTrader(ITrader):

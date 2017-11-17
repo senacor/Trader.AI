@@ -5,13 +5,13 @@ Created on 08.11.2017
 '''
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.model.ITrader import ITrader
-from trading.model.trader_interface import TradingActionList
-from trading.model.trader_interface import TradingAction
-from trading.model.trader_interface import TradingActionEnum
-from trading.model.trader_interface import SharesOfCompany
-from trading.model.trader_interface import CompanyEnum
-from predicting.model.IPredictor import IPredictor
+from model.ITrader import ITrader
+from model.trader_actions import TradingActionList
+from model.trader_actions import TradingAction
+from model.trader_actions import TradingActionEnum
+from model.trader_actions import SharesOfCompany
+from model.trader_actions import CompanyEnum
+from model.IPredictor import IPredictor
 import copy
 from logger import logger
 

@@ -20,7 +20,7 @@ from model.StockMarketData import StockMarketData
 from predicting.predictor.simple_predictor import SimplePredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
-from trading.model.trader_interface import SharesOfCompany, TradingActionList
+from model.trader_actions import SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
