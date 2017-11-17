@@ -154,7 +154,7 @@ class Portfolio:
 
         return updated_portfolio
 
-    def isTradingActionListValid(self, trading_action_list: TradingActionList,
+    def is_trading_action_list_valid(self, trading_action_list: TradingActionList,
                                  stock_market_data: StockMarketData) -> bool:
         """
         Validates if generated TradingActionList is valid in comparison to current Portfolio
