@@ -8,7 +8,7 @@ Module for testing of all predicting components
 import unittest
 from predicting.predictor.nn_predictor import StockANnPredictor
 from predicting.predictor.nn_predictor import StockBNnPredictor
-from trading.model.trader_interface import CompanyEnum
+from model.CompanyEnum import CompanyEnum
 from utils import read_stock_market_data_conveniently
 
 class NnPredictorTest(unittest.TestCase):
