@@ -162,7 +162,7 @@ class EvaluatorTest(unittest.TestCase):
                                                            evaluation_offset=100)
 
         last_date = list(portfolios_over_time['portfolio 1'].keys())[-1]
-        self.assertEqual(last_date, dt.datetime.strptime('2017-11-07', '%Y-%m-%d').date())
+        self.assertEqual(last_date, dt.datetime.strptime('2017-11-06', '%Y-%m-%d').date())
 
         data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
         self.assertEqual(len(data_row_lengths), 1)
