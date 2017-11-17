@@ -2,8 +2,6 @@ from typing import List
 
 import datetime
 
-from definitions import DATASETS_DIR
-
 from evaluating.evaluator_utils import draw, get_data_up_to_offset, check_data_length
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
@@ -60,10 +58,14 @@ class PortfolioEvaluator:
             # `evaluation_offset` has the 'disabled' value, so we calculate it based on the underlying data
             evaluation_offset = market_data.get_row_count() - 1
 
+        # Reading should start one day later, because we also save the initial portfolio value in our return data.
+        # Therefore the return data contains `evaluation_offset` rows which includes `evaluation_offset`-1 trades
+        evaluation_offset = evaluation_offset - 1
+
         # And now the clock ticks
-        for index in range(1, evaluation_offset):
-            # We start at -`evaluation_offset` and roll through the `market_data` in forward direction
-            current_tick = index - evaluation_offset + 1
+        # We start at -`evaluation_offset` and roll through the `market_data` in forward direction until the
+        # second-to-last item
+        for current_tick in range(-evaluation_offset, 0):
 
             # Retrieve the stock market data up the current day, i.e. move one tick further in `market_data`
             current_market_data = get_data_up_to_offset(market_data, current_tick)
@@ -72,7 +74,7 @@ class PortfolioEvaluator:
             current_date = current_market_data.get_most_recent_trade_day()
 
             for portfolio, trader in portfolio_trader_mapping:
-                if index == 1:
+                if current_tick == -evaluation_offset:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)
                     all_portfolios.update({portfolio.name: {yesterday: portfolio}})
