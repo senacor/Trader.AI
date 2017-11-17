@@ -9,11 +9,12 @@ import os
 from keras.models import Sequential
 from keras.models import model_from_json
 from definitions import ROOT_DIR, DATASETS_DIR
+from model.StockData import StockData
 from model.StockMarketData import StockMarketData
 import numpy
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
-from typing import List
+from typing import List, Dict, Tuple
 from logger import logger
 
 
@@ -118,12 +119,12 @@ def read_stock_market_data(stocks: StockList, periods: PeriodList) -> StockMarke
     for stock in stocks:
         filename = stock.value
         if len(periods) is 0:
-            data[stock] = __read_stock_market_data([[stock, filename]])
+            data[stock] = StockData(__read_stock_market_data([[stock, filename]])[stock])
         else:
             period_data = list()
             for period in periods:
                 period_data.append(__read_stock_market_data([[stock, ('%s_%s' % (filename, period))]]))
-            data[stock] = [item for sublist in period_data for item in sublist.market_data[stock]]
+            data[stock] = StockData([item for period_dict in period_data for item in period_dict[stock]])
 
     return StockMarketData(data)
 
@@ -134,7 +135,7 @@ The csv's column keys
 DATE, OPEN, HIGH, LOW, CLOSE, ADJ_CLOSE, VOLUME = range(7)
 
 
-def __read_stock_market_data(names_and_filenames: list) -> StockMarketData:
+def __read_stock_market_data(names_and_filenames: list) -> Dict[CompanyEnum, List[Tuple[dt.datetime.date, float]]]:
     """
     Reads CSV files from "../`DATASETS_DIR`/`name`.csv" and creates a `StockMarketData` object from this
 
@@ -142,7 +143,7 @@ def __read_stock_market_data(names_and_filenames: list) -> StockMarketData:
         names_and_filenames: Tuples of filenames and logical names used as dict keys
 
     Returns:
-        The created `StockMarketData` object
+        A dict. Structure: { CompanyEnum: List[Tuple[dt.datetime.date, float]] }
     """
     data = {}
     for company_enum, filename in names_and_filenames:
@@ -159,4 +160,4 @@ def __read_stock_market_data(names_and_filenames: list) -> StockMarketData:
 
         data[company_enum] = dates
 
-    return StockMarketData(data)
+    return data

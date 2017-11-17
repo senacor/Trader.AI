@@ -7,8 +7,9 @@ Module for testing of the evaluating component
 """
 import unittest
 
-import datetime as dt
+from datetime import date, datetime
 
+from model.StockData import StockData
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
@@ -33,18 +34,6 @@ class EvaluatorTest(unittest.TestCase):
         self.assertGreater(len(stock_market_data.market_data), 0)
         self.assertTrue(CompanyEnum.COMPANY_A in stock_market_data.market_data)
         self.assertTrue(CompanyEnum.COMPANY_B in stock_market_data.market_data)
-
-    def testGetMostRecentTradeDay(self):
-        """
-        Tests: StockMarketData#get_most_recent_trade_day
-
-        Read the stock market data and check if the last available date is determined correctly
-        """
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                                   ['1962-2011', '2012-2017'])
-
-        self.assertEqual(stock_market_data.get_most_recent_trade_day(),
-                         stock_market_data.market_data[CompanyEnum.COMPANY_A][-1][0])
 
     def testDoTrade(self):
         """
@@ -74,8 +63,7 @@ class EvaluatorTest(unittest.TestCase):
         """
         cash_reserve = 10000.0
 
-        data = list()
-        data.append(('2017-01-01', 150.0))
+        data = StockData([(date(2017, 1, 1), 150.0)])
         stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
 
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
@@ -101,8 +89,7 @@ class EvaluatorTest(unittest.TestCase):
         """
         cash_reserve = 20000.0
 
-        data = list()
-        data.append(('2017-01-01', 150.0))
+        data = StockData([(date(2017, 1, 1), 150.0)])
         stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
 
         portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
@@ -140,7 +127,7 @@ class EvaluatorTest(unittest.TestCase):
                                                            evaluation_offset=100)
 
         last_date = list(portfolios_over_time['portfolio 1'].keys())[-1]
-        self.assertEqual(last_date, dt.datetime.strptime('2017-11-06', '%Y-%m-%d').date())
+        self.assertEqual(last_date, datetime.strptime('2017-11-06', '%Y-%m-%d').date())
 
         data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
         self.assertEqual(len(data_row_lengths), 1)

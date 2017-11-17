@@ -14,7 +14,7 @@ from model.trader_actions import SharesOfCompany
 from model.trader_actions import TradingActionList
 from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from depenedency_injection_containers import Traders
+from dependency_injection_containers import Traders
 
 from datetime import date
 

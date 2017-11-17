@@ -8,7 +8,8 @@ Module for testing of all predicting components
 import unittest
 
 from datetime import date
-from depenedency_injection_containers import Predictors
+from dependency_injection_containers import Predictors
+from model.StockData import StockData
 
 
 class SimplePredictorTest(unittest.TestCase):
@@ -23,7 +24,7 @@ class SimplePredictorTest(unittest.TestCase):
 
         sp = Predictors.RandomPredictor() 
         
-        inputData = list()
+        inputData = StockData([])
         
         today = date(2017, 11, 8)
         yesterday = date(2017, 11, 8)

@@ -4,6 +4,7 @@ Created on 08.11.2017
 @author: jtymoszuk
 '''
 from model.Portfolio import Portfolio
+from model.StockData import StockData
 from model.StockMarketData import StockMarketData
 from model.ITrader import ITrader
 from model.trader_actions import TradingActionList
@@ -43,14 +44,14 @@ class SimpleTrader(ITrader):
 
         result = TradingActionList()
 
-        company_a_data = stock_market_data.market_data.get(CompanyEnum.COMPANY_A)
+        company_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
         if (self.stock_a_predictor is not None and company_a_data is not None):
             self.__trade_for_company(CompanyEnum.COMPANY_A, company_a_data, self.stock_a_predictor, local_portfolio,
                                  result)
         else:
             logger.warning(f" stock_a_predictor:  {self.stock_a_predictor} or company_a_data: {company_a_data} is None -> No prediction for Company A")
 
-        company_b_data = stock_market_data.market_data.get(CompanyEnum.COMPANY_B)
+        company_b_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
         if (self.stock_b_predictor is not None and company_b_data is not None):
             self.__trade_for_company(CompanyEnum.COMPANY_B, company_b_data, self.stock_b_predictor, local_portfolio,
                                  result)
@@ -59,10 +60,10 @@ class SimpleTrader(ITrader):
 
         return result
 
-    def __trade_for_company(self, company_enum: CompanyEnum, company_data: list, predictor: IPredictor, portfolio: Portfolio,
+    def __trade_for_company(self, company_enum: CompanyEnum, company_data: StockData, predictor: IPredictor, portfolio: Portfolio,
                         result_trading_action_list: TradingActionList):
 
-        lastValue = company_data[-1][-1]
+        lastValue = company_data.get_last()[-1]
 
         # This determines the trade action to apply
         trading_action = self.__determine_action(company_data, predictor, lastValue)
