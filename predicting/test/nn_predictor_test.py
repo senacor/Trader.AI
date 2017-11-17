@@ -9,7 +9,7 @@ import unittest
 from predicting.predictor.nn_predictor import StockANnPredictor
 from predicting.predictor.nn_predictor import StockBNnPredictor
 from model.CompanyEnum import CompanyEnum
-from utils import read_stock_market_data_conveniently
+from utils import read_stock_market_data
 
 class NnPredictorTest(unittest.TestCase):
 
@@ -21,7 +21,7 @@ class NnPredictorTest(unittest.TestCase):
        
     def testStockANnPredictor(self):
         # Get stock A data
-        stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
         stock_data = stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
 
         # Load stock A predictor
@@ -34,7 +34,7 @@ class NnPredictorTest(unittest.TestCase):
 
     def testStockBNnPredictor(self):
         # Get stock B data
-        stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_B], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_B], ['1962-2011'])
         stock_data = stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B)
 
         # Load stock B predictor

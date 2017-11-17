@@ -6,7 +6,7 @@ Created on 08.11.2017
 from model.IPredictor import IPredictor
 import numpy as np
 
-from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data_conveniently
+from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data
 from model.CompanyEnum import CompanyEnum
 from logger import logger
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     # Load the training data; here: complete data about stock A (Disney)
     logger.debug("Data loading...")
-    full_stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
+    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
     
     company_a_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
     datesA = np.array([[x[0] for x in company_a_stock_market_data]])[0].tolist()

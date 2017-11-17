@@ -6,7 +6,7 @@ Created on 16.11.2017
 from model.IPredictor import IPredictor
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
-from utils import read_stock_market_data_conveniently
+from utils import read_stock_market_data
 from logger import logger
 
 class PerfectPredictor(IPredictor):
@@ -26,8 +26,8 @@ class PerfectPredictor(IPredictor):
         assert company.value == 'stock_a' or company.value == 'stock_b'
 
         # Load all stock data, but only save it for the given company
-        stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                                                ['1962-2011', '2012-2017'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
+                                                   ['1962-2011', '2012-2017'])
         self.stock_values = stock_market_data.get_stock_data_for_company(company)
 
     def doPredict(self, data:list) -> float:

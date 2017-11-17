@@ -7,7 +7,6 @@ import random
 from collections import deque
 import numpy as np
 
-from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model import Portfolio, StockMarketData
 from model.IPredictor import IPredictor
@@ -21,7 +20,7 @@ from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
 from model.trader_actions import SharesOfCompany
 
-from utils import save_keras_sequential, load_keras_sequential
+from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
 
 # Define possible actions per stock
@@ -327,9 +326,7 @@ class RnnTrader(ITrader):
 EPISODES = 2
 if __name__ == "__main__":
     # Reading training data
-    # TODO use convinient method
-    training_data = read_stock_market_data([[CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_A.value + '_1962-2011'],
-                                            [CompanyEnum.COMPANY_B, CompanyEnum.COMPANY_B.value + '_1962-2011']])
+    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['_1962-2011'])
 
     # Define initial portfolio
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
