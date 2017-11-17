@@ -24,6 +24,8 @@ if __name__ == "__main__":
 
     # Evaluate their performance over the testing period
     evaluator = PortfolioEvaluator([benchmark, trader], True)
-    # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen übergeben
+    # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen berechnen
     # TODO kriegen wir das eleganter hin?
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, trader_portfolio], 1000)
+    stock_data_testing_period = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A], [testing_period])
+    days_of_testing_period = len(stock_data_testing_period.get_stock_data_for_company(CompanyEnum.COMPANY_A))
+    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, trader_portfolio], days_of_testing_period)
