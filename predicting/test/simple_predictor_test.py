@@ -8,7 +8,7 @@ Module for testing of all predicting components
 import unittest
 
 from datetime import date
-from depenedency_injection_containers import Predictors
+from dependency_injection_containers import Predictors
 from model.StockData import StockData
 
 
