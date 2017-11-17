@@ -327,6 +327,7 @@ class RnnTrader(ITrader):
 EPISODES = 2
 if __name__ == "__main__":
     # Reading training data
+    # TODO use convinient method
     training_data = read_stock_market_data([[CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_A.value + '_1962-2011'],
                                             [CompanyEnum.COMPANY_B, CompanyEnum.COMPANY_B.value + '_1962-2011']])
 
@@ -341,5 +342,6 @@ if __name__ == "__main__":
     for i in range(EPISODES):
         evaluator.inspect_over_time(training_data, [initial_portfolio])
 
+    # TODO saving doesn't work?
     # Save trained neural network
     trader.save_model()

@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # Define benchmark and trader
     benchmark = BuyAndHoldTrader()
-    trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
+    trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
 
     # Define identical portfolio for benchmark and trader
     benchmark_portfolio = Portfolio(10000, [], 'Benchmark')

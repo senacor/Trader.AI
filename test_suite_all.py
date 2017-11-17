@@ -1,14 +1,14 @@
 import unittest
 
-from evaluating.test.evaluator_test import EvaluatorTest
-from predicting.test.perfect_predictor_test import PerfectPredictorTest
 from predicting.test.predictor_test import PredictingTest
+from predicting.test.perfect_predictor_test import PerfectPredictorTest
+from predicting.test.nn_predictor_test import NnPredictorTest
 from trading.test.trader_test import TraderTest
-from predicting.test.perfect_stock_a_predictor_test import PerfectStockAPredictorTest
+from evaluating.test.evaluator_test import EvaluatorTest
 
 if __name__ == "__main__":
 
-    test_classes = [EvaluatorTest, PredictingTest, PerfectPredictorTest, PerfectStockAPredictorTest, TraderTest]
+    test_classes = [PredictingTest, PerfectPredictorTest, NnPredictorTest, TraderTest, EvaluatorTest]
 
     suites = []
     for test in test_classes:
