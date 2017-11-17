@@ -8,6 +8,7 @@ import numpy as np
 
 from utils import load_keras_sequential, save_keras_sequential, read_stock_market_data_conveniently
 from model.CompanyEnum import CompanyEnum
+from logger import logger
 
 MODEL_FILE_NAME_STOCK_A = 'stock_a_predictor'
 MODEL_FILE_NAME_STOCK_B = 'stock_b_predictor'
@@ -46,7 +47,7 @@ class BaseNnPredictor(IPredictor):
             # Let network predict the next stock value based on last 100 stock values
             return self.network.predict(input_values)
         except:
-            print("Error in predicting next stock value.")
+            logger.error("Error in predicting next stock value.")
             assert False
             
 class StockANnPredictor(BaseNnPredictor):
@@ -92,7 +93,7 @@ def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
 
     # Evaluate the trained neural network and plot results
     score = network.evaluate(lastPrices, currentPrice, batch_size=128, verbose=0)
-    print('Test score: ', score)
+    logger.debug('Test score: ', score)
     plt.figure()
     plt.plot(history.history['loss'])
     plt.title('training loss / testing loss by epoch')
@@ -120,20 +121,20 @@ if __name__ == "__main__":
     from keras.layers import Dense
 
     # Load the training data; here: complete data about stock A (Disney)
-    print("Data loading...")
+    logger.debug("Data loading...")
     full_stock_market_data = read_stock_market_data_conveniently([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
     
     company_a_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
     datesA = np.array([[x[0] for x in company_a_stock_market_data]])[0].tolist()
     pricesA = np.array([[x[1] for x in company_a_stock_market_data]])[0].tolist()
     
-    print("Data for Stock A loaded:", len(pricesA), "prices and", len(datesA), "dates read.")
+    logger.debug("Data for Stock A loaded:", len(pricesA), "prices and", len(datesA), "dates read.")
     learnNnAndSave(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
     
     company_b_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B)
     datesB = np.array([[x[0] for x in company_b_stock_market_data]])[0].tolist()
     pricesB = np.array([[x[1] for x in company_b_stock_market_data]])[0].tolist()
-    print("Data for Stock B loaded:", len(pricesB), "prices and", len(datesB), "dates read.")
+    logger.debug("Data for Stock B loaded:", len(pricesB), "prices and", len(datesB), "dates read.")
     learnNnAndSave(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
 
 

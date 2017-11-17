@@ -13,6 +13,7 @@ from trading.model.trader_interface import SharesOfCompany
 from trading.model.trader_interface import CompanyEnum
 from predicting.model.IPredictor import IPredictor
 import copy
+from logger import logger
 
 
 class SimpleTrader(ITrader):
@@ -38,7 +39,6 @@ class SimpleTrader(ITrader):
         Returns:
           A TradingActionList instance, may be empty never None
         """
-
         local_portfolio = copy.deepcopy(portfolio)
 
         result = TradingActionList()
@@ -48,16 +48,14 @@ class SimpleTrader(ITrader):
             self.__trade_for_company(CompanyEnum.COMPANY_A, company_a_data, self.stock_a_predictor, local_portfolio,
                                  result)
         else:
-            # TODO: use Logging!!!
-            print("!!!! SimpleTrader: stock_a_predictor or company_a_data is None -> No prediction for Company A")
+            logger.warning(f" stock_a_predictor:  {self.stock_a_predictor} or company_a_data: {company_a_data} is None -> No prediction for Company A")
 
         company_b_data = stock_market_data.market_data.get(CompanyEnum.COMPANY_B)
         if (self.stock_b_predictor is not None and company_b_data is not None):
             self.__trade_for_company(CompanyEnum.COMPANY_B, company_b_data, self.stock_b_predictor, local_portfolio,
                                  result)
         else:
-            # TODO: use Logging!!!
-            print("!!!! SimpleTrader: stock_b_predictor or company_b_data is None -> No prediction for Company B")
+            logger.warning("stock_b_predictor or company_b_data is None -> No prediction for Company B")
 
         return result
 
