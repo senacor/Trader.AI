@@ -9,8 +9,6 @@ import unittest
 
 import datetime as dt
 
-from definitions import DATASETS_DIR, JSON_DIR
-from evaluating.evaluator_utils import read_portfolio
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
@@ -23,18 +21,6 @@ from model.trader_actions import SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
-    def testReadPortfolio(self):
-        """
-        Tests: evaluator_utils.py/read_portfolio
-
-        Read "../json/portfolio.json" and check if that happens correctly
-        """
-        portfolio = read_portfolio(path=JSON_DIR)
-
-        self.assertEqual(len(portfolio.shares), 2)
-        self.assertEqual(portfolio.cash, 10000.0)
-        self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_B)
-
     def testReadStockMarketData(self):
         """
         Tests: evaluator_utils.py/read_stock_market_data
@@ -69,7 +55,7 @@ class EvaluatorTest(unittest.TestCase):
         """
         trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
         current_portfolio_value = 0.0  # Dummy value
-        portfolio = read_portfolio(path=JSON_DIR)
+        portfolio = Portfolio(10000, [], 'Test')
         market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
         trading_action_list = trader.doTrade(portfolio, current_portfolio_value, market_data)
 

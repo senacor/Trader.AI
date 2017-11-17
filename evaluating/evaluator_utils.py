@@ -14,37 +14,6 @@ from model.CompanyEnum import CompanyEnum
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
 """
 
-"""
-Some JSON keys
-"""
-JSON_KEY_SHARES = 'shares'
-JSON_KEY_COMPANY_ENUM = 'company_enum'
-JSON_KEY_AMOUNT = 'amount'
-JSON_KEY_CASH = 'cash'
-
-
-def read_portfolio(name: str = 'portfolio', path="../json/") -> Portfolio:
-    """
-    Reads the JSON file from "../json/`name`.json" and creates a `Portfolio` object from this
-
-    Args:
-        name: The filename to read
-        path: The path from which to read. Default: "../json/"
-
-    Returns:
-        The created `Portfolio` object
-    """
-    file = open(os.path.join(path, name + ".json"))
-    data = json.loads(file.read())
-    file.close()
-
-    shares_list = list()
-    for share in data[JSON_KEY_SHARES]:
-        shares_list.append(SharesOfCompany(CompanyEnum[share[JSON_KEY_COMPANY_ENUM]], share[JSON_KEY_AMOUNT]))
-
-    return Portfolio(data[JSON_KEY_CASH], shares_list)
-
-
 def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
     """
     Draws all given `Portfolios` based on the given `prices`
