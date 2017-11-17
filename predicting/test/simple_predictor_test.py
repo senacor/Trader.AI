@@ -11,7 +11,7 @@ from datetime import date
 from depenedency_injection_containers import Predictors
 
 
-class PredictingTest(unittest.TestCase):
+class SimplePredictorTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -40,5 +40,5 @@ class PredictingTest(unittest.TestCase):
 
     
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(PredictingTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(SimplePredictorTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
