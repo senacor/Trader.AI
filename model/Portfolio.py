@@ -125,24 +125,27 @@ class Portfolio:
             trade_volume = amount * current_price
 
             if trade_action.action is TradingActionEnum.BUY:
-                logger.debug(f"  Buying {amount} shares of '{share.company_enum}' with an individual value of {current_price}")
+                logger.debug(f"Buying {amount} shares of '{share.company_enum}' with an individual value of "
+                             f"{current_price}")
                 logger.debug(f"  Volume of this trade: {trade_volume}")
 
                 if trade_volume <= updated_portfolio.cash:
                     share.amount += amount
                     updated_portfolio.cash -= trade_volume
                 else:
-                    logger.warning(f"  No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction with "
-                          f"volume of {trade_volume}")
+                    logger.warning(f"No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction "
+                                   f"with volume of {trade_volume}")
             elif trade_action.action is TradingActionEnum.SELL:
-                logger.debug(f"  Selling {amount} shares of {share.company_enum} with individual value of {current_price}")
+                logger.debug(f"Selling {amount} shares of {share.company_enum} with individual value of "
+                             f"{current_price}")
                 logger.debug(f"  Volume of this trade: {trade_volume}")
 
-                if share.amount > amount:
+                if share.amount >= amount:
                     share.amount -= amount
                     updated_portfolio.cash += trade_volume
                 else:
-                    logger.warning(f"  Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} shares")
+                    logger.warning(f"Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} "
+                                   f"shares")
 
             logger.debug(f"Resulting available cash after trade: {updated_portfolio.cash}")
 
