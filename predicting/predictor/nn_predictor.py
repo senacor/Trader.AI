@@ -32,7 +32,7 @@ class BaseNnPredictor(IPredictor):
         self.model = load_keras_sequential(RELATIVE_PATH, nn_filename)
         # ... if that wasn't possible, then create a new untrained one
         if self.model is None:
-            logger.debug(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
+            logger.warn(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
             self.trained = False
             self.model = Sequential()
             self.model.add(Dense(500, activation='relu', input_dim=100))
@@ -106,7 +106,7 @@ def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
 
     # Evaluate the trained neural network and plot results
     score = network.evaluate(lastPrices, currentPrice, batch_size=128, verbose=0)
-    logger.debug('Test score: ', score)
+    logger.debug(f"Test score: {score}")
     plt.figure()
     plt.plot(history.history['loss'])
     plt.title('training loss / testing loss by epoch')
@@ -136,13 +136,13 @@ if __name__ == "__main__":
     datesA = np.array([[x[0] for x in company_a_stock_market_data]])[0].tolist()
     pricesA = np.array([[x[1] for x in company_a_stock_market_data]])[0].tolist()
     
-    logger.debug("Data for Stock A loaded:", len(pricesA), "prices and", len(datesA), "dates read.")
+    logger.debug(f"Data for Stock A loaded: {len(pricesA)} prices and {len(datesA)} dates read.")
     learnNnAndSave(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
     
     company_b_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B)
     datesB = np.array([[x[0] for x in company_b_stock_market_data]])[0].tolist()
     pricesB = np.array([[x[1] for x in company_b_stock_market_data]])[0].tolist()
-    logger.debug("Data for Stock B loaded:", len(pricesB), "prices and", len(datesB), "dates read.")
+    logger.debug(f"Data for Stock B loaded: {len(pricesB)} prices and {len(datesB)} dates read.")
     learnNnAndSave(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
 
 

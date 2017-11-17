@@ -32,45 +32,50 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
     try:
         model_as_json = model.to_json()
 
-        json_file = open(os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.json'), "w")
+        model_filename_with_path = os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.json')
+        weights_filename_with_path = os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.h5')
+
+        json_file = open(model_filename_with_path, "w")
         json_file.write(model_as_json)
         json_file.close()
 
-        model.save_weights(os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.h5'))
+        model.save_weights(weights_filename_with_path)
+        logger.info(f"save_keras_sequential: Saved Sequential from {model_filename_with_path} and {weights_filename_with_path}!")
         return True
     except:
         logger.error(f"save_keras_sequential: Writing of Sequential as file failed")
         return False
 
 
-def load_keras_sequential(relative_path: str, filename: str) -> Sequential:
+def load_keras_sequential(relative_path: str, file_name_without_extension: str) -> Sequential:
     """
     Loads a Keras Sequential neural network from file system
     
     Args:
-        model : Sequential to save
         relative_path : relative path in project
+        file_name_without_extension : file name without extension, will be used for json with models and h5 with weights.
     Returns:
         Sequential, or None if nothing found or error
     """
 
-    model_filename_with_path = os.path.join(ROOT_DIR, relative_path, filename + '.json')
-    weights_filenme_with_path = os.path.join(ROOT_DIR, relative_path, filename + '.h5')
+    model_filename_with_path = os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.json')
+    weights_filename_with_path = os.path.join(ROOT_DIR, relative_path, file_name_without_extension + '.h5')
 
-    if os.path.exists(model_filename_with_path) and os.path.exists(weights_filenme_with_path):
+    if os.path.exists(model_filename_with_path) and os.path.exists(weights_filename_with_path):
         try:
             json_file = open(model_filename_with_path, 'r')
             loaded_model_json = json_file.read()
             json_file.close()
             model = model_from_json(loaded_model_json)
-            model.load_weights(weights_filenme_with_path)
+            model.load_weights(weights_filename_with_path)
+            logger.info(f"load_keras_sequential: Loaded Sequential from {model_filename_with_path} and {weights_filename_with_path}!")
             return model
         except:
             logger.error(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
             return None
     else:
         logger.error(
-            f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filenme_with_path} not found!")
+            f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filename_with_path} not found!")
         return None
 
 

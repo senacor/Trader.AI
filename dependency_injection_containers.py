@@ -57,7 +57,7 @@ class Traders(containers.DeclarativeContainer):
         )
    
     """RNN Trader"""
-    RnnTraderr_with_perfect_prediction = providers.Factory(
+    RnnTrader_with_perfect_prediction = providers.Factory(
         RnnTrader, 
         stock_a_predictor=Predictors.PerfectPredictor_stock_a, 
         stock_b_predictor=Predictors.PerfectPredictor_stock_b
