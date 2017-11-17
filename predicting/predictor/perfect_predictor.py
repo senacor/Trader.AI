@@ -7,6 +7,7 @@ from predicting.model.IPredictor import IPredictor
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
 from utils import read_stock_market_data_conveniently
+from logger import logger
 
 class PerfectPredictor(IPredictor):
     '''
@@ -48,5 +49,5 @@ class PerfectPredictor(IPredictor):
             (_, next_value) = self.stock_values[index + 1]
             return next_value
         else:
-            print(f"Couldn't make a perfect prediction for the day after {current_date}")
+            logger.error(f"Couldn't make a perfect prediction for the day after {current_date}")
             assert False

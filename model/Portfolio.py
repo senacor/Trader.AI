@@ -1,3 +1,5 @@
+from typing import List
+
 import copy
 import datetime
 
@@ -7,23 +9,34 @@ from model.CompanyEnum import CompanyEnum
 from trading.model.trader_interface import TradingActionList, TradingActionEnum, TradingAction
 from logger import logger
 
+SharesList = List[SharesOfCompany]
+
+
 class Portfolio:
     """
     Represents portfolio of a client
     """
 
-    def __init__(self, cash: float, shares: list, name: str = 'nameless'):
+    def __init__(self, cash: float, shares: SharesList, name: str = 'nameless'):
         """ Constructor
 
         Args:
-          cash : current cash level
-          shares : list of SharesOfCompany, see SharesOfCompany
+          cash: The portfolio's initial cash level
+          shares: The portfolio's initial list of shares
+          name: The portfolio's name. This is mainly used as diagram legends in `PortfolioEvaluator#draw`
         """
-        self.name = name  # TODO wo brauchen wir name?
         self.cash = cash
         self.shares = shares
+        self.name = name
 
     def total_value(self, date: datetime.date, prices: dict):
+        """
+        Calculates the portfolio's total value based on the held shares multiplied by their current value added to the
+        cash level.
+
+        Returns:
+            The portfolio's total value
+        """
         values = [share.amount *
                   [price[1] for price in prices[share.company_enum] if date == price[0]][0]
                   for share in self.shares]
@@ -31,9 +44,29 @@ class Portfolio:
         return sum(values) + self.cash
 
     def __has_stock(self, company_enum: CompanyEnum):
-        return len(self.shares) != 0 and len([share for share in self.shares if share.company_enum == company_enum]) != 0
+        """
+        Checks whether the stock by the given `company_enum` is held in the portfolio
+        Args:
+            company_enum: The company to check the stock existence for
+
+        Returns:
+            `True` if existing, `False` otherwise
+        """
+        return len(self.shares) != 0 and len(
+            [share for share in self.shares if share.company_enum == company_enum]) != 0
 
     def get_or_insert(self, company_enum: CompanyEnum):
+        """
+        If the portfolios holds a stock of `company_enum` this is returned. Otherwise an initial object with 0 shares
+        held is inserted.
+
+        Args:
+            company_enum: The company to get/insert the stock count for
+
+        Returns:
+            An object of type `SharesOfCompany` of this `company_enum`, either with intial share count of 0 or the
+            actual share count
+        """
         if not self.__has_stock(company_enum):
             share = SharesOfCompany(company_enum, 0)
             self.shares.append(share)
@@ -43,14 +76,14 @@ class Portfolio:
 
     def __get_by_name(self, company_enum: CompanyEnum) -> SharesOfCompany:
         """
-        Returns SharesOfCompany for company name, or None if nothing found
+        Returns SharesOfCompany for `company_enum`, or None if nothing found
         """
         return next((share for share in self.shares if share.company_enum == company_enum), None)
 
     def get_amount(self, company_enum: CompanyEnum) -> int:
         """
-        Return the amount of shares we hold from the given company.
-         If we don't hold any shares of this company, we return 0.
+        Return the amount of shares we hold from the given `company_enum`.  If the portfolio doesn't hold any shares of
+        this company, 0 ist returned
         """
         share = self.__get_by_name(company_enum)
         if share is not None:
@@ -62,9 +95,13 @@ class Portfolio:
         """
         Iterates through the list of trading actions (`trade_action_list`), applies those actions and returns an updated
         `Portfolio` object based on the given `StockMarketData`. If `trade_action_list` is empty nothing will be changed
-        :param stock_market_data: The market data based on which the actions are applied
-        :param trade_action_list: The list of trading action to apply
-        :return: An updated portfolio. This is a deep copy of the given `portfolio` (see `copy.deepcopy`)
+
+        Args:
+            stock_market_data: The market data based on which the actions are applied
+            trade_action_list: The list of trading action to apply
+
+        Returns:
+            An updated portfolio. This is a deep copy of the given `portfolio` (see `copy.deepcopy`)
         """
         updated_portfolio = copy.deepcopy(self)
 
@@ -114,60 +151,68 @@ class Portfolio:
 
         return updated_portfolio
 
-    def isTradingActionListValid(self, tradingActionList: TradingActionList, stockMarketData: StockMarketData) -> bool:
+    def isTradingActionListValid(self, trading_action_list: TradingActionList,
+                                 stock_market_data: StockMarketData) -> bool:
         """
         Validates if generated TradingActionList is valid in comparison to current Portfolio
+
         Args:
-          trading_action_list : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
-          stockMarketData: StockMarketData containing date for all companies
+          trading_action_list: TradingActionList containing generated TradingActions to be sent into Evaluation (Stock Market)
+          stock_market_data: StockMarketData containing date for all companies
+
         Returns:
-          A True if given TradingActionList is valid in comparison to current Portfolio, False otherwise, never None
+          `True` if given TradingActionList is valid in comparison to current Portfolio, `False` otherwise, never None
         """
 
         current_cash = self.cash
 
-        most_recent_price_company_a = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
-        trading_action_for_company_a = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
+        most_recent_price_company_a = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
+        trading_action_for_company_a = trading_action_list.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
 
-        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_A,
-                                                             trading_action_for_company_a, most_recent_price_company_a)
-        if (is_valid is False):
+        is_valid, current_cash = self.__is_trading_action_valid(current_cash, CompanyEnum.COMPANY_A,
+                                                                trading_action_for_company_a,
+                                                                most_recent_price_company_a)
+        if is_valid is False:
             return False
 
-        most_recent_price_company_b = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
-        trading_action_for_company_b = tradingActionList.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
+        most_recent_price_company_b = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
+        trading_action_for_company_b = trading_action_list.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
 
-        is_valid, current_cash = self.__isTradingActionValid(current_cash, CompanyEnum.COMPANY_B,
-                                                             trading_action_for_company_b, most_recent_price_company_b)
-        if (is_valid is False):
+        is_valid, current_cash = self.__is_trading_action_valid(current_cash, CompanyEnum.COMPANY_B,
+                                                                trading_action_for_company_b,
+                                                                most_recent_price_company_b)
+        if is_valid is False:
             return False
 
         return True
 
-    def __isTradingActionValid(self, current_cash: float, company_enum: CompanyEnum, trading_action_for_company: TradingAction,
-                               most_recent_price_company: float):
+    def __is_trading_action_valid(self, current_cash: float, company_enum: CompanyEnum,
+                                  trading_action_for_company: TradingAction, most_recent_price_company: float):
         """
         Validates if given TradingAction is valid
+
         Args:
-          current_cash : TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
-          company_enum : CCompanyEnum
+          current_cash: TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          company_enum: CCompanyEnum
           trading_action_for_company: TradingAction
           most_recent_price_company: most recent price of company as float
+
         Returns:
           A True if given TradingAction is valid in comparison to current Portfolio and Cash, False otherwise, never None
         """
-        if (trading_action_for_company is not None):
-            if (trading_action_for_company.action == TradingActionEnum.BUY):
+        if trading_action_for_company is not None:
+            if trading_action_for_company.action == TradingActionEnum.BUY:
                 price_to_pay = most_recent_price_company * trading_action_for_company.shares
 
                 current_cash = current_cash - price_to_pay
-                if (current_cash < 0):
+                if current_cash < 0:
                     logger.warning(
-                        f"Not enough money to pay! tradingActionForCompany: {trading_action_for_company}, Portfolio: {self}")
+                        f"Not enough money to pay! tradingActionForCompany: "
+                        f"{trading_action_for_company}, Portfolio: {self}")
                     return False, current_cash
 
-            elif (trading_action_for_company.action == TradingActionEnum.SELL):
-                if (trading_action_for_company.shares > self.get_amount(company_enum)):
+            elif trading_action_for_company.action == TradingActionEnum.SELL:
+                if trading_action_for_company.shares > self.get_amount(company_enum):
                     return False
             else:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {trading_action_for_company}')
