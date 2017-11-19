@@ -23,7 +23,7 @@ from  definitions import DATASETS_DIR
 from utils import read_stock_market_data
 
 
-class TraderTest(unittest.TestCase):
+class SimpleTraderTest(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -184,5 +184,5 @@ class TraderTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TraderTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(SimpleTraderTest)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -1,6 +1,13 @@
+import unittest
 from unittest import TestCase
 
+from datetime import date
+import numpy as np
+
 from model.CompanyEnum import CompanyEnum
+from model.Portfolio import Portfolio
+from model.SharesOfCompany import SharesOfCompany
+from model.StockMarketData import StockMarketData
 from utils import read_stock_market_data
 
 
@@ -38,3 +45,36 @@ class TestStockMarketData(TestCase):
 
         self.assertEqual(stock_market_data.get_row_count(),
                          stock_market_data.market_data[CompanyEnum.COMPANY_A].get_row_count())
+
+    # TODO is that a good place for this test?
+    def testStockMarketDataConstruction(self):
+        companyName2DateValueArrayDict = dict()
+
+        today = date(2017, 11, 8)
+        yesterday = date(2017, 11, 8)
+        date_value_array_1 = np.array([[today, yesterday], [10.0, 20.0]])
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_A] = date_value_array_1
+
+        date_value_array_2 = np.array([[today, yesterday], [1.0, 2.0]])
+        companyName2DateValueArrayDict[CompanyEnum.COMPANY_B] = date_value_array_2
+
+        stock_market_data = StockMarketData(companyName2DateValueArrayDict)
+        stock_market_data.market_data.items()
+
+    # TODO is that a good place for this test?
+    def testPortfolioConstruction(self):
+        shares_of_company_list = list()
+        shares_of_company_a = SharesOfCompany(CompanyEnum.COMPANY_A, 10)
+        shares_of_company_b = SharesOfCompany(CompanyEnum.COMPANY_B, 50)
+        shares_of_company_list.append(shares_of_company_a)
+        shares_of_company_list.append(shares_of_company_b)
+
+        portfolio = Portfolio(1000.0, shares_of_company_list)
+
+        self.assertEqual(portfolio.cash, 1000.0)
+        self.assertEqual(len(portfolio.shares), 2)
+        self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
+        self.assertEqual(portfolio.shares[0].amount, 10)
+
+        self.assertEqual(portfolio.shares[1].company_enum, CompanyEnum.COMPANY_B)
+        self.assertEqual(portfolio.shares[1].amount, 50)

@@ -32,15 +32,20 @@ class StockMarketData:
 
     def get_most_recent_price(self, company_enum: CompanyEnum):
         """
-        Determines the lastest stock price of the given `company_enum`
+        Determines the lastest stock price of the given `company_enum`.
+        Returns None if no stock price for the given company was found.
 
         Args:
             company_enum: The company to determine the stock price of
 
         Returns:
-            The lastest `company_enum`'s stock price
+            The lastest `company_enum`'s stock price or None.
         """
-        return self.market_data.get(company_enum).get_last()[1]
+        company_data = self.market_data.get(company_enum)
+        if company_data is not None:
+            return company_data.get_last()[1]
+        else:
+            return None
 
     def get_row_count(self):
         """
@@ -62,6 +67,15 @@ class StockMarketData:
             A list of `StockData` for the given company
         """
         return self.market_data.get(company_enum)
+
+    def get_number_of_companies(self) -> int:
+        """
+        Returns number of companies stored in this market data.
+
+        Returns:
+            Number of companies as integer.
+        """
+        return len(self.market_data)
 
     def check_data_length(self):
         """

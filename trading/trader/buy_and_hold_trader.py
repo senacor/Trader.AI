@@ -36,13 +36,14 @@ class BuyAndHoldTrader(ITrader):
             self.bought_stocks = True
             trading_actions = TradingActionList()
 
-            companies = list(CompanyEnum)
-
-            available_cash_per_stock = portfolio.cash / len(companies)
+            # Calculate how many cash to spend per company
+            available_cash_per_stock = portfolio.cash / stockMarketData.get_number_of_companies()
 
             # Invest (100 // `len(companies)`)% of cash into each stock
-            for company in companies:
-                amount_to_buy = available_cash_per_stock // stockMarketData.get_most_recent_price(company)
-                trading_actions.buy(company, amount_to_buy)
+            for company in list(CompanyEnum):
+                most_recent_price = stockMarketData.get_most_recent_price(company)
+                if most_recent_price is not None:
+                    amount_to_buy = available_cash_per_stock // most_recent_price
+                    trading_actions.buy(company, amount_to_buy)
 
         return trading_actions
