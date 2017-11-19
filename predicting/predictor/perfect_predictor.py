@@ -30,7 +30,7 @@ class PerfectPredictor(IPredictor):
         # Load all stock data, but only save it for the given company
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
                                                    ['1962-2011', '2012-2017'])
-        self.stock_values = stock_market_data.get_for_company(company)
+        self.stock_data = stock_market_data.get_for_company(company)
 
     def doPredict(self, data: StockData) -> float:
         """ Use the loaded stock values to predict the next stock value.
@@ -46,9 +46,9 @@ class PerfectPredictor(IPredictor):
         assert isinstance(data.get_first()[1], float)
 
         (current_date, current_value) = data.get_last()
-        index = self.stock_values.index((current_date, current_value))
-        if index is not None and index < self.stock_values.get_row_count() - 1:
-            (_, next_value) = self.stock_values.get(index + 1)
+        index = self.stock_data.index((current_date, current_value))
+        if index is not None and index < self.stock_data.get_row_count() - 1:
+            (_, next_value) = self.stock_data.get(index + 1)
             return next_value
         else:
             logger.error(f"Couldn't make a perfect prediction for the day after {current_date}")

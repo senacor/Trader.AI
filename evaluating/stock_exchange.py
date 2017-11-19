@@ -7,7 +7,7 @@ from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
-from trading.trader.rnn_trader import RnnTrader
+from trading.trader.dql_trader import DqlTrader
 
 if __name__ == "__main__":
     # Load stock market data for training and testing period
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # Define traders
     buy_and_hold_trader = BuyAndHoldTrader()
     simple_trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
-    rnn_trader = RnnTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
+    rnn_trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
 
     # Define portfolios for the traders
     benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')

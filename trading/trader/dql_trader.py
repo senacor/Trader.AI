@@ -8,8 +8,11 @@ from collections import deque
 import numpy as np
 
 from evaluating.portfolio_evaluator import PortfolioEvaluator
-from model import Portfolio, StockMarketData
+from model.StockData import StockData
+from model.Portfolio import Portfolio
+from model.StockMarketData import StockMarketData
 from model.IPredictor import IPredictor
+from predicting.predictor.perfect_predictor import PerfectPredictor
 from predicting.predictor.random_predictor import RandomPredictor
 from model.ITrader import ITrader
 from model.trader_actions import TradingActionList, TradingAction
@@ -56,77 +59,61 @@ class State:
 
 
 class DqlTrader(ITrader):
-    '''
-    Implementation of ITrader based on Reinforced Neural Network (RNN): doTrade generates TradingActionList according to last generated changes on Portfolio value.
-    '''
-    MODEL_FILE_NAME = 'rnn_trader'
-
-    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor, learnFromTrades: bool = False):
-        '''
-        Constructor
-        '''
-        # Save predictors and whether we learn from subsequent trades
+    """
+    Implementation of ITrader based on reinforced Q-learning (RQL).
+    """
+    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor, use_trained_model: bool = True):
+        """
+        TODO
+        Args:
+            stock_a_predictor:
+            stock_b_predictor:
+            use_trained_model:
+        """
+        # Save predictors
         self.stock_a_predictor = stock_a_predictor
         self.stock_b_predictor = stock_b_predictor
-        self.learnFromTrades = learnFromTrades
 
-        # Hyperparameters for neural network
-        self.state_size = 7  # TODO: infer from...?
-        # Discretization of actions as list of (+1.0,+1.0), (+1.0, +0.5), (+1.0, 0.0), ..., (-1.0, -1.0)
-        # We have 5 actions per stock (+1.0, +0.5, 0.0, -0.5, -1.0)
-        # Means 25 actions for our two stocks
+        # Hyper parameters for neural network
+        self.state_size = 7
         self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS)
         self.hidden_size = 50
 
-        # These are hyper parameters for the DQN
-        self.discount_factor = 0.99
+        # Hyper parameters for deep Q-learning
         self.learning_rate = 0.001
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 2  # TODO war mal 64
         self.train_start = 1000
-        # create replay memory using deque
+
+        # Parameters for experience memory
         self.memory = deque(maxlen=2000)
-
-        # create main model, either from file or (if not existent) from scratch
-        self.model = self.load_model()
-        if (self.model is None):
-            self.model = self.build_model()
-
-        # create and initialize target model
-        # self.target_model = self.build_model()
-        # self.update_target_model()
-
         self.lastPortfolioValue = None
         self.lastActionA = None
         self.lastActionB = None
         self.lastState = None
 
-    # Destructor
-    def __del__(self):
-        if self.learnFromTrades:
-            save_keras_sequential(self.model, 'trading', self.MODEL_FILE_NAME)
+        # Create main model, either as trained model (from file) or as untrained model (from scratch)
+        self.model = None
+        if use_trained_model:
+            self.model = load_keras_sequential('trading', 'dql_trader')
+            logger.info(f"DQL Trader: Loaded trained model!")
+        if self.model is None: # loading failed or we didn't want to use a trained model
+            self.model = Sequential()
+            self.model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+            self.model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
+            self.model.add(Dense(self.action_size, activation='relu', kernel_initializer='he_uniform'))
+            logger.info(f"DQL Trader: Create new untrained model!")
+        assert self.model is not None
+        self.model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
-    # TODO description
-    def build_model(self) -> Sequential:
-        model = Sequential()
-        model.add(
-            Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
-        # activation=tanh for output between -1 and +1
-        model.add(Dense(self.action_size, activation='relu', kernel_initializer='he_uniform'))
-        # model.summary()
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
-        return model
-
-    # TODO remove this method?
-    def load_model(self) -> Sequential:
+    def save_trained_model(self):
         """
-        Load model from file system
+        Save the trained neural network under a fixed name specific for this trader.
         """
-        return load_keras_sequential('trading', self.MODEL_FILE_NAME)
-
+        print(f"DQL Trader: Saving trained model")
+        save_keras_sequential(self.model, 'trading', 'dql_trader')
 
     def get_action(self, state: State):
         """
@@ -143,34 +130,42 @@ class DqlTrader(ITrader):
         which in turn means there is no cash left to buy stock B (the action +0.2)
         """
         if np.random.rand() <= self.epsilon:
-            # generate two random actions
+            # Generate and return two random actions
             return random.choice(STOCKACTIONS), random.choice(STOCKACTIONS)
         else:
-            # generate values per action by calling neural network with current state
-            actionValues = self.model.predict(state.get_input_array())
-            # Get index with highest value and return corresponding actions
-            index = np.argmax(actionValues[0])  # TODO what if there are more actions with the same values?
+            # Generate values per action by calling neural network with current state
+            action_values = self.model.predict(state.get_input_array())
+            # Get index with highest value (if there are more than one, get the first), and return corresponding actions
+            index = np.argmax(action_values[0])
             return self.get_actions_from_index(index)
 
     def get_actions_from_index(self, index: int):
+        """
+        Convert index from neural network output into two STOCKACTIONS.
+        Args:
+            index: Index of corrsponding combination of STOCKACTIONs in neural network output.
+
+        Returns:
+            Two STOCKACTIONs, one for stock A and one for stock B.
+
+        """
         assert 0 <= index < self.action_size
         return STOCKACTIONS[index // len(STOCKACTIONS)], STOCKACTIONS[index % len(STOCKACTIONS)]
 
     def get_index_from_actions(self, actionA: float, actionB: float):
+        """
+        Convert two STOCKACTIONS into index of neural network output.
+        Args:
+            actionA: STOCKACTION for stock A.
+            actionB: STOCKACTION for stock B.
+
+        Returns:
+            Index of corrsponding combination of STOCKACTIONs in neural network output.
+
+        """
         assert actionA in STOCKACTIONS
         assert actionB in STOCKACTIONS
         return STOCKACTIONS.index(actionA) * len(STOCKACTIONS) + STOCKACTIONS.index(actionB)
-
-    # TODO save sample <s,a,r,s'> to the replay memory
-    # TODO do we really need this function?
-    def append_sample(self, state: State, actionA: float, actionB: float, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-
-    def decrease_epsilon(self):
-        """
-        Decreases epsilon by one step (decay), but not lower than its defined minimum
-        """
-        self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
 
     # TODO implement reward using discounted future values as well
     def calculateReward(self, last_portfolio_value: float, current_portfolio_value: float) -> int:
@@ -203,7 +198,7 @@ class DqlTrader(ITrader):
             state.print()
             target = reward  # TODO also take future rewards into account using gamma
 
-            # build target action values and exchange value for the choosen actions
+            # build target action values and exchange value for the chosen actions
             target_action_values = self.model.predict(state.get_input_array())
             index = self.get_index_from_actions(actionA, actionB)
             target_action_values[0][index] = target
@@ -211,7 +206,6 @@ class DqlTrader(ITrader):
             # finally train the model for one epoch
             self.model.fit(state.get_input_array(), target_action_values, batch_size=self.batch_size, epochs=1, verbose=1)
 
-    # TODO why company names as parameters? we don't use them
     # TODO let ILSE give us information whether both (all) previous trades succeeded
     # TODO maybe get rid of currentPortfolioValue, because this is easily computable from the portfolio
     def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
@@ -226,119 +220,93 @@ class DqlTrader(ITrader):
           A TradingActionList instance, may be empty never None
         """
         # build current state object
-        predictedValueStockA = self.stock_a_predictor.doPredict(
-            stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A))
-        predictedValueStockB = self.stock_b_predictor.doPredict(
-            stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B))
+        stock_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+        stock_b_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+        predicted_stock_a = self.stock_a_predictor.doPredict(stock_a_data)
+        predicted_stock_b = self.stock_b_predictor.doPredict(stock_b_data)
         current_state = State(portfolio.cash,
                               portfolio.get_amount(CompanyEnum.COMPANY_A),
                               portfolio.get_amount(CompanyEnum.COMPANY_B),
                               stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A),
                               stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B),
-                              predictedValueStockA,
-                              predictedValueStockB)
+                              predicted_stock_a,
+                              predicted_stock_b)
 
         if self.lastState is not None:  # doTrade was called before at least once
             assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None
-            # baue memory tuple auf
+            # Calculate reward and store state, actions, reward and following state in memory
             reward = self.calculateReward(self.lastPortfolioValue, current_portfolio_value)
             memoryTuple = (self.lastState, self.lastActionA, self.lastActionB, reward, current_state)
-            # memory tuple speichern
             self.memory.append(memoryTuple)
-            # wir nehmen zufällige Teilmenge von memory und trainieren model mit obiger Teilmenge
+            # Train from experiences stored in memory
             self.train_model()
 
         # Create actions for current state
         actionA, actionB = self.get_action(current_state)
+        logger.info(f"DQL Trader: Computed trading actions {actionA} and {actionB}")
         # Decrease epsilon for fewer random actions
-        self.decrease_epsilon()
+        self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
         # Save created actions for the next call of doTrade
         self.lastActionA = actionA
         self.lastActionB = actionB
         self.lastPortfolioValue = current_portfolio_value
         self.lastState = current_state
-        return self.create_TradingActionList(actionA, actionB, portfolio, stock_market_data)
+        return self.create_trading_actions(actionA, actionB, portfolio, stock_market_data)
 
-    def create_TradingActionList(self, actionA: float, actionB: float, currentPortfolio: Portfolio,
-                                 stockMarketData: StockMarketData) -> TradingActionList:
+    def create_trading_actions(self, action_a: float, action_b: float, portfolio: Portfolio, stock_market_data: StockMarketData) -> TradingActionList:
         """
-        Creates TradingActionList for later Evaluation
+        Take output from neural net (two floats from STOCKACTIONS) and convert it into corresponding trading actions.
         Args:
-          actionA : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for Company A
-          actionB : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for Company B
-          currentPortfolio : current Portfolio of this Trader
-          stockMarketData: StockMarketData
+            action_a: float between -1.0 and 1.0, representing buy(positive)/sell(negative) and percentage of shares to consider for Company A
+            action_b: float between -1.0 and 1.0, representing buy(positive)/sell(negative) and percentage of shares to consider for Company B
+            portfolio: current portfolio of this trader
+            stock_market_data: current stock market data
+
         Returns:
-          A TradingActionList instance, may be empty never None
+            List of corresponding TradingActions
         """
-        result = TradingActionList()
+        assert action_a in STOCKACTIONS and action_b in STOCKACTIONS
+        assert portfolio is not None and stock_market_data is not None
+        trading_actions = TradingActionList()
 
-        mostRecentPriceCompanyA = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_A)
-        tradingActionA = self.create_TradingAction(CompanyEnum.COMPANY_A, actionA, currentPortfolio,
-                                                   mostRecentPriceCompanyA)
-        result.add_trading_action(tradingActionA)
-
-        mostRecentPriceCompanyB = stockMarketData.get_most_recent_price(CompanyEnum.COMPANY_B)
-        tradingActionB = self.create_TradingAction(CompanyEnum.COMPANY_B, actionB, currentPortfolio,
-                                                   mostRecentPriceCompanyB)
-        result.add_trading_action(tradingActionB)
-
-        return result
-
-    def create_TradingAction(self, companyEnum: CompanyEnum, action: float, currentPortfolio: Portfolio,
-                             mostRecentPriceCompany: float) -> TradingAction:
-        """
-        Creates single TradingAction for later evaluation in Stock Market
-        Args:
-          companyEnum : CompanyEnum describes current Company
-          action : float value between -1.0 and 1.0, representing operation (Buy=positive or Sell=negative) and percentage of shares to consider for given Company
-          currentPortfolio : current Portfolio of this Trader
-          mostRecentPriceCompany: most recent price of given company on stock market as float
-        Returns:
-          A TradingAction instance, may be None
-        """
-        assert action >= -1.0 and action <= 1.0
-
-        if (action > 0.0):
-            possibleAmountOfUnitsToBuy = int(currentPortfolio.cash // mostRecentPriceCompany)
-
-            amountOfSharesOfComapanyToBuy = int(action * possibleAmountOfUnitsToBuy)
-
-            sharesOfCompanyToBuy = SharesOfCompany(companyEnum, amountOfSharesOfComapanyToBuy)
-
-            return TradingAction(TradingActionEnum.BUY, sharesOfCompanyToBuy)
-
-        elif (action < 0.0):
-            # Get amount of shares we own; it may be 0
-            amountOfSharesWeOwn = currentPortfolio.get_amount(companyEnum)
-            assert amountOfSharesWeOwn >= 0
-            # Percent of shares to sell multiply by number of owned actions
-            amountOfSharesToSell = int(abs(action) * amountOfSharesWeOwn)
-            # Wrap into SharesOfCompany object TODO do we need this?
-            sharesOfCompanyToSell = SharesOfCompany(companyEnum, amountOfSharesToSell)
-            return TradingAction(TradingActionEnum.SELL, sharesOfCompanyToSell)
-        else:
-            logger.info(f"Trading action is None, action: {action}, Portfolio: {currentPortfolio}")
-
-        return None
+        # Create trading actions for stock A
+        owned_amount = portfolio.get_amount(CompanyEnum.COMPANY_A)
+        if action_a < 0.0 and owned_amount > 0:
+            amount_to_sell = int(abs(action_a) * owned_amount)
+            trading_actions.sell(CompanyEnum.COMPANY_A, amount_to_sell)
+        if action_a > 0.0:
+            current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
+            amount_to_buy = int(action_a * (portfolio.cash // current_price))
+            trading_actions.buy(CompanyEnum.COMPANY_A, amount_to_buy)
+        # Create trading actions for stock B
+        owned_amount = portfolio.get_amount(CompanyEnum.COMPANY_B)
+        if action_b < 0.0 and owned_amount > 0:
+            amount_to_sell = int(abs(action_b) * owned_amount)
+            trading_actions.sell(CompanyEnum.COMPANY_B, amount_to_sell)
+        if action_b > 0.0:
+            current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
+            amount_to_buy = int(action_b * (portfolio.cash // current_price))
+            trading_actions.buy(CompanyEnum.COMPANY_B, amount_to_buy)
+        return trading_actions
 
 
-EPISODES = 2
+
+# This method retrains the trader from scratch using training data from 1962-2011
+EPISODES = 1
 if __name__ == "__main__":
     # Reading training data
-    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['_1962-2011'])
+    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['2012-2017'])
 
     # Define initial portfolio
-    initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
+    portfolio = Portfolio(10000.0, [], 'DQL trader portfolio')
 
-    # Define this trader, thereby loading trained networks
-    trader = DqlTrader(RandomPredictor(), RandomPredictor())
+    # Initialize trader: use perfect predictors, don't use an already trained model, but learn while trading
+    # trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
+    trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True)
+    trader.epsilon = trader.epsilon_min
 
-    # Start evaluation and thereby learn training data
+    # Start evaluation and train correspondingly; display the results in a plot
     evaluator = PortfolioEvaluator([trader], True)
     for i in range(EPISODES):
-        evaluator.inspect_over_time(training_data, [initial_portfolio])
-
-    # TODO saving doesn't work?
-    # Save trained neural network
-    trader.save_model()
+        evaluator.inspect_over_time(training_data, [portfolio], 10)
+    #trader.save_trained_model()
