@@ -1,7 +1,7 @@
 '''
-Created on 13.11.2017
+Created on 19.11.2017
 
-@author: jtymoszuk
+@author: rmueller
 '''
 import random
 from collections import deque
@@ -55,7 +55,7 @@ class State:
 
 
 
-class RnnTrader(ITrader):
+class DqlTrader(ITrader):
     '''
     Implementation of ITrader based on Reinforced Neural Network (RNN): doTrade generates TradingActionList according to last generated changes on Portfolio value.
     '''
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     initial_portfolio = Portfolio(50000.0, [], 'RNN trader portfolio')
 
     # Define this trader, thereby loading trained networks
-    trader = RnnTrader(RandomPredictor(), RandomPredictor())
+    trader = DqlTrader(RandomPredictor(), RandomPredictor())
 
     # Start evaluation and thereby learn training data
     evaluator = PortfolioEvaluator([trader], True)
