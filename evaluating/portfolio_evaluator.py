@@ -56,7 +56,7 @@ class PortfolioEvaluator:
 
         if evaluation_offset == -1:
             # `evaluation_offset` has the 'disabled' value, so we calculate it based on the underlying data
-            evaluation_offset = market_data.get_row_count() - 1
+            evaluation_offset = market_data.get_row_count()
 
         # Reading should start one day later, because we also save the initial portfolio value in our return data.
         # Therefore the return data contains `evaluation_offset` rows which includes `evaluation_offset`-1 trades

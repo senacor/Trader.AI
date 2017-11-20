@@ -8,7 +8,7 @@ from predicting.test.nn_predictor_test import NnPredictorTest
 from trading.test.buy_and_hold_trader_test import BuyAndHoldTraderTest
 from trading.test.simple_trader_test import SimpleTraderTest
 from trading.test.dql_trader_test import DqlTraderTest
-from evaluating.test.evaluator_test import EvaluatorTest
+from evaluating.test.evaluator_test import EvaluatorTest, UtilsTest, TraderTestWeShouldMoveThis
 from model.test.test_stockMarketData import TestStockMarketData
 
 if __name__ == "__main__":
@@ -18,6 +18,9 @@ if __name__ == "__main__":
         BuyAndHoldTraderTest,
         SimpleTraderTest,
         DqlTraderTest,
+
+        # TODO @Janusz You may either move this test to your test codebase or even delete the test altogether (jh)
+        TraderTestWeShouldMoveThis,
 
         # Predictor
         RandomPredictorTest,
@@ -30,7 +33,10 @@ if __name__ == "__main__":
         # Model
         TestPortfolio,
         TestStockMarketData,
-        TestStockData
+        TestStockData,
+
+        # Misc
+        UtilsTest
     ]
 
     suites = []
