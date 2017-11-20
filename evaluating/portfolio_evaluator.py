@@ -20,13 +20,15 @@ class PortfolioEvaluator:
         """
         Constructor
 
-        :param trader: The `ITrader` implementation to use
-        :param draw_results: If this is set to `False` a diagram is *not* drawn
+        Args:
+            trader: The `ITrader` implementations to use for each portfolio respectively
+            draw_results: If this is set to `True` a diagram is drawn. Default: `False`
         """
         self.trader_list = trader_list
         self.draw_results = draw_results
 
-    def inspect_over_time(self, market_data: StockMarketData, portfolios: PortfolioList, evaluation_offset: int = -1):
+    def inspect_over_time(self, market_data: StockMarketData, portfolios: PortfolioList, evaluation_offset: int = -1,
+                          date_offset=None):
         """
         Lets the clock tick and executes this for every given `Portfolio` on every tick:
         * Notifies the trader which returns a list of trading actions
@@ -34,12 +36,17 @@ class PortfolioEvaluator:
         * Save the portfolio's state after the trade(s)
 
         Args:
-            :param market_data: The stock market data with which to work. Only those symbols are tradable for that are contained in this data
-            :param portfolios: The list of portfolios to manage
-            :param evaluation_offset: How many data rows should we look backward (from the end of `market_data`) as a start date? If omitted all data rows will be used. Default: -1, which is equal to omitting the parameter
+            market_data: The stock market data with which to work. Only those symbols are tradable for that are
+             contained in this data
+            portfolios: The list of portfolios to manage
+            evaluation_offset: How many data rows should we look backward (from the end of `market_data`) as a start
+             date? If omitted all data rows will be used. Default: -1, which is equal to omitting the parameter.
+            date_offset: Use a date offset instead of `evaluation_offset`. If this is set it overwrites any value
+             provided as `evaluation_offset`
 
         Returns:
-            If `self.test_mode` is `True`: All portfolios' value courses. Otherwise: Nothing. It just draws the course of all portfolios given the market data
+            All portfolios' value courses. If `self.draw_results` is `True`: It also draws the course of all portfolios
+             given the market data
         """
 
         portfolio_trader_mapping = list(zip(portfolios, self.trader_list))
@@ -54,9 +61,15 @@ class PortfolioEvaluator:
             # Checks whether all data series are of the same length (i.e. have an equal count of date->price items)
             return
 
-        if evaluation_offset == -1:
+        if evaluation_offset == -1 and date_offset is None:
             # `evaluation_offset` has the 'disabled' value, so we calculate it based on the underlying data
             evaluation_offset = market_data.get_row_count()
+
+        if date_offset is not None:
+            # `date_offset` is set, so the `evaluation_offset` is calculated based on the given date
+            market_data_for_company = market_data.get_for_company(next(iter(market_data.get_companies())))
+            index = market_data_for_company.get_dates().index(date_offset)
+            evaluation_offset = market_data.get_row_count() - index
 
         # Reading should start one day later, because we also save the initial portfolio value in our return data.
         # Therefore the return data contains `evaluation_offset` rows which includes `evaluation_offset`-1 trades

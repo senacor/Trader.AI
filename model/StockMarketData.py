@@ -19,7 +19,7 @@ class StockMarketData:
             market_data: Dictionary containing current and historical data for all companies in the stock market.
              Structure: {`CompanyEnum`: list(`datetime.date`, `float`)}
         """
-        self.market_data = market_data
+        self.__market_data = market_data
 
     def get_most_recent_trade_day(self):
         """
@@ -28,7 +28,7 @@ class StockMarketData:
         Returns:
             A `datetime.date` object with the latest trade day
         """
-        return next(iter(self.market_data.values())).get_last()[0]
+        return next(iter(self.__market_data.values())).get_last()[0]
 
     def get_most_recent_price(self, company_enum: CompanyEnum) -> float:
         """
@@ -41,7 +41,7 @@ class StockMarketData:
         Returns:
             The lastest `company_enum`'s stock price or None.
         """
-        company_data = self.market_data.get(company_enum)
+        company_data = self.__market_data.get(company_enum)
         if company_data is not None:
             return company_data.get_last()[1]
         else:
@@ -54,7 +54,7 @@ class StockMarketData:
         Returns:
             The row count
         """
-        return next(iter(self.market_data.values())).get_row_count()
+        return next(iter(self.__market_data.values())).get_row_count()
 
     def get_for_company(self, company_enum: CompanyEnum) -> StockData:
         """
@@ -66,7 +66,7 @@ class StockMarketData:
         Returns:
             A list of `StockData` for the given company
         """
-        return self.market_data.get(company_enum)
+        return self.__market_data.get(company_enum)
 
     def get_number_of_companies(self) -> int:
         """
@@ -75,7 +75,16 @@ class StockMarketData:
         Returns:
             Number of companies as integer.
         """
-        return len(self.market_data)
+        return len(self.__market_data)
+
+    def get_companies(self):
+        """
+        Returns a list of companies stored in this market data
+
+        Returns:
+            The list of companies
+        """
+        return list(self.__market_data.keys())
 
     def check_data_length(self) -> bool:
         """
@@ -85,4 +94,4 @@ class StockMarketData:
         Returns:
             `True` if all value rows have the same length, `False` if not
         """
-        return len(set([stock_data.get_row_count() for stock_data in self.market_data.values()])) == 1
+        return len(set([stock_data.get_row_count() for stock_data in self.__market_data.values()])) == 1

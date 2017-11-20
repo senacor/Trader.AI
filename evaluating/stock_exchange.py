@@ -29,6 +29,8 @@ if __name__ == "__main__":
     evaluator = PortfolioEvaluator([buy_and_hold_trader, simple_trader, dql_trader], True)
     # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen berechnen
     # TODO kriegen wir das eleganter hin?
+    # TODO @Richard Accomplished it by adding a parameter `date_offset`. Watch it being in action in
+    # TODO `EvaluatorTest#test_inspect_with_date_offset` (jh)
     stock_data_testing_period = read_stock_market_data([CompanyEnum.COMPANY_A], [testing_period])
     days_of_testing_period = stock_data_testing_period.get_for_company(CompanyEnum.COMPANY_A).get_row_count()
     evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, dql_trader_portfolio], days_of_testing_period)

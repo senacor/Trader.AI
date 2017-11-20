@@ -48,7 +48,7 @@ def get_data_up_to_offset(stock_market_data: StockMarketData, offset: int):
         return stock_market_data
 
     offset_data = {}
-    for key, value in stock_market_data.market_data.items():
-        offset_data[key] = value.copy_to_offset(offset)
+    for company in stock_market_data.get_companies():
+        offset_data[company] = stock_market_data.get_for_company(company).copy_to_offset(offset)
 
     return StockMarketData(offset_data)
