@@ -88,7 +88,7 @@ class StockBNnPredictor(BaseNnPredictor):
 # The following code trains and stores the corresponding neural network
 ###############################################################################
 
-def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
+def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
     lastPrices, currentPrice = [], []
     for i in range(0, len(prices) - 100):
@@ -137,12 +137,12 @@ if __name__ == "__main__":
     pricesA = company_a_StockData.get_values()
     
     logger.debug(f"Data for Stock A loaded: {len(pricesA)} prices and {len(datesA)} dates read.")
-    learnNnAndSave(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
+    learn_nn_and_save(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
     
     company_b_StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
     datesB = company_b_StockData.get_dates()
     pricesB = company_b_StockData.get_values()
     logger.debug(f"Data for Stock B loaded: {len(pricesB)} prices and {len(datesB)} dates read.")
-    learnNnAndSave(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
+    learn_nn_and_save(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
 
 

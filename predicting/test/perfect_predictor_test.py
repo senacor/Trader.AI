@@ -7,13 +7,10 @@ Module for testing of PerfectPredictor
 '''
 import unittest
 
-from datetime import date
 import datetime as dt
 
-import predicting
 from model.CompanyEnum import CompanyEnum
 from model.StockData import StockData
-from model.StockMarketData import StockMarketData
 from predicting.predictor.perfect_predictor import PerfectPredictor
 
 

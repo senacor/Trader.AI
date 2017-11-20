@@ -113,11 +113,17 @@ class StockData:
     def get_dates(self) -> list:
         """
         Deliveres all dates out of StockDataList
+        
+        Returns:
+            all dates out of StockDataList as list
         """
         return np.array([[x[0] for x in self.__stock_data]])[0].tolist()
         
     def get_values(self) -> list:
         """
         Deliveres all values out of StockDataList
+        
+        Returns:
+            all values out of StockDataList as list
         """
         return np.array([[x[1] for x in self.__stock_data]])[0].tolist()
