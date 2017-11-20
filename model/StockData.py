@@ -1,5 +1,6 @@
 import datetime
 from typing import List, Tuple
+import numpy as np
 
 StockDataTuple = Tuple[datetime.date, float]
 StockDataList = List[StockDataTuple]
@@ -107,3 +108,16 @@ class StockData:
             A `StockData` object with only the first `offset` data rows
         """
         return StockData(self.__stock_data.copy()[:offset])
+    
+    
+    def get_dates(self) -> list:
+        """
+        Deliveres all dates out of StockDataList
+        """
+        return np.array([[x[0] for x in self.__stock_data]])[0].tolist()
+        
+    def get_values(self) -> list:
+        """
+        Deliveres all values out of StockDataList
+        """
+        return np.array([[x[1] for x in self.__stock_data]])[0].tolist()

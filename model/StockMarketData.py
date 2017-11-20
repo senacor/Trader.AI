@@ -30,7 +30,7 @@ class StockMarketData:
         """
         return next(iter(self.market_data.values())).get_last()[0]
 
-    def get_most_recent_price(self, company_enum: CompanyEnum):
+    def get_most_recent_price(self, company_enum: CompanyEnum) -> float:
         """
         Determines the lastest stock price of the given `company_enum`.
         Returns None if no stock price for the given company was found.
@@ -47,7 +47,7 @@ class StockMarketData:
         else:
             return None
 
-    def get_row_count(self):
+    def get_row_count(self) -> int:
         """
         Determines how many data rows are available for the first company in the underlying stock market data
 
@@ -56,7 +56,7 @@ class StockMarketData:
         """
         return next(iter(self.market_data.values())).get_row_count()
 
-    def get_for_company(self, company_enum: CompanyEnum):
+    def get_for_company(self, company_enum: CompanyEnum) -> StockData:
         """
         Delivers data for the given `company_enum`, or `None` if no data can be found
 
@@ -77,7 +77,7 @@ class StockMarketData:
         """
         return len(self.market_data)
 
-    def check_data_length(self):
+    def check_data_length(self) -> bool:
         """
         Checks if all underlying stock data lists have the same count. Does this by extracting every
         row count, inserting those numbers into a set and checking if this set has the length of 1
