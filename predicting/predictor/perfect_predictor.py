@@ -25,13 +25,16 @@ class PerfectPredictor(IPredictor):
             company: The company whose stock values we should predict.
         """
         # This predictor is for stock A or stock B only!
+        # TODO Our whole algorithm relies on correct values in CompanyEnum. So this assertion is needless IMO (jh)
         assert company.value == 'stock_a' or company.value == 'stock_b'
 
         # Load all stock data, but only save it for the given company
+        # TODO Why do we read all/both company's data? We only need one, see line underneath (jh)
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
                                                    ['1962-2011', '2012-2017'])
         self.stock_data = stock_market_data.get_for_company(company)
 
+    # TODO Why providing `StockData` as method parameter when it has been already constructed/read in constructor? (jh)
     def doPredict(self, data: StockData) -> float:
         """ Use the loaded stock values to predict the next stock value.
     
@@ -41,6 +44,9 @@ class PerfectPredictor(IPredictor):
           predicted next stock value for that company
         """
         assert data is not None and data.get_row_count() > 0
+
+        # TODO Don't do this here. As already stated above: Our whole algorithm relies on these assumptions. Either we
+        # should assert this at central places or not at all (jh - I prefer 'not at all')
         assert len(data.get_first()) == 2
         assert isinstance(data.get_first()[0], dt.date)
         assert isinstance(data.get_first()[1], float)

@@ -1,5 +1,7 @@
 import unittest
 
+from model.test.test_portfolio import TestPortfolio
+from model.test.test_stockData import TestStockData
 from predicting.test.simple_predictor_test import SimplePredictorTest
 from predicting.test.perfect_predictor_test import PerfectPredictorTest
 from predicting.test.nn_predictor_test import NnPredictorTest
@@ -11,10 +13,25 @@ from model.test.test_stockMarketData import TestStockMarketData
 
 if __name__ == "__main__":
 
-    test_classes = [SimplePredictorTest, PerfectPredictorTest, NnPredictorTest,
-                    BuyAndHoldTraderTest, SimpleTraderTest, DqlTraderTest,
-                    EvaluatorTest,
-                    TestStockMarketData]
+    test_classes = [
+        # Trader
+        BuyAndHoldTraderTest,
+        SimpleTraderTest,
+        DqlTraderTest,
+
+        # Predictor
+        SimplePredictorTest,
+        PerfectPredictorTest,
+        NnPredictorTest,
+
+        # Evaluator
+        EvaluatorTest,
+
+        # Model
+        TestPortfolio,
+        TestStockMarketData,
+        TestStockData
+    ]
 
     suites = []
     for test in test_classes:

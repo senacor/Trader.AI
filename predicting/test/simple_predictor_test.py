@@ -12,6 +12,7 @@ from dependency_injection_containers import Predictors
 from model.StockData import StockData
 
 
+# TODO Please rename to `RandomPredictorTest` (jh)
 class SimplePredictorTest(unittest.TestCase):
 
     def setUp(self):
