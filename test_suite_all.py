@@ -1,8 +1,8 @@
 import unittest
 
+from predicting.test.random_predictor_test import RandomPredictorTest
 from model.test.test_portfolio import TestPortfolio
 from model.test.test_stockData import TestStockData
-from predicting.test.simple_predictor_test import SimplePredictorTest
 from predicting.test.perfect_predictor_test import PerfectPredictorTest
 from predicting.test.nn_predictor_test import NnPredictorTest
 from trading.test.buy_and_hold_trader_test import BuyAndHoldTraderTest
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         DqlTraderTest,
 
         # Predictor
-        SimplePredictorTest,
+        RandomPredictorTest,
         PerfectPredictorTest,
         NnPredictorTest,
 

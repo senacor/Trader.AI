@@ -110,18 +110,18 @@ class StockData:
 
     def get_dates(self) -> list:
         """
-        Returns all dates out of the underlying list of stock data
+        Returns all dates out of StockDataList
 
         Returns:
-            A list of all dates
+            all dates out of StockDataList as list
         """
         return [data[0] for data in self.__stock_data]
 
     def get_values(self) -> list:
         """
-        Returns all values out of the underlying list of stock data
+        Returns all values out of StockDataList
 
         Returns:
-            A list of all values
+            all values out of StockDataList as list
         """
         return [data[1] for data in self.__stock_data]
