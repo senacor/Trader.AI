@@ -1,4 +1,25 @@
 # Trader AI
+## Abstract
+
+## Table Of Content
+* [Abstract](#abstract)
+* [Table of Content](#table-of-content)
+* [Overview](#overview)
+* [Components](#components)
+  * [Stock Exchange](#stock-exchange) 
+  * [Trader](#trader)
+  * [Predictor](#predictor)
+* [Required Tools](#required-tools)
+  * [Preface](#preface)
+  * [Installing Python 3 on Mac](#installing-python-3-on-mac)
+  * [Installing Python 3 on Windows](#installing-python-3-on-a-windows)
+  * [Optional: Installing virtualenv](#optional-installing-virtualenv)
+  * [Run The Application](#run-the-application)
+* [Development](#development)
+  ** [IDE](#ide)
+  ** [Overview Of This Repository](#overview-of-this-repository)
+* [Authors](#authors)
+
 ## Overview
 This Python application comprises three components with which the functionality of Neural Networks is shown exemplarily. 
 The following resources provide some basic introductions into the topic of Neural Networks:
@@ -63,13 +84,13 @@ To run Trader AI the following tools are required:
 * pip (comes with Python)
 * virtualenv (details see below)
 
-### Installing Python 3 on a Mac
+### Installing Python 3 on Mac
 On Mac there are two ways to install Python 3:
 * The installer way: Visit https://www.python.org/downloads/release/python-363/ to install Python 3
 * The Homebrew way: Visit http://docs.python-guide.org/en/latest/starting/install3/osx/ for a tutorial to install 
 Python 3 using Homebrew
 
-### Installing Python 3 on a Windows
+### Installing Python 3 on Windows
 A good tutorial can be found here: http://docs.python-guide.org/en/latest/starting/install3/win/.
 
 ### Optional: Installing virtualenv
@@ -79,7 +100,7 @@ version switching and shipping.
 
 To install virtualenv run `$ pip install virtual env`
 
-### Run the application
+### Run The Application
 After installing all required tools execute the following commands:
 
 * Clone the repository
