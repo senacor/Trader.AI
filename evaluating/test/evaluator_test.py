@@ -107,7 +107,7 @@ class UtilsTest(unittest.TestCase):
         """
         Tests: evaluator_utils.py/read_stock_market_data
 
-        Read "../datasets/[AAPL|GOOG].csv" and check if that happens correctly
+        Read "../datasets/stock_[a|b]_[1962-2011|2012-2017].csv" and check if that happens correctly
         """
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
                                                    ['1962-2011', '2012-2017'])
