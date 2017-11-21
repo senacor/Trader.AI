@@ -1,23 +1,23 @@
 # Trader AI
 ## Abstract
+Python application to show AI functionality based on Keras and TensorFlow.
 
 ## Table Of Content
 * [Abstract](#abstract)
-* [Table of Content](#table-of-content)
+* [Table Of Content](#table-of-content)
 * [Overview](#overview)
 * [Components](#components)
   * [Stock Exchange](#stock-exchange) 
   * [Trader](#trader)
   * [Predictor](#predictor)
 * [Required Tools](#required-tools)
-  * [Preface](#preface)
   * [Installing Python 3 on Mac](#installing-python-3-on-mac)
-  * [Installing Python 3 on Windows](#installing-python-3-on-a-windows)
+  * [Installing Python 3 on Windows](#installing-python-3-on-windows)
   * [Optional: Installing virtualenv](#optional-installing-virtualenv)
-  * [Run The Application](#run-the-application)
+  * [Run the Application](#run-the-application)
 * [Development](#development)
-  ** [IDE](#ide)
-  ** [Overview Of This Repository](#overview-of-this-repository)
+  * [IDE](#ide)
+  * [Overview Of This Repository](#overview-of-this-repository)
 * [Authors](#authors)
 
 ## Overview
@@ -75,14 +75,12 @@ receive an estimated stock price the Trader calls its specific Predictor with th
 in turn replies with the estimated stock price.   
 
 ## Required Tools
-Trader AI's codebase relies on Python 3. The following paragraphs describe which tools are required to run the 
-application.
-
-### Preface
-To run Trader AI the following tools are required:
+Trader AI's codebase relies on Python 3. To run Trader AI the following tools are required:
 * Python 3
-* pip (comes with Python)
-* virtualenv (details see below)
+* pip
+* virtualenv
+
+Details on how to install these tools are listed below.
 
 ### Installing Python 3 on Mac
 On Mac there are two ways to install Python 3:
@@ -90,18 +88,27 @@ On Mac there are two ways to install Python 3:
 * The Homebrew way: Visit http://docs.python-guide.org/en/latest/starting/install3/osx/ for a tutorial to install 
 Python 3 using Homebrew
 
+Check if *pip* is installed with running `$ pip --version`. In case it is not already installed:
+* When using the installer: Install *pip* separately by running `$ python get-pip.py` after downloading 
+[get-pip.py](https://bootstrap.pypa.io/get-pip.py)
+* When using Homebrew: Execute `$ brew install pip`
+
 ### Installing Python 3 on Windows
-A good tutorial can be found here: http://docs.python-guide.org/en/latest/starting/install3/win/.
+A good tutorial can be found here: http://docs.python-guide.org/en/latest/starting/install3/win/. To ease running Python
+in the Command Line you should consider adding the Python installation directory to the PATH environment variable.
+
+Check if *pip* is installed with running `$ pip --version`. In case it is not already installed run 
+`$ python get-pip.py` after downloading [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
 
 ### Optional: Installing virtualenv
-The easiest and cleanest way to install all required dependencies is `virtualenv`. This keeps all dependencies in a 
+The easiest and cleanest way to install all required dependencies is *virtualenv*. This keeps all dependencies in a 
 specific directory which in turn will not interfere with your system's configuration. This also allows for easier 
 version switching and shipping.
 
-To install virtualenv run `$ pip install virtual env`
+To install *virtualenv* run `$ pip install virtualenv`
 
-### Run The Application
-After installing all required tools execute the following commands:
+### Run the Application
+After installing all required tools (Python, *pip*, *\[virtualenv]*) execute the following commands:
 
 * Clone the repository
 ```
@@ -109,18 +116,25 @@ $ git clone https://github.com/senacor/Trader.AI.git
 $ cd Trader.AI
 ```
 
-* If you installed virtualenv the following commands run the following commands
+* If you want to use *virtualenv*, create a virtual environment. The directory *virtual_env* is already added to 
+*.gitignore*
+  * On Mac:
 ```
 $ virtualenv -p python3 virtual_env
 $ source virtual_env/bin/activate
 ```
+  * On Windows:
+```
+$ virtualenv -p [path\to\python3\installation\dir\]python virtual_env
+$ virtual_env/Scripts/activate
+```
 
-* Install all requirements
+* Install all dependencies - this installs all required dependencies by Trader.AI
 ```
 $ pip install -r requirements.txt
 ```
 
-* Run the programm
+* Run the program
 ```
 $ python stock_exchange.py
 ```
@@ -129,7 +143,7 @@ Trader implementations respectively.
 
 ## Development
 ### IDE
-To start developing Python application basically there are not any huge requirements. You could open your favorite text
+To start developing Python applications, there are not any huge requirements actually. You could open your favorite text
 editor (notepad.exe, TextEdit, vim, Notepad++, sublime, Atom, emacs, ...), type in some code and run it with 
 `$ python your-file.py`. However, there are some IDEs which make developing and running Python applications more 
 convenient. We worked with the following:
@@ -137,11 +151,12 @@ convenient. We worked with the following:
 * [PyDev](http://www.pydev.org/) (based on Eclipse)
 
 In your IDE you may have to select the correct Python environment. Mostly the IDEs can detect the correct environment
-automatically. To check and - if needed - reconfigure this do as follows:
-* PyCharm: Visit "Preferences" > "Project: Traider.AI" > "Project Interpreter" and check if the right environment is
-selected. If not, select the gear symbol in the upper right, click "Add Local" and select the `virtual_env` directory
-inside your repository.
-* PyDev: \# TODO
+automatically. To check and - if needed - select the correct Python installation directory or the *virtual_env* 
+directory inside your repository do as follows:
+* **PyCharm**: Visit "Preferences" > "Project: Traider.AI" > "Project Interpreter" and check if the correct environment 
+is selected. If not, select the gear symbol in the upper right
+* **PyDev**: Visit "Window" > "Preferences" > "PyDev" > "Interpreters" > "Python Interpreter" and check if the correct
+environment is selected. If not, select "New..."
 
 ### Overview Of This Repository
 This repository contains a number of packages and files. Following a short overview:
