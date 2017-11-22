@@ -10,7 +10,7 @@ from model.Portfolio import Portfolio
 from model.trader_actions import CompanyEnum, TradingActionEnum
 from utils import read_stock_market_data
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
-
+from definitions import PERIOD_1
 
 class BuyAndHoldTraderTest(TestCase):
     def setUp(self):
@@ -22,7 +22,7 @@ class BuyAndHoldTraderTest(TestCase):
     def testBuyAndHoldTraderWithOneStock(self):
         trader = BuyAndHoldTrader()
         self.assertIsNotNone(trader)
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], [PERIOD_1])
         self.assertIsNotNone(stock_market_data)
         portfolio = Portfolio(10000, [])
         self.assertIsNotNone(portfolio)
@@ -46,7 +46,7 @@ class BuyAndHoldTraderTest(TestCase):
     def testBuyAndHoldTraderWithTwoStocks(self):
         trader = BuyAndHoldTrader()
         self.assertIsNotNone(trader)
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
         self.assertIsNotNone(stock_market_data)
         portfolio = Portfolio(10000, [])
         self.assertIsNotNone(portfolio)

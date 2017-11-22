@@ -6,12 +6,12 @@ from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from dependency_injection_containers import Traders
 import datetime
+from definitions import PERIOD_1, PERIOD_2, PERIOD_3
 
 if __name__ == "__main__":
     # Load stock market data for training and testing period
-    training_period, testing_period = '1962-2011', '2012-2017'
     stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                               [training_period, testing_period])
+                                               [PERIOD_1, PERIOD_2, PERIOD_3])
 
     # Define traders
     buy_and_hold_trader = Traders.BuyAndHoldTrader()
