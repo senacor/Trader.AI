@@ -22,89 +22,6 @@ from model.trader_actions import SharesOfCompany, TradingActionList
 
 
 class EvaluatorTest(unittest.TestCase):
-    def testReadStockMarketData(self):
-        """
-        Tests: evaluator_utils.py/read_stock_market_data
-
-        Read "../datasets/[AAPL|GOOG].csv" and check if that happens correctly
-        """
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                                   ['1962-2011', '2012-2017'])
-
-        self.assertGreater(len(stock_market_data.market_data), 0)
-        self.assertTrue(CompanyEnum.COMPANY_A in stock_market_data.market_data)
-        self.assertTrue(CompanyEnum.COMPANY_B in stock_market_data.market_data)
-
-    def testDoTrade(self):
-        """
-        Tests: SimpleTrader#doTrade
-
-        Reads the available portfolio and stock market data of stock A and executes one trade.
-        Checks if the action list is not empty.
-        """
-        trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
-        current_portfolio_value = 0.0  # Dummy value
-        portfolio = Portfolio(10000, [], 'Test')
-        market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
-        trading_action_list = trader.doTrade(portfolio, current_portfolio_value, market_data)
-
-        self.assertTrue(trading_action_list is not None)
-        self.assertTrue(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
-
-    def testUpdatePortfolio_noSufficientCashReserve(self):
-        """
-        Tests: Portfolio#update
-
-        Flavour: Not enough cash in the portfolio, so no trades should be applied
-
-        Creates a portfolio, a stock market data object and a arbitrary `TradingActionList` and executes this trading
-        actions on the portfolio. Checks if those are applied correctly
-        """
-        cash_reserve = 10000.0
-
-        data = StockData([(date(2017, 1, 1), 150.0)])
-        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
-
-        portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
-        trading_action_list = TradingActionList()
-        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
-
-        updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
-
-        # Trade volume is too high for current cash reserve. Nothing should happen
-        self.assertEqual(updated_portfolio.cash, cash_reserve)
-        self.assertEqual(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(updated_portfolio.shares[0].amount, 200)
-
-    def testUpdatePortfolio_sufficientCashReserve(self):
-        """
-        Tests: Portfolio#update
-
-        Flavour: Enough cash in the portfolio, so the trades should be applied
-
-        Creates a portfolio, a stock market data object and a arbitrary `TradingActionList` and executes this trading
-        actions on the portfolio. Checks if those are applied correctly
-        """
-        cash_reserve = 20000.0
-
-        data = StockData([(date(2017, 1, 1), 150.0)])
-        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
-
-        portfolio = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
-
-        trading_action_list = TradingActionList()
-        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
-
-        updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
-
-        # Current cash reserve is sufficient for trade volume. Trade should happen
-        self.assertLess(updated_portfolio.cash, cash_reserve)
-        self.assertLess(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(updated_portfolio.shares[0].amount, 300)
-
     def testUpdateAndDraw(self):
         """
         Tests: Evaluator#inspect_over_time
@@ -133,31 +50,97 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(len(data_row_lengths), 1)
         self.assertEqual(data_row_lengths.pop(), 100)
 
+    def test_inspect_with_default_offset(self):
+        data = StockData([(date(2017, 1, 1), 150.0), (date(2017, 1, 2), 200.0), (date(2017, 1, 3), 250.0)])
+        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
+
+        portfolio = Portfolio(20000, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
+
+        evaluator = PortfolioEvaluator([SimpleTrader(RandomPredictor(), RandomPredictor())])
+
+        portfolio_over_time: dict = evaluator.inspect_over_time(stock_market_data, [portfolio], evaluation_offset=-1)[
+            'nameless']
+
+        self.assertTrue(date(2016, 12, 31) in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 1) in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 2) in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 3) not in portfolio_over_time.keys())
+
+    def test_inspect_with_date_offset(self):
+        data = StockData([(date(2017, 1, 1), 150.0), (date(2017, 1, 2), 200.0), (date(2017, 1, 3), 250.0)])
+        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
+
+        portfolio = Portfolio(20000, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
+
+        evaluator = PortfolioEvaluator([SimpleTrader(RandomPredictor(), RandomPredictor())])
+
+        portfolio_over_time: dict = \
+            evaluator.inspect_over_time(stock_market_data, [portfolio], date_offset=date(2017, 1, 2))['nameless']
+
+        self.assertTrue(date(2016, 12, 31) not in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 1) in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 2) in portfolio_over_time.keys())
+        self.assertTrue(date(2017, 1, 3) not in portfolio_over_time.keys())
+
+
+class TraderTestWeShouldMoveThis(unittest.TestCase):
+    def testDoTrade(self):
+        """
+        Tests: SimpleTrader#doTrade
+
+        Reads the available portfolio and stock market data of stock A and executes one trade.
+        Checks if the action list is not empty.
+        """
+        trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
+        current_portfolio_value = 0.0  # Dummy value
+        portfolio = Portfolio(10000, [], 'Test')
+        market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
+        trading_action_list = trader.doTrade(portfolio, current_portfolio_value, market_data)
+
+        self.assertTrue(trading_action_list is not None)
+        self.assertTrue(trading_action_list.len(), 1)
+        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
+
+
+class UtilsTest(unittest.TestCase):
+    def testReadStockMarketData(self):
+        """
+        Tests: evaluator_utils.py/read_stock_market_data
+
+        Read "../datasets/stock_[a|b]_[1962-2011|2012-2017].csv" and check if that happens correctly
+        """
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
+                                                   ['1962-2011', '2012-2017'])
+
+        self.assertGreater(stock_market_data.get_number_of_companies(), 0)
+        self.assertTrue(CompanyEnum.COMPANY_A in stock_market_data.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in stock_market_data.get_companies())
+
     def testReadData_2stocks_2periods(self):
         period1 = '1962-2011'
         period2 = '2012-2017'
 
         test = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [period1, period2])
 
-        self.assertEqual(len(test.market_data), 2)
-        self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
-        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+        self.assertEqual(test.get_number_of_companies(), 2)
+        self.assertTrue(CompanyEnum.COMPANY_A in test.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.get_companies())
 
     def testReadData_2stocks_1period(self):
         period1 = '1962-2011'
 
         test = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [period1])
 
-        self.assertEqual(len(test.market_data), 2)
-        self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
-        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+        self.assertEqual(test.get_number_of_companies(), 2)
+        self.assertTrue(CompanyEnum.COMPANY_A in test.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.get_companies())
 
     def testReadData_2stocks_noPeriods(self):
         test = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [])
 
-        self.assertEqual(len(test.market_data), 2)
-        self.assertTrue(CompanyEnum.COMPANY_A in test.market_data.keys())
-        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+        self.assertEqual(test.get_number_of_companies(), 2)
+        self.assertTrue(CompanyEnum.COMPANY_A in test.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.get_companies())
 
     def testReadData_1stock_2periods(self):
         period1 = '1962-2011'
@@ -165,18 +148,21 @@ class EvaluatorTest(unittest.TestCase):
 
         test = read_stock_market_data([CompanyEnum.COMPANY_B], [period1, period2])
 
-        self.assertEqual(len(test.market_data), 1)
-        self.assertFalse(CompanyEnum.COMPANY_A in test.market_data.keys())
-        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+        self.assertEqual(test.get_number_of_companies(), 1)
+        self.assertFalse(CompanyEnum.COMPANY_A in test.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.get_companies())
 
     def testReadData_1stock_noPeriods(self):
         test = read_stock_market_data([CompanyEnum.COMPANY_B], [])
 
-        self.assertEqual(len(test.market_data), 1)
-        self.assertFalse(CompanyEnum.COMPANY_A in test.market_data.keys())
-        self.assertTrue(CompanyEnum.COMPANY_B in test.market_data.keys())
+        self.assertEqual(test.get_number_of_companies(), 1)
+        self.assertFalse(CompanyEnum.COMPANY_A in test.get_companies())
+        self.assertTrue(CompanyEnum.COMPANY_B in test.get_companies())
 
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(EvaluatorTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suites = list()
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(EvaluatorTest))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(UtilsTest))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(TraderTestWeShouldMoveThis))
+    unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))

@@ -59,6 +59,8 @@ class SimpleTraderTest(unittest.TestCase):
         # Buy stocks based on prediction:
         # SimpleTrader buys only stocks A again
         # TODO @Janusz Why doesn't SimpleTrader buy stocks B?
+        # This is because `SimpleTrader` buys sequentially without considering future/earlier trade actions. So in case
+        # of two BUY actions, all available cash is spent for buying the first stock - an issue I already raised (jh)
         trading_action_list = trader.doTrade(portfolio, 0.0, stock_market_data)
         self.assertIsNotNone(trading_action_list)
         self.assertEqual(trading_action_list.len(), 1)

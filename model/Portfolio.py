@@ -111,13 +111,15 @@ class Portfolio:
             logger.info("trade_action_list.is_empty -> No action this time")
             return updated_portfolio
 
+        available_cash = updated_portfolio.cash
+
         for trade_action in trade_action_list.iterator():
             company_enum = trade_action.shares.company_enum
 
             current_date = stock_market_data.get_most_recent_trade_day()
             current_price = stock_market_data.get_most_recent_price(company_enum)
 
-            logger.debug(f"Available cash on {current_date}: {updated_portfolio.cash}")
+            logger.debug(f"Available cash on {current_date}: {available_cash}")
             # for share in update.shares:
             share = updated_portfolio.get_or_insert(company_enum)
             # if share.name is update.shares.name:
@@ -129,7 +131,7 @@ class Portfolio:
                              f"{current_price}")
                 logger.debug(f"  Volume of this trade: {trade_volume}")
 
-                if trade_volume <= updated_portfolio.cash:
+                if trade_volume <= available_cash:
                     share.amount += amount
                     updated_portfolio.cash -= trade_volume
                 else:
@@ -155,7 +157,7 @@ class Portfolio:
         return updated_portfolio
 
     def is_trading_action_list_valid(self, trading_action_list: TradingActionList,
-                                 stock_market_data: StockMarketData) -> bool:
+                                     stock_market_data: StockMarketData) -> bool:
         """
         Validates if generated TradingActionList is valid in comparison to current Portfolio
 
@@ -221,3 +223,25 @@ class Portfolio:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {trading_action_for_company}')
 
         return True, current_cash
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, Portfolio):
+            return False
+
+        if self.cash != o.cash:
+            return False
+
+        if len(self.shares) != len(o.shares):
+            return False
+
+        for share in self.shares:
+            company = share.company_enum
+            amount = share.amount
+
+            if company not in [share.company_enum for share in o.shares]:
+                return False
+
+            if amount not in [share.amount for share in o.shares if share.company_enum == company]:
+                return False
+
+        return True

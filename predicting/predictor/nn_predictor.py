@@ -88,7 +88,7 @@ class StockBNnPredictor(BaseNnPredictor):
 # The following code trains and stores the corresponding neural network
 ###############################################################################
 
-def learnNnAndSave(dates: list, prices: list, filename_to_save:str):
+def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
     lastPrices, currentPrice = [], []
     for i in range(0, len(prices) - 100):
@@ -132,17 +132,17 @@ if __name__ == "__main__":
     logger.debug("Data loading...")
     full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
     
-    company_a_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_A)
-    datesA = np.array([[x[0] for x in company_a_stock_market_data]])[0].tolist()
-    pricesA = np.array([[x[1] for x in company_a_stock_market_data]])[0].tolist()
+    company_a_StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    datesA = company_a_StockData.get_dates()
+    pricesA = company_a_StockData.get_values()
     
     logger.debug(f"Data for Stock A loaded: {len(pricesA)} prices and {len(datesA)} dates read.")
-    learnNnAndSave(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
+    learn_nn_and_save(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_stock_market_data = full_stock_market_data.get_stock_data_for_company(CompanyEnum.COMPANY_B)
-    datesB = np.array([[x[0] for x in company_b_stock_market_data]])[0].tolist()
-    pricesB = np.array([[x[1] for x in company_b_stock_market_data]])[0].tolist()
+    company_b_StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    datesB = company_b_StockData.get_dates()
+    pricesB = company_b_StockData.get_values()
     logger.debug(f"Data for Stock B loaded: {len(pricesB)} prices and {len(datesB)} dates read.")
-    learnNnAndSave(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
+    learn_nn_and_save(datesB, pricesB, MODEL_FILE_NAME_STOCK_B)
 
 

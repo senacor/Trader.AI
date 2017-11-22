@@ -12,7 +12,7 @@ from dependency_injection_containers import Predictors
 from model.StockData import StockData
 
 
-class SimplePredictorTest(unittest.TestCase):
+class RandomPredictorTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -20,7 +20,7 @@ class SimplePredictorTest(unittest.TestCase):
     def tearDown(self):
         pass
        
-    def testSimplePredictor(self):
+    def testRandomPredictor(self):
 
         sp = Predictors.RandomPredictor() 
         
@@ -41,5 +41,5 @@ class SimplePredictorTest(unittest.TestCase):
 
     
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(SimplePredictorTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(RandomPredictorTest)
     unittest.TextTestRunner(verbosity=2).run(suite)

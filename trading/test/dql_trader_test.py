@@ -28,6 +28,10 @@ class DqlTraderTest(unittest.TestCase):
         print(state.to_string())
 
     def testDqlTraderConstruction(self):
+
+        # TODO A constructor can IMO never result in a `None` object. That would mean a failing object construction
+        # which should lead to an automatic test failure - I've seen this at several places throughout our code base
+        # (jh)
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
         self.assertIsNotNone(trader)
 

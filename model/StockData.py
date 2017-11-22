@@ -107,3 +107,21 @@ class StockData:
             A `StockData` object with only the first `offset` data rows
         """
         return StockData(self.__stock_data.copy()[:offset])
+
+    def get_dates(self) -> list:
+        """
+        Returns all dates out of StockDataList
+
+        Returns:
+            all dates out of StockDataList as list
+        """
+        return [data[0] for data in self.__stock_data]
+
+    def get_values(self) -> list:
+        """
+        Returns all values out of StockDataList
+
+        Returns:
+            all values out of StockDataList as list
+        """
+        return [data[1] for data in self.__stock_data]
