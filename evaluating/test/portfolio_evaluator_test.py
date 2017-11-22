@@ -98,6 +98,20 @@ class UtilsTest(unittest.TestCase):
         assert CompanyEnum.COMPANY_A in stock_market_data.get_companies()
         assert CompanyEnum.COMPANY_B in stock_market_data.get_companies()
 
+    def test_read_stock_market_data__ignore_missing_file(self):
+        """
+        Tests: evaluator_utils.py/read_stock_market_data
+
+        Read "../datasets/stock_[a|b]_[1962-2011|this-file-does-not-exist].csv" and check if that happens correctly,
+         e.g. ignore that one file does not exist
+        """
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
+                                                   [PERIOD_1, "this-file-does-not-exist"])
+
+        assert stock_market_data.get_number_of_companies() > 0
+        assert CompanyEnum.COMPANY_A in stock_market_data.get_companies()
+        assert CompanyEnum.COMPANY_B in stock_market_data.get_companies()
+
     def test_read_stock_market_data__2stocks_2periods(self):
         test = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
 
