@@ -15,10 +15,9 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from predicting.predictor.random_predictor import RandomPredictor
-from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
-from model.trader_actions import SharesOfCompany, TradingActionList
+from model.trader_actions import SharesOfCompany
+from predicting.predictor.reference.random_predictor import RandomPredictor
 
 
 class EvaluatorTest(unittest.TestCase):
@@ -83,25 +82,6 @@ class EvaluatorTest(unittest.TestCase):
         self.assertTrue(date(2017, 1, 3) not in portfolio_over_time.keys())
 
 
-class TraderTestWeShouldMoveThis(unittest.TestCase):
-    def testDoTrade(self):
-        """
-        Tests: SimpleTrader#doTrade
-
-        Reads the available portfolio and stock market data of stock A and executes one trade.
-        Checks if the action list is not empty.
-        """
-        trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), None)
-        current_portfolio_value = 0.0  # Dummy value
-        portfolio = Portfolio(10000, [], 'Test')
-        market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
-        trading_action_list = trader.doTrade(portfolio, current_portfolio_value, market_data)
-
-        self.assertTrue(trading_action_list is not None)
-        self.assertTrue(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
-
-
 class UtilsTest(unittest.TestCase):
     def testReadStockMarketData(self):
         """
@@ -164,5 +144,4 @@ if __name__ == "__main__":
     suites = list()
     suites.append(unittest.TestLoader().loadTestsFromTestCase(EvaluatorTest))
     suites.append(unittest.TestLoader().loadTestsFromTestCase(UtilsTest))
-    suites.append(unittest.TestLoader().loadTestsFromTestCase(TraderTestWeShouldMoveThis))
     unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(suites))

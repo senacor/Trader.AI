@@ -23,6 +23,8 @@ class TestPortfolio(TestCase):
         self.assertEqual(portfolio.shares[1].company_enum, CompanyEnum.COMPANY_B)
         self.assertEqual(portfolio.shares[1].amount, 50)
 
+        self.assertTrue(f"{portfolio.cash}" in f"{portfolio}")
+
     def test_update__no_sufficient_cash_reserve(self):
         """
         Tests: Portfolio#update

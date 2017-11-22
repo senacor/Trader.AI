@@ -8,23 +8,19 @@ from collections import deque
 import numpy as np
 
 from evaluating.portfolio_evaluator import PortfolioEvaluator
-from model.StockData import StockData
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.IPredictor import IPredictor
-from predicting.predictor.perfect_predictor import PerfectPredictor
-from predicting.predictor.random_predictor import RandomPredictor
 from model.ITrader import ITrader
-from model.trader_actions import TradingActionList, TradingAction
+from model.trader_actions import TradingActionList
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
-from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from model.trader_actions import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 # Define possible actions per stock
 #STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
@@ -50,6 +46,9 @@ class State:
               f"A: {self.stockA} x {self.priceA} ({self.predictedA}), "
               f"B: {self.stockB} x {self.priceB} ({self.predictedB})")
 
+    #TODO rm Instead of custom `to_string` you should rather use `__repr__`. This method is then automatically called
+    # by `format()` and `print()`. See example in `Portfolio`
+    # -> https://docs.python.org/3.6/reference/datamodel.html#object.__str__
     def to_string(self) -> str:
         return 'cash: ' + str(self.cash) + ', A: ' + str(self.stockA) + ' x ' + str(self.priceA) + ' (' + str(self.predictedA) + '), B: ' + str(self.stockB) + ' x ' + str(self.priceB) + ' (' + str(self.predictedB) + ')'
 

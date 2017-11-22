@@ -6,7 +6,7 @@ Module for testing of all predicting components
 @author: rmueller
 '''
 import unittest
-from predicting.predictor.nn_value_predictor import StockANnValuePredictor, StockBNnValuePredictor
+from predicting.predictor.reference.nn_value_predictor import StockANnValuePredictor, StockBNnValuePredictor
 from model.CompanyEnum import CompanyEnum
 from utils import read_stock_market_data
 

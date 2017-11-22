@@ -12,7 +12,7 @@ from model.SharesOfCompany import SharesOfCompany
 from model.Portfolio import Portfolio
 from model.trader_actions import CompanyEnum, TradingActionEnum
 from trading.trader.dql_trader import DqlTrader, State, STOCKACTIONS
-from predicting.predictor.perfect_predictor import PerfectPredictor
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 class DqlTraderTest(unittest.TestCase):
     def setUp(self):

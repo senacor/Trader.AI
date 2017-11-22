@@ -11,7 +11,7 @@ import datetime as dt
 
 from model.CompanyEnum import CompanyEnum
 from model.StockData import StockData
-from predicting.predictor.perfect_predictor import PerfectPredictor
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 
 class PerfectPredictorTest(unittest.TestCase):
