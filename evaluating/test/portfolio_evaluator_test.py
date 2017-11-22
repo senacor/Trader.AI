@@ -15,10 +15,9 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from predicting.predictor.random_predictor import RandomPredictor
-from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
-from model.trader_actions import SharesOfCompany, TradingActionList
+from model.trader_actions import SharesOfCompany
+from predicting.predictor.reference.random_predictor import RandomPredictor
 
 
 class EvaluatorTest(unittest.TestCase):

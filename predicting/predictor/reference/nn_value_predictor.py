@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense
 
-RELATIVE_PATH = 'predicting/predictor/nn_value_predictor'
+RELATIVE_PATH = 'predicting/predictor/reference/nn_value_predictor'
 MODEL_FILE_NAME_STOCK_A = 'nn_value_predictor_stock_a_network'
 MODEL_FILE_NAME_STOCK_B = 'nn_value_predictor_stock_b_network'
 

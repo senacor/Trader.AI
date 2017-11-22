@@ -8,23 +8,19 @@ from collections import deque
 import numpy as np
 
 from evaluating.portfolio_evaluator import PortfolioEvaluator
-from model.StockData import StockData
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.IPredictor import IPredictor
-from predicting.predictor.perfect_predictor import PerfectPredictor
-from predicting.predictor.random_predictor import RandomPredictor
 from model.ITrader import ITrader
-from model.trader_actions import TradingActionList, TradingAction
+from model.trader_actions import TradingActionList
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
-from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from model.trader_actions import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 # Define possible actions per stock
 #STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
