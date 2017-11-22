@@ -198,14 +198,14 @@ This repository contains a number of packages and files. Following a short overv
 * evaluating - Python package which contains all evaluating/ILSE logic
 * model - Python package which contains all shared model classes
 * predicting - Python package which contains all predicting logic
-* research - \# TODO rm
 * trading - Python package which contains all trading logic
+* `.travis.yml` - Configuration for Travis CI. See [https://travis-ci.org/senacor/Trader.AI/]()
 * `definitions.py` - Contains some project-wide Python constants
 * `dependency_injection_containers.py` - Contains all configured dependencies for dependency injection
 * `logger.py` - Contains project-wide logger configuration
+* `README.md` - This file
 * `requirements.txt` - Contains an export of all project dependencies (by running `$ pip freeze > requirements.txt`)
 * `stock_exchange.py` - Contains the central main method. This starts ILSE
-* `test_suite_all.py` - Test suite containing all test classes from all packages
 * `utils.py` - Contains utility methods that are needed project-wide
 
 ## Authors
