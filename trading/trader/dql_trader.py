@@ -8,27 +8,26 @@ from collections import deque
 import numpy as np
 
 from evaluating.portfolio_evaluator import PortfolioEvaluator
-from model.StockData import StockData
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.IPredictor import IPredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
-from predicting.predictor.random_predictor import RandomPredictor
 from model.ITrader import ITrader
-from model.trader_actions import TradingActionList, TradingAction
+from model.trader_actions import TradingActionList
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
-from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from model.trader_actions import SharesOfCompany
 
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
 
 # Define possible actions per stock
 #STOCKACTIONS = [+1.0, +0.5, 0.0, -0.5, -1.0]
-STOCKACTIONS = [+1.0, -1.0]
+STOCKACTIONS = [+1.0, +0.9, +0.8, +0.2, +0.1, -1.0]
+#STOCKACTIONS_A = [+1.0, +0.9, +0.8, -1.0]
+#STOCKACTIONS_B = [+1.0, -1.0]
+
 
 
 class State:
@@ -37,6 +36,7 @@ class State:
     """
     def __init__(self, cash: float, stockA: int, stockB: int, priceA: float, priceB: float, predictedA: float,
                  predictedB: float):
+        assert stockA >= 0 and stockB >= 0
         self.cash = cash
         self.stockA = stockA
         self.stockB = stockB
@@ -53,13 +53,20 @@ class State:
     def to_string(self) -> str:
         return 'cash: ' + str(self.cash) + ', A: ' + str(self.stockA) + ' x ' + str(self.priceA) + ' (' + str(self.predictedA) + '), B: ' + str(self.stockB) + ' x ' + str(self.priceB) + ' (' + str(self.predictedB) + ')'
 
-    def deepcopy(self):
-        return State(self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB)
-
     def get_input_array(self):
         # Only use prices and predicted prices
         #return np.array([[self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB]])
-        return np.array([[self.priceA, self.predictedA, self.priceB, self.predictedB]])
+        #return np.array([[self.priceA, self.predictedA, self.priceB, self.predictedB]])
+        if self.priceA <= self.predictedA:
+            movement_a = 1 # up or equal
+        else:
+            movement_a = 0 # down
+        if self.priceB <= self.predictedB:
+            movement_b = 1 # up or equal
+        else:
+            movement_b = 0 # down
+        #return np.array([[self.stockA, self.stockB, movement_a, movement_b]])
+        return np.array([[movement_a, movement_b]])
 
 
 
@@ -81,7 +88,7 @@ class DqlTrader(ITrader):
         self.train_while_trading = train_while_trading
 
         # Hyper parameters for neural network
-        self.state_size = 4
+        self.state_size = 2
         self.action_size = len(STOCKACTIONS) * len(STOCKACTIONS)
         self.hidden_size = 50
 
@@ -107,13 +114,8 @@ class DqlTrader(ITrader):
             logger.info(f"DQL Trader: Loaded trained model!")
         if self.model is None: # loading failed or we didn't want to use a trained model
             self.model = Sequential()
-            #self.model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-            self.model.add(Dense(self.hidden_size, input_dim=self.state_size, activation='relu'))
-            #self.model.add(Dropout(0.2))
-            #self.model.add(Dense(self.hidden_size, activation='relu', kernel_initializer='he_uniform'))
+            self.model.add(Dense(self.hidden_size * 2, input_dim=self.state_size, activation='relu'))
             self.model.add(Dense(self.hidden_size, activation='relu'))
-            #self.model.add(Dropout(0.2))
-            #self.model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
             self.model.add(Dense(self.action_size, activation='linear'))
             logger.info(f"DQL Trader: Create new untrained model!")
         assert self.model is not None
@@ -178,7 +180,7 @@ class DqlTrader(ITrader):
         assert actionB in STOCKACTIONS
         return STOCKACTIONS.index(actionA) * len(STOCKACTIONS) + STOCKACTIONS.index(actionB)
 
-    def calculate_reward(self, current_state: State, last_portfolio_value: float, current_portfolio_value: float) -> int:
+    def calculate_reward(self, current_state: State, last_portfolio_value: float, current_portfolio_value: float) -> float:
         """
         Implements rewards function
         
@@ -199,34 +201,42 @@ class DqlTrader(ITrader):
 
 
         # Explicitly model logik of SimpleTrader
-        if self.lastState.predictedA - self.lastState.priceA > 0:
-            if self.lastState.predictedB - self.lastState.priceB > 0: # A up, B up
-                if self.lastActionA > 0 and self.lastActionB > 0:
-                    return 100
-                else:
-                    return -100
-            else: # A up, B down
-                if self.lastActionA > 0 and self.lastActionB < 0:
-                    return 100
-                else:
-                    return -100
-        else:
-            if self.lastState.predictedB - self.lastState.priceB > 0: # A down, B up
-                if self.lastActionA < 0 and self.lastActionB > 0:
-                    return 100
-                else:
-                    return -100
-            else: # A down, B down
-                if self.lastActionA < 0 and self.lastActionB < 0:
-                    return 100
-                else:
-                    return -100
+        # if self.lastState.predictedA - self.lastState.priceA > 0:
+        #     if self.lastState.predictedB - self.lastState.priceB > 0: # A up, B up
+        #         if self.lastActionA > 0 and self.lastActionB > 0:
+        #             return 100
+        #         else:
+        #             return -100
+        #     else: # A up, B down
+        #         if self.lastActionA > 0 and self.lastActionB < 0:
+        #             return 100
+        #         else:
+        #             return -100
+        # else:
+        #     if self.lastState.predictedB - self.lastState.priceB > 0: # A down, B up
+        #         if self.lastActionA < 0 and self.lastActionB > 0:
+        #             return 100
+        #         else:
+        #             return -100
+        #     else: # A down, B down
+        #         if self.lastActionA < 0 and self.lastActionB < 0:
+        #             return 100
+        #         else:
+        #             return -100
 
         # Only check portfolio value
-        # if current_portfolio_value >= last_portfolio_value:
+        # if current_portfolio_value > last_portfolio_value:
         #     return +100
+        # elif current_portfolio_value == last_portfolio_value:
+        #     return 0
         # else:
         #     return -100
+        if current_portfolio_value > last_portfolio_value:
+            return ((current_portfolio_value / last_portfolio_value) * 10.0) * ((current_portfolio_value / last_portfolio_value) * 10.0)
+        elif current_portfolio_value == last_portfolio_value:
+            return 0.0
+        else:
+            return -100.0
 
     def train_model(self):
         """
@@ -308,46 +318,52 @@ class DqlTrader(ITrader):
         self.lastState = current_state
         return self.create_trading_actions(action_a, action_b, portfolio, stock_market_data)
 
-    def create_trading_actions(self, action_a: float, action_b: float, portfolio: Portfolio, stock_market_data: StockMarketData) -> TradingActionList:
+    def create_trading_actions(self, action_a: float, action_b: float,
+                               portfolio: Portfolio, stock_market_data: StockMarketData) -> TradingActionList:
         """
-        Take output from neural net (two floats from STOCKACTIONS) and convert it into corresponding trading actions.
+        Take two floats between -1.0 and +1.0 (one for stock A and one for stock B) and convert them into corresponding
+        trading actions.
+        A float between 0.0 and +1.0 encodes buying a stock, measured in percent of cash of the current portfolio.
+        A float between -1.0 and 0.0 encodes selling a stock, measured in percent of the amount this stock is present
+        in the current portfolio.
+        A float of 0.0 encodes "do nothing", so: no trading action at all.
         Args:
-            action_a: float between -1.0 and 1.0, representing buy(positive)/sell(negative) and percentage of shares to consider for Company A
-            action_b: float between -1.0 and 1.0, representing buy(positive)/sell(negative) and percentage of shares to consider for Company B
+            action_a: float between -1.0 and 1.0, representing buy(positive) / sell(negative) for Company A
+            action_b: float between -1.0 and 1.0, representing buy(positive) / sell(negative) for Company B
             portfolio: current portfolio of this trader
             stock_market_data: current stock market data
 
         Returns:
             List of corresponding TradingActions
         """
-        assert action_a in STOCKACTIONS and action_b in STOCKACTIONS
+        assert -1.0 <= action_a <= +1.0 and -1.0 <= action_b <= +1.0
         assert portfolio is not None and stock_market_data is not None
         trading_actions = TradingActionList()
 
         # Create trading actions for stock A
-        owned_amount = portfolio.get_amount(CompanyEnum.COMPANY_A)
-        if action_a < 0.0 and owned_amount > 0:
-            amount_to_sell = int(abs(action_a) * owned_amount)
-            trading_actions.sell(CompanyEnum.COMPANY_A, amount_to_sell)
+        owned_amount_a = portfolio.get_amount(CompanyEnum.COMPANY_A)
         if action_a > 0.0:
             current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
             amount_to_buy = int(action_a * (portfolio.cash // current_price))
             trading_actions.buy(CompanyEnum.COMPANY_A, amount_to_buy)
+        if action_a < 0.0 and owned_amount_a > 0:
+            amount_to_sell = int(abs(action_a) * owned_amount_a)
+            trading_actions.sell(CompanyEnum.COMPANY_A, amount_to_sell)
         # Create trading actions for stock B
-        owned_amount = portfolio.get_amount(CompanyEnum.COMPANY_B)
-        if action_b < 0.0 and owned_amount > 0:
-            amount_to_sell = int(abs(action_b) * owned_amount)
-            trading_actions.sell(CompanyEnum.COMPANY_B, amount_to_sell)
+        owned_amount_b = portfolio.get_amount(CompanyEnum.COMPANY_B)
         if action_b > 0.0:
             current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
             amount_to_buy = int(action_b * (portfolio.cash // current_price))
             trading_actions.buy(CompanyEnum.COMPANY_B, amount_to_buy)
+        if action_b < 0.0 and owned_amount_b > 0:
+            amount_to_sell = int(abs(action_b) * owned_amount_b)
+            trading_actions.sell(CompanyEnum.COMPANY_B, amount_to_sell)
         return trading_actions
 
 
 
 # This method retrains the trader from scratch using training data from 1962-2011
-EPISODES = 100
+EPISODES = 50
 if __name__ == "__main__":
     # Reading training data
     #training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
@@ -365,7 +381,7 @@ if __name__ == "__main__":
     evaluator = PortfolioEvaluator([trader], False)
     for i in range(EPISODES):
         logger.error(f"DQL Trader: Starting training episode {i}")
-        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 600)
+        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 300)
         # Get final portfolio value
         trader_portfolio_over_time = all_portfolios_over_time[name]
         import datetime as dt
