@@ -248,4 +248,4 @@ class Portfolio:
         return True
 
     def __repr__(self) -> str:
-        return f"Portfolio[name={self.name}]"
+        return f"<Portfolio(name=\"{self.name}\", cash={self.cash}, shares={self.shares})>"
