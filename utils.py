@@ -100,13 +100,13 @@ def read_stock_market_data(stocks: StockList, periods: PeriodList) -> StockMarke
         * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
         * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
             * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
+            * 'stock_a_2012-2015.csv'
             * 'stock_b_1962-2011.csv'
-            * 'stock_b_2012-2017.csv'
+            * 'stock_b_2012-2015.csv'
           into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
         * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
             * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
+            * 'stock_a_2012-2015.csv'
           into a dict with a key `CompanyEnum.COMPANY_A`
         * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
             * 'stock_a_1962-2011.csv'

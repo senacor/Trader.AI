@@ -19,9 +19,9 @@ class TestStockData(TestCase):
     def test_get_dates(self):
         old_implementation = np.array([[x[0] for x in get_test_data().iter()]])[0].tolist()
 
-        self.assertEqual(get_test_data().get_dates(), old_implementation)
+        assert get_test_data().get_dates() == old_implementation
 
     def test_get_values(self):
         old_implementation = np.array([[x[1] for x in get_test_data().iter()]])[0].tolist()
 
-        self.assertEqual(get_test_data().get_values(), old_implementation)
+        assert get_test_data().get_values() == old_implementation
