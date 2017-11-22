@@ -48,7 +48,7 @@ class EvaluatorTest(unittest.TestCase):
 
         data_row_lengths = set([len(value_set) for value_set in portfolios_over_time.values()])
         self.assertEqual(len(data_row_lengths), 1)
-        self.assertEqual(data_row_lengths.pop(), 101)
+        self.assertEqual(data_row_lengths.pop(), 100)
 
     def test_inspect_with_default_offset(self):
         data = StockData([(date(2017, 1, 1), 150.0), (date(2017, 1, 2), 200.0), (date(2017, 1, 3), 250.0)])
