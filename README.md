@@ -153,6 +153,24 @@ $ python stock_exchange.py
 After some Terminal action this should show a diagram depicting the course of different portfolios which use different
 Trader implementations respectively.
 
+Furthermore you can execute the test suite to see if all works well:
+```
+$ python test_suite_all.py
+```
+
+## Preparations for the Code Camp
+1. Install Python, pip and (optional) virtualenv. See [Required Tools](#required-tools)
+2. Create a virtual environment. This is optional, however recommended. It allows for easier dependency management and
+prevents messing up your system's Python installation and dependencies. The recommended way is to create *one* virtual
+environment for this Code Camp. See [Create a Virtual Environment (optional)](#create-a-virtual-environment-optional-)
+3. Install all dependencies. Download `requirements.txt` and install all Code Camp-related dependencies (in the newly
+created virtual environment):
+```
+$ wget https://raw.githubusercontent.com/senacor/Trader.AI/master/requirements.txt
+$ pip install -r requirements.txt
+```
+4. Install an IDE. We recommend either JetBrains PyCharm or PyDev (based on Eclipse)
+
 ## Development
 ### IDE
 To start developing Python applications, there are not any huge requirements actually. You could open your favorite text
@@ -181,7 +199,6 @@ This repository contains a number of packages and files. Following a short overv
 * `definitions.py` - Contains some project-wide Python constants
 * `dependency_injection_containers.py` - Contains all configured dependencies for dependency injection
 * `logger.py` - Contains project-wide logger configuration
-* `README.md` - This file
 * `requirements.txt` - Contains an export of all project dependencies (by running `$ pip freeze > requirements.txt`)
 * `stock_exchange.py` - Contains the central main method. This starts ILSE
 * `test_suite_all.py` - Test suite containing all test classes from all packages
