@@ -14,11 +14,12 @@ from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense
 
-MODEL_FILE_NAME_STOCK_A = 'stock_a_predictor'
-MODEL_FILE_NAME_STOCK_B = 'stock_b_predictor'
-RELATIVE_PATH = 'predicting/predictor'
+RELATIVE_PATH = 'predicting/predictor/nn_value_predictor'
+MODEL_FILE_NAME_STOCK_A = 'nn_value_predictor_stock_a_network'
+MODEL_FILE_NAME_STOCK_B = 'nn_value_predictor_stock_b_network'
 
-class BaseNnPredictor(IPredictor):
+
+class BaseNnValuePredictor(IPredictor):
     '''
     Perfect predictor based on an already trained neural network.
     '''
@@ -32,7 +33,7 @@ class BaseNnPredictor(IPredictor):
         self.model = load_keras_sequential(RELATIVE_PATH, nn_filename)
         # ... if that wasn't possible, then create a new untrained one
         if self.model is None:
-            logger.warn(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
+            logger.warn(f"Loading of trained neural network failed, creating a new untrained one.")
             self.trained = False
             self.model = Sequential()
             self.model.add(Dense(500, activation='relu', input_dim=100))
@@ -64,7 +65,7 @@ class BaseNnPredictor(IPredictor):
             logger.error("Error in predicting next stock value.")
             assert False
 
-class StockANnPredictor(BaseNnPredictor):
+class StockANnValuePredictor(BaseNnValuePredictor):
     '''
     Perfect predictor for stock A based on an already trained neural network.
     '''
@@ -72,9 +73,9 @@ class StockANnPredictor(BaseNnPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_A)
+        super().__init__(MODEL_FILE_NAME_STOCK_A)
 
-class StockBNnPredictor(BaseNnPredictor):
+class StockBNnValuePredictor(BaseNnValuePredictor):
     '''
     Perfect predictor for stock B based on an already trained neural network.
     '''
@@ -82,7 +83,7 @@ class StockBNnPredictor(BaseNnPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        BaseNnPredictor.__init__(self, MODEL_FILE_NAME_STOCK_B)
+        super().__init__(MODEL_FILE_NAME_STOCK_B)
 
 ###############################################################################
 # The following code trains and stores the corresponding neural network

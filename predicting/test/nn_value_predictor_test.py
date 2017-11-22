@@ -6,12 +6,11 @@ Module for testing of all predicting components
 @author: rmueller
 '''
 import unittest
-from predicting.predictor.nn_predictor import StockANnPredictor
-from predicting.predictor.nn_predictor import StockBNnPredictor
+from predicting.predictor.nn_value_predictor import StockANnValuePredictor, StockBNnValuePredictor
 from model.CompanyEnum import CompanyEnum
 from utils import read_stock_market_data
 
-class NnPredictorTest(unittest.TestCase):
+class NnValuePredictorTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -25,7 +24,7 @@ class NnPredictorTest(unittest.TestCase):
         stock_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
 
         # Load stock A predictor
-        predictor = StockANnPredictor()
+        predictor = StockANnValuePredictor()
 
         # Check that prediction is within 10% of the most recent stock value
         stock_value = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
@@ -40,7 +39,7 @@ class NnPredictorTest(unittest.TestCase):
         stock_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
 
         # Load stock B predictor
-        predictor = StockBNnPredictor()
+        predictor = StockBNnValuePredictor()
 
         # Check that prediction for a trained model is within 10% of the most recent stock value
         stock_value = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
@@ -50,5 +49,5 @@ class NnPredictorTest(unittest.TestCase):
             self.assertLessEqual(stock_prediction, stock_value * 1.1)
     
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(NnPredictorTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(NnValuePredictorTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
