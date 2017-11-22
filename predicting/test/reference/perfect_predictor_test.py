@@ -27,14 +27,14 @@ class PerfectPredictorTest(unittest.TestCase):
         self.assertIsNotNone(predictor_a)
         self.assertIsNotNone(predictor_a.stock_data)
         self.assertEqual(predictor_a.stock_data.get(0)[1], 0.05962)
-        self.assertEqual(predictor_a.stock_data.get_last()[1], 102.759895)
+        self.assertEqual(predictor_a.stock_data.get_last()[1], 101.610001)
 
         # Create a perfect predictor for stock B
         predictor_b = PerfectPredictor(CompanyEnum.COMPANY_B)
         self.assertIsNotNone(predictor_b)
         self.assertIsNotNone(predictor_b.stock_data)
         self.assertEqual(predictor_b.stock_data.get(0)[1], 2.192523)
-        self.assertEqual(predictor_b.stock_data.get_last()[1], 128.89408900000001)
+        self.assertEqual(predictor_b.stock_data.get_last()[1], 151.350006)
 
     def testDoPredictStockA(self):
         predictor = PerfectPredictor(CompanyEnum.COMPANY_A)

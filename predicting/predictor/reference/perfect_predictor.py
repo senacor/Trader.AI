@@ -3,7 +3,7 @@ Created on 16.11.2017
 
 @author: rmueller
 '''
-from definitions import PERIOD_2, PERIOD_1
+from definitions import PERIOD_1, PERIOD_2, PERIOD_3
 from model.IPredictor import IPredictor
 from model.CompanyEnum import CompanyEnum
 import datetime as dt
@@ -32,7 +32,7 @@ class PerfectPredictor(IPredictor):
         # Load all stock data, but only save it for the given company
         # TODO Why do we read all/both company's data? We only need one, see line underneath (jh)
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                                   [PERIOD_1, PERIOD_2])
+                                                   [PERIOD_1, PERIOD_2, PERIOD_3])
         self.stock_data = stock_market_data.get_for_company(company)
 
     # TODO Why providing `StockData` as method parameter when it has been already constructed/read in constructor? (jh)

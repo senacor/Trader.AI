@@ -108,7 +108,7 @@ class Portfolio:
         logger.debug(f"Updating portfolio {self.name}:")
 
         if trade_action_list.is_empty():
-            logger.info("trade_action_list.is_empty -> No action this time")
+            logger.debug("trade_action_list.is_empty -> No action this time")
             return updated_portfolio
 
         available_cash = updated_portfolio.cash

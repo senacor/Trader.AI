@@ -6,7 +6,9 @@ Created on 19.11.2017
 import random
 from collections import deque
 import numpy as np
+import datetime as dt
 
+from definitions import PERIOD_1, PERIOD_2
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
@@ -75,25 +77,26 @@ class DqlTrader(ITrader):
     Implementation of ITrader based on reinforced Q-learning (RQL).
     """
 
-    # Stockactions model the possible output from the neural network.
-    # A stockaction is of a pair of floats, each between -1.0 and +1.0.
+    # Stock actions model the possible output from the neural network.
+    # A stock action is of a pair of floats, each between -1.0 and +1.0.
     # The first float encodes an action for stock A, the second float encodes an action for stock B.
     # A float between 0.0 and +1.0 encodes buying a stock, measured in percent of cash of the current portfolio.
     # A float between -1.0 and 0.0 encodes selling a stock, measured in percent of the amount this stock is present
     # in the current portfolio.
     # A float of 0.0 encodes "do nothing", so: no trading action at all.
-    # ATTENTION: These stockactions greatly reduce the action space of the neural network and directly influence
+    # ATTENTION: These stock actions vastly reduce the action space of the neural network and directly influence
     # its training performance. So choose wisely ;-)
-    STOCKACTIONS = [(+1.0, +0.0), (+0.0, +1.0),
-                    (+0.9, +0.1), (+0.1, +0.9),
-                    (+0.8, +0.2), (+0.2, +0.8),
-                    (+0.7, +0.3), (+0.3, +0.7),
-                    (+0.6, +0.4), (+0.4, +0.6),
-                    (+0.5, +0.5),
-                    (+1.0, -1.0), (-1.0, +1.0),
-                    (-1.0, -1.0)]
+    STOCK_ACTIONS = [(+1.0, +0.0), (+0.0, +1.0),
+                     (+0.9, +0.1), (+0.1, +0.9),
+                     (+0.8, +0.2), (+0.2, +0.8),
+                     (+0.7, +0.3), (+0.3, +0.7),
+                     (+0.6, +0.4), (+0.4, +0.6),
+                     (+0.5, +0.5),
+                     (+1.0, -1.0), (-1.0, +1.0),
+                     (-1.0, -1.0)]
 
-    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor, load_trained_model: bool = True, train_while_trading: bool = False):
+    def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor,
+                 load_trained_model: bool = True, train_while_trading: bool = False, name: str = 'dql_trader'):
         """
         Constructor
         Args:
@@ -102,44 +105,45 @@ class DqlTrader(ITrader):
             load_trained_model: Flag to trigger loading an already trained neural network
             train_while_trading: Flag to trigger on-the-fly training while trading
         """
-        # Save predictors and training mode
+        # Save predictors, training mode and name
         assert stock_a_predictor is not None and stock_b_predictor is not None
         self.stock_a_predictor = stock_a_predictor
         self.stock_b_predictor = stock_b_predictor
         self.train_while_trading = train_while_trading
+        self.name = name
 
-        # Hyper parameters for neural network
+        # Parameters for neural network
         self.state_size = 2
-        self.action_size = len(self.STOCKACTIONS)
+        self.action_size = len(self.STOCK_ACTIONS)
         self.hidden_size = 50
 
-        # Hyper parameters for deep Q-learning
+        # Parameters for deep Q-learning
         self.learning_rate = 0.001
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 64
-        self.min_size_of_memory = 1000 # should be way bigger than batch_size, but smaller
+        self.min_size_of_memory_before_training = 1000 # should be way bigger than batch_size, but smaller than memory
         self.memory = deque(maxlen=2000)
 
-        # Parameters for experience memory
-        # TODO do we need this?
-        self.lastPortfolioValue = None
-        self.lastActionA = None
-        self.lastActionB = None
-        self.lastState = None
+        # Attributes necessary to remember our last actions and fill our memory with experiences
+        self.last_state = None
+        self.last_action_a = None
+        self.last_action_b = None
+        self.last_portfolio_value = None
 
         # Create main model, either as trained model (from file) or as untrained model (from scratch)
         self.model = None
         if load_trained_model:
-            self.model = load_keras_sequential('trading', 'dql_trader')
-            logger.info(f"DQL Trader: Loaded trained model!")
+            logger.debug(f"DQL Trader: Try to load trained model")
+            self.model = load_keras_sequential('trading', self.name)
+            logger.debug(f"DQL Trader: Loaded trained model")
         if self.model is None: # loading failed or we didn't want to use a trained model
             self.model = Sequential()
             self.model.add(Dense(self.hidden_size * 2, input_dim=self.state_size, activation='relu'))
             self.model.add(Dense(self.hidden_size, activation='relu'))
             self.model.add(Dense(self.action_size, activation='linear'))
-            logger.info(f"DQL Trader: Created new untrained model!")
+            logger.info(f"DQL Trader: Created new untrained model")
         assert self.model is not None
         self.model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
@@ -152,22 +156,18 @@ class DqlTrader(ITrader):
 
     def get_action(self, state: State) -> (float, float):
         """
-        Get best action for current state, either randomly or predicted from neural network
-        Choice between random and neural network solely depends on epsilon
-        Epsilon is the probability of a random action
-        Return value is two floats between -1.0 and +1.0
-        First float is for action on stock A, second float is for action on stock B
-        Minus means "sell stock proportionally to owned amount", e.g. -0.5 means "sell half of your owned stock"
-        Plus means "buy stock proportionally to owned cash", e.g. +0.5 means "take half of your cash and by that stock"
-        ATTENTION: if sum of action over all stocks is greater than 1.0, then not all stocks can be bought!
-        Example: action stock A = +1.0 and action stock B = +0.2
-        This leads to all cash to be spent on buying stock A (because of action +1.0),
-        which in turn means there is no cash left to buy stock B (the action +0.2)
+        Get best action for current state, either randomly or predicted from the neural network.
+        The choice between random and neural network solely depends on epsilon:
+        Epsilon is the probability of a random action.
+        Args:
+            state:
+        Returns:
+            A pair of floats encoding the stock actions
         """
         if self.train_while_trading and np.random.rand() <= self.epsilon:
             # Generate and return two random actions
             logger.debug(f"DQL Trader: Choose random actions")
-            return random.choice(self.STOCKACTIONS)
+            return random.choice(self.STOCK_ACTIONS)
         else:
             # Generate values per action by calling neural network with current state
             action_values = self.model.predict(state.to_model_input())
@@ -175,87 +175,22 @@ class DqlTrader(ITrader):
             # Get index with highest value (if there are more than one, get the first), and return corresponding actions
             index = np.argmax(action_values[0])
             logger.debug(f"DQL Trader: Choosen index: {index}")
-            return self.STOCKACTIONS[index]
+            return self.STOCK_ACTIONS[index]
 
-    def get_actions_from_index(self, index: int):
+    def calculate_reward(self, last_portfolio_value: float, current_portfolio_value: float) -> float:
         """
-        Convert index from neural network output into two STOCKACTIONS.
-        Args:
-            index: Index of corrsponding combination of STOCKACTIONs in neural network output.
-
-        Returns:
-            Two STOCKACTIONs, one for stock A and one for stock B.
-        """
-        assert 0 <= index < self.action_size
-        #return STOCKACTIONS[index // len(STOCKACTIONS)], STOCKACTIONS[index % len(STOCKACTIONS)]
-
-    def get_index_from_actions(self, actionA: float, actionB: float):
-        """
-        Convert two STOCKACTIONS into index of neural network output.
-        Args:
-            actionA: STOCKACTION for stock A.
-            actionB: STOCKACTION for stock B.
-
-        Returns:
-            Index of corresponding combination of STOCKACTIONs in neural network output.
-        """
-        # assert actionA in STOCKACTIONS
-        # assert actionB in STOCKACTIONS
-        # return STOCKACTIONS.index(actionA) * len(STOCKACTIONS) + STOCKACTIONS.index(actionB)
-
-    def calculate_reward(self, current_state: State, last_portfolio_value: float, current_portfolio_value: float) -> float:
-        """
-        Implements rewards function
+        Implements the rewards function by comparing last portfolio value and current portfolio value.
+        The reward will be positive if we gained portfolio value and negative if we lost portfolio value.
+        This function overproportionally rewards gains by squaring the positive returns.
         
         Args:
-            last_portfolio_value - last value of Portfolio
-            current_portfolio_value - current value of Portfolio
+            last_portfolio_value: Last value of Portfolio
+            current_portfolio_value: Current value of Portfolio
+        Returns:
+            The reward as float
         """
-        assert current_state is not None
-        assert last_portfolio_value is not None and current_portfolio_value is not None
-
-        # Compare performance without action to performance with the taken actions
-        # old_portfolio_at_todays_prices = self.lastState.cash + (self.lastState.stockA *  current_state.priceA) + (self.lastState.stockB * current_state.priceB)
-        # logger.debug(f"DQL Trader: Old value {old_portfolio_at_todays_prices} and todays value {current_portfolio_value}")
-        # if current_portfolio_value >= old_portfolio_at_todays_prices:
-        #     return +100
-        # else:
-        #     return -100
-
-
-        # Explicitly model logik of SimpleTrader
-        # if self.lastState.predictedA - self.lastState.priceA > 0:
-        #     if self.lastState.predictedB - self.lastState.priceB > 0: # A up, B up
-        #         if self.lastActionA > 0 and self.lastActionB > 0:
-        #             return 100
-        #         else:
-        #             return -100
-        #     else: # A up, B down
-        #         if self.lastActionA > 0 and self.lastActionB < 0:
-        #             return 100
-        #         else:
-        #             return -100
-        # else:
-        #     if self.lastState.predictedB - self.lastState.priceB > 0: # A down, B up
-        #         if self.lastActionA < 0 and self.lastActionB > 0:
-        #             return 100
-        #         else:
-        #             return -100
-        #     else: # A down, B down
-        #         if self.lastActionA < 0 and self.lastActionB < 0:
-        #             return 100
-        #         else:
-        #             return -100
-
-        # Only check portfolio value
-        # if current_portfolio_value > last_portfolio_value:
-        #     return +100
-        # elif current_portfolio_value == last_portfolio_value:
-        #     return 0
-        # else:
-        #     return -100
         if current_portfolio_value > last_portfolio_value:
-            return ((current_portfolio_value / last_portfolio_value) * 10.0) * ((current_portfolio_value / last_portfolio_value) * 10.0)
+            return ((current_portfolio_value / last_portfolio_value) * 10.0)**2
         elif current_portfolio_value == last_portfolio_value:
             return 0.0
         else:
@@ -265,25 +200,16 @@ class DqlTrader(ITrader):
         """
         Train the neural network using a small random batch of the stored experiences in memory.
         """
-        # Only train if we've seen at least a certain amount of experiences
-        # if len(self.memory) < self.train_start:
-        #     return
-        # batch_size = min(self.batch_size, len(self.memory))
-        # batch = random.sample(self.memory, batch_size)
-        assert len(self.memory) >= self.batch_size
+        # Take a random sample (of size batch_size) from our memory
         batch = random.sample(self.memory, self.batch_size)
 
-        for state, actionA, actionB, reward, nextState in batch:
-            # We ignore future rewards and focus solely on short-term trading
-            target = reward
-
-            # Build target action values and exchange value for the chosen actions
+        # Train the neural net by using the immediate reward as desired output (this ignores all future rewards)
+        for state, actionA, actionB, reward, _ in batch:
             output_values = self.model.predict(state.to_model_input())
-            #index = self.get_index_from_actions(actionA, actionB)
-            index = self.STOCKACTIONS.index((actionA, actionB))
-            logger.debug(f"DQL Trader: actionA: {actionA}, actionB: {actionB}, index of action to target: {index}, reward: {target}")
+            index = self.STOCK_ACTIONS.index((actionA, actionB))
+            logger.debug(f"DQL Trader: actionA: {actionA}, actionB: {actionB}, index of action to target: {index}, reward: {reward}")
             target_action_values = self.model.predict(state.to_model_input())
-            target_action_values[0][index] = target
+            target_action_values[0][index] = reward
             logger.debug(
                 f"DQL Trader: Before training: Input {state.to_model_input()} Output {output_values} Expected {target_action_values}")
 
@@ -318,26 +244,22 @@ class DqlTrader(ITrader):
                               predicted_stock_b)
         logger.debug(f"DQL Trader: Current state: {current_state}")
 
-        if self.train_while_trading and self.lastState is not None:  # doTrade was called before at least once
-            assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None
-            # Calculate reward and store state, actions, reward and following state in memory
-            reward = self.calculate_reward(current_state, self.lastPortfolioValue, current_portfolio_value)
-            memory_tuple = (self.lastState, self.lastActionA, self.lastActionB, reward, current_state)
+        # Store experience and train the neural network only if doTrade was called before at least once
+        if self.train_while_trading and self.last_state is not None:
+            reward = self.calculate_reward(self.last_portfolio_value, current_portfolio_value)
+            memory_tuple = (self.last_state, self.last_action_a, self.last_action_b, reward, current_state)
             self.memory.append(memory_tuple)
-            # Train from experiences stored in memory (once we have enough experiences)
-            if len(self.memory) > self.batch_size + self.min_size_of_memory:
+            if len(self.memory) > self.batch_size + self.min_size_of_memory_before_training:
                 self.train_model()
 
-        # Create actions for current state
+        # Create actions for current state and decrease epsilon for fewer random actions
         (action_a, action_b) = self.get_action(current_state)
-        logger.debug(f"DQL Trader: Computed trading actions {action_a} and {action_b}")
-        # Decrease epsilon for fewer random actions
         self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
-        # Save created actions for the next call of doTrade
-        self.lastActionA = action_a
-        self.lastActionB = action_b
-        self.lastPortfolioValue = current_portfolio_value
-        self.lastState = current_state
+        logger.debug(f"DQL Trader: Computed trading actions {action_a} and {action_b} with epsilon {self.epsilon}")
+
+        # Save created state, actions and portfolio value for the next call of doTrade
+        self.last_state, self.last_action_a, self.last_action_b = current_state, action_a, action_b
+        self.last_portfolio_value = current_portfolio_value
         return self.create_trading_actions(action_a, action_b, portfolio, stock_market_data)
 
     def create_trading_actions(self, action_a: float, action_b: float,
@@ -383,27 +305,24 @@ class DqlTrader(ITrader):
 # This method retrains the trader from scratch using training data from 1962-2011
 EPISODES = 50
 if __name__ == "__main__":
-    # Reading training data
-    #training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
-    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['2012-2017'])
+    # Read the training data
+    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
+    final_day = dt.date(2015, 12, 30)
 
     # Define initial portfolio
     name = 'DQL trader portfolio'
     portfolio = Portfolio(10000.0, [], name)
 
     # Initialize trader: use perfect predictors, don't use an already trained model, but learn while trading
-    trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False, True)
-    #trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True, False)
+    trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B),
+                       False, True, 'dql_trader_perfect')
 
-    # Start evaluation and train correspondingly; display the results in a plot
+    # Start evaluation and train correspondingly; don't display the results in a plot but display final portfolio value
     evaluator = PortfolioEvaluator([trader], False)
     for i in range(EPISODES):
-        logger.error(f"DQL Trader: Starting training episode {i}")
+        logger.info(f"DQL Trader: Starting training episode {i}")
         all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 300)
-        # Get final portfolio value
         trader_portfolio_over_time = all_portfolios_over_time[name]
-        import datetime as dt
-        final_day = dt.date(2017, 11, 6)
-        trader_portfolio = trader_portfolio_over_time[final_day]
-        logger.error(f"DQL Trader: Finished training episode {i}, final portfolio value {trader_portfolio.total_value(final_day, training_data)}")
+        final_portfolio_value = trader_portfolio_over_time[final_day].total_value(final_day, training_data)
+        logger.info(f"DQL Trader: Finished training episode {i}, final portfolio value {final_portfolio_value}")
         trader.save_trained_model()

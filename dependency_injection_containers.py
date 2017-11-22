@@ -6,6 +6,8 @@ Created on 09.11.2017
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
+from definitions import DQLTRADER_PERFECT_PREDICTOR, DQLTRADER_RANDOM_PREDICTOR, \
+    DQLTRADER_PERFECT_NN_BINARY_PREDICTOR, DQLTRADER_NN_BINARY_PREDICTOR
 from trading.trader.simple_trader import SimpleTrader
 from trading.trader.dql_trader import DqlTrader
 from model.CompanyEnum import CompanyEnum
@@ -82,23 +84,27 @@ class Traders(containers.DeclarativeContainer):
     DqlTrader_with_perfect_prediction = providers.Factory(
         DqlTrader,
         stock_a_predictor=Predictors.PerfectPredictor_stock_a,
-        stock_b_predictor=Predictors.PerfectPredictor_stock_b
+        stock_b_predictor=Predictors.PerfectPredictor_stock_b,
+        name=DQLTRADER_PERFECT_PREDICTOR
         )
     
     DqlTrader_with_random_prediction = providers.Factory(
         DqlTrader,
         stock_a_predictor=Predictors.RandomPredictor,
-        stock_b_predictor=Predictors.RandomPredictor
+        stock_b_predictor=Predictors.RandomPredictor,
+        name=DQLTRADER_RANDOM_PREDICTOR
         )
     
     DqlTrader_with_nn_binary_perfect_prediction = providers.Factory(
         DqlTrader,
         stock_a_predictor=Predictors.StockANnPerfectBinaryPredictor,
-        stock_b_predictor=Predictors.StockBNnPerfectBinaryPredictor
+        stock_b_predictor=Predictors.StockBNnPerfectBinaryPredictor,
+        name=DQLTRADER_PERFECT_NN_BINARY_PREDICTOR
         )
     
     DqlTrader_with_nn_binary_prediction = providers.Factory(
         DqlTrader,
         stock_a_predictor=Predictors.StockANnBinaryPredictor,
-        stock_b_predictor=Predictors.StockBNnBinaryPredictor
+        stock_b_predictor=Predictors.StockBNnBinaryPredictor,
+        name=DQLTRADER_NN_BINARY_PREDICTOR
         )
