@@ -9,6 +9,7 @@ import unittest
 from predicting.predictor.reference.nn_value_predictor import StockANnValuePredictor, StockBNnValuePredictor
 from model.CompanyEnum import CompanyEnum
 from utils import read_stock_market_data
+from definitions import PERIOD_1
 
 class NnValuePredictorTest(unittest.TestCase):
 
@@ -20,7 +21,7 @@ class NnValuePredictorTest(unittest.TestCase):
        
     def testStockANnPredictor(self):
         # Get stock A data
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], [PERIOD_1])
         stock_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
 
         # Load stock A predictor
@@ -35,7 +36,7 @@ class NnValuePredictorTest(unittest.TestCase):
 
     def testStockBNnPredictor(self):
         # Get stock B data
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_B], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_B], [PERIOD_1])
         stock_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
 
         # Load stock B predictor

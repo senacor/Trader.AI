@@ -7,6 +7,7 @@ Module for testing of deep q-learning trader.
 '''
 import unittest
 
+from definitions import PERIOD_3
 from utils import read_stock_market_data
 from model.SharesOfCompany import SharesOfCompany
 from model.Portfolio import Portfolio
@@ -48,7 +49,7 @@ class DqlTraderTest(unittest.TestCase):
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
         self.assertIsNotNone(trader)
         portfolio = Portfolio(10000, [])
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['2012-2017'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_3])
         self.assertIsNotNone(stock_market_data)
 
         # Check doing nothing

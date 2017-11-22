@@ -13,7 +13,7 @@ from model.trader_actions import CompanyEnum
 from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
-
+from definitions import PERIOD_1
 
 class SimpleTraderTest(unittest.TestCase):
     def setUp(self):
@@ -25,7 +25,7 @@ class SimpleTraderTest(unittest.TestCase):
     def testSimpleTraderWithOneStock(self):
         trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
         self.assertIsNotNone(trader)
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], [PERIOD_1])
         self.assertIsNotNone(stock_market_data)
         portfolio = Portfolio(10000, [])
         self.assertIsNotNone(portfolio)
@@ -41,7 +41,7 @@ class SimpleTraderTest(unittest.TestCase):
     def testSimpleTraderWithTwoStocks(self):
         trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
         self.assertIsNotNone(trader)
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
         self.assertIsNotNone(stock_market_data)
         portfolio = Portfolio(10000, [])
         self.assertIsNotNone(portfolio)

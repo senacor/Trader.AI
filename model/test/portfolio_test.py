@@ -15,15 +15,15 @@ class TestPortfolio(TestCase):
         portfolio = Portfolio(1000.0,
                               [SharesOfCompany(CompanyEnum.COMPANY_A, 10), SharesOfCompany(CompanyEnum.COMPANY_B, 50)])
 
-        self.assertEqual(portfolio.cash, 1000.0)
-        self.assertEqual(len(portfolio.shares), 2)
-        self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(portfolio.shares[0].amount, 10)
+        assert portfolio.cash == 1000.0
+        assert len(portfolio.shares) == 2
+        assert portfolio.shares[0].company_enum == CompanyEnum.COMPANY_A
+        assert portfolio.shares[0].amount == 10
 
-        self.assertEqual(portfolio.shares[1].company_enum, CompanyEnum.COMPANY_B)
-        self.assertEqual(portfolio.shares[1].amount, 50)
+        assert portfolio.shares[1].company_enum == CompanyEnum.COMPANY_B
+        assert portfolio.shares[1].amount == 50
 
-        self.assertTrue(f"{portfolio.cash}" in f"{portfolio}")
+        assert f"{portfolio.cash}" in f"{portfolio}"
 
     def test_update__no_sufficient_cash_reserve(self):
         """
@@ -46,10 +46,10 @@ class TestPortfolio(TestCase):
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Trade volume is too high for current cash reserve. Nothing should happen
-        self.assertEqual(updated_portfolio.cash, cash_reserve)
-        self.assertEqual(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(updated_portfolio.shares[0].amount, 200)
+        assert updated_portfolio.cash == cash_reserve
+        assert updated_portfolio.cash == portfolio.cash
+        assert updated_portfolio.shares[0].company_enum == CompanyEnum.COMPANY_A
+        assert updated_portfolio.shares[0].amount == 200
 
     def test_update__sufficient_cash_reserve(self):
         """
@@ -73,10 +73,10 @@ class TestPortfolio(TestCase):
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
         # Current cash reserve is sufficient for trade volume. Trade should happen
-        self.assertLess(updated_portfolio.cash, cash_reserve)
-        self.assertLess(updated_portfolio.cash, portfolio.cash)
-        self.assertEqual(updated_portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(updated_portfolio.shares[0].amount, 300)
+        assert updated_portfolio.cash < cash_reserve
+        assert updated_portfolio.cash < portfolio.cash
+        assert updated_portfolio.shares[0].company_enum == CompanyEnum.COMPANY_A
+        assert updated_portfolio.shares[0].amount == 300
 
     def test_update__action_order_does_not_matter(self):
         """
@@ -99,7 +99,7 @@ class TestPortfolio(TestCase):
         portfolio1 = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(cash_reserve, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
-        self.assertEqual(portfolio1, portfolio2)
+        assert portfolio1 == portfolio2
 
         # Create two trading action lists with the same entries, however in different order
         trading_action_list_order1 = TradingActionList()
@@ -115,7 +115,7 @@ class TestPortfolio(TestCase):
         updated_portfolio_order2 = portfolio2.update(stock_market_data, trading_action_list_order2)
 
         # The portfolios should still be equal after applying the actions
-        self.assertEqual(updated_portfolio_order1, updated_portfolio_order2)
+        assert updated_portfolio_order1 == updated_portfolio_order2
 
     def test_update__do_not_drop_below_cash_0(self):
         """
@@ -142,46 +142,46 @@ class TestPortfolio(TestCase):
 
         updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
 
-        self.assertTrue(updated_portfolio.cash >= 0)
+        assert updated_portfolio.cash >= 0
 
     def test_eq__wrong_instance(self):
         portfolio = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
-        self.assertNotEqual(portfolio, "a string")
+        assert portfolio != "a string"
 
     def test_eq__different_cash_reserve(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(100.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
-        self.assertNotEqual(portfolio1, portfolio2)
+        assert portfolio1 != portfolio2
 
     def test_eq__different_stock_count__empty(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(10.0, [])
 
-        self.assertNotEqual(portfolio1, portfolio2)
+        assert portfolio1 != portfolio2
 
     def test_eq__different_stock_count__not_empty(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200),
                                       SharesOfCompany(CompanyEnum.COMPANY_B, 200)])
 
-        self.assertNotEqual(portfolio1, portfolio2)
+        assert portfolio1 != portfolio2
 
     def test_eq__different_stock_names(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_B, 200)])
 
-        self.assertNotEqual(portfolio1, portfolio2)
+        assert portfolio1 != portfolio2
 
     def test_eq__different_stock_quantity(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 300)])
 
-        self.assertNotEqual(portfolio1, portfolio2)
+        assert portfolio1 != portfolio2
 
     def test_eq__equal(self):
         portfolio1 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
         portfolio2 = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
 
-        self.assertEqual(portfolio1, portfolio2)
+        assert portfolio1 == portfolio2
