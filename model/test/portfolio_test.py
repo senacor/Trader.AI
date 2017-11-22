@@ -18,7 +18,7 @@ class TestPortfolio(TestCase):
         self.assertEqual(portfolio.cash, 1000.0)
         self.assertEqual(len(portfolio.shares), 2)
         self.assertEqual(portfolio.shares[0].company_enum, CompanyEnum.COMPANY_A)
-        self.assertEqual(portfolio.shares[0].amount, 10)
+        self.assertEqual(portfolio.shares[0].amount, 100000)
 
         self.assertEqual(portfolio.shares[1].company_enum, CompanyEnum.COMPANY_B)
         self.assertEqual(portfolio.shares[1].amount, 50)
