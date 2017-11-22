@@ -25,17 +25,16 @@ Python application to show AI functionality based on Keras and TensorFlow.
 * [Authors](#authors)
 
 ## Overview
-This Python application simulates a computer-based stock trading program. It contains a Stock Exchange which manages the 
-transactions that connected Traders instruct it to do. The Traders itself may use a connected Predictor to receive
-information about future stock values. The goal of this application is to show the functionality of Neural Networks 
-exemplarily. 
+This Python application simulates a computer-based stock trading program. Its goal is to demonstrate the basic functionality of neural networks trained by supervised learning and reinforcement learning (deep Q-learning).
+
+The application consists of a stock exchange and serveral connected traders. The stock exchange asks each trader once per day for its orders, and executes any received ones. Each trader computes its orders using stock market information provided by the stock exchange. A trader consists of two components: A neural network for predicting future stock prices, and a neural network for computing orders based on these predictions. Thereby, the first neural network can be trained using supervised learning, and the latter neural network can be trained using reinforcement learning (deep Q-learning).
 
 The following resources provide some basic introductions into the topic of Neural Networks:
 * \# TODO [Material aus Confluence](https://tech-projects.senacor.com/confluence/pages/viewpage.action?pageId=30638253) -> 
     sollten wir noch einzeln je nach Sinnhaftigkeit verlinken
 * \# TODO Unsere Präsentation fürs InnoLab, jedenfalls die Folien zum AI-/NN-/ML-Thema allgemein
 
-Some other interesting links:
+Some other interesting links: \# TODO
 * AI basics
   * [30 amazing applications of deep learning](http://www.yaronhadad.com/deep-learning-most-amazing-applications/)
   * [Neural Network to play a snake game – Towards Data Science – Medium](https://medium.com/towards-data-science/today-im-going-to-talk-about-a-small-practical-example-of-using-neural-networks-training-one-to-6b2cbd6efdb3)
@@ -51,36 +50,26 @@ Some other interesting links:
 
 ## Components
 ### Stock Exchange
-The Innovation Lab Stock Exchange ("ILSE") represents the central 'metronome' of the application. ILSE maintains both
-the stock prices and the Trader's portfolios. This means that all Traders connected to ILSE are assigned one portfolio
-which ILSE manages to prevent fraud. A portfolios comprises not only the inventory of all stocks and their quantity, but 
-also the available cash amount. 
+The Innovation Lab Stock Exchange ("ILSE") represents the central 'metronome' of the application. It is implemented by a class 'StockExchange'. ILSE maintains both the stock prices and the trader's portfolios. This means that all traders connected to ILSE are assigned one portfolio which ILSE manages to prevent fraud. A portfolios comprises not only the inventory of all stocks and their quantity, but also the available cash amount. 
 
-ILSE emulates trading days by calling the connected Traders. To keep it simple the Traders are only called on day's end. 
-ILSE then provides each Trader with both the latest close prices and its respective portfolio. The Traders itself is
-supposed to reply with a list of trading actions which ILSE has to execute. A trading action is one of the following
-actions for all stocks that are traded at ILSE: Buy, Sell or *no action*. After obtaining all trading actions for all
-connected Traders ILSE executes them one by one. This is only limited by the check if the specific planned action is
-valid for a given portfolio. That means, for buying stocks the portfolio's cash reserve must suffice. On the other hand,
-for selling stocks there the planned quantity of stocks must reside in the portfolio.
+ILSE emulates trading days by calling the connected traders. To keep it simple the traders are only called on day's end. 
+ILSE then provides each trader with both the latest close prices and its respective portfolio. A trader is
+supposed to reply with a list of orders which ILSE has to execute. An order is one of the following
+actions for all stocks that are traded at ILSE: Buy or sell. After obtaining all orders for all
+connected traders ILSE executes the orders one by one. This is only limited by checks whether the specific order is
+valid for a given portfolio. That means, for buying stocks the portfolio's cash reserve must suffice. For selling stocks, the corresponding quantity of stocks must reside in the portfolio.
 
-After execution of all trading actions for all connected Traders the current trading day has ended and the next one 
+After executing all orders for all connected traders the current trading day has ended and the next one 
 begins.
   
 ### Trader
-As stated before each Trader is responsible to tell ILSE which trading actions should be executed. Traders are provided
-both the latest close prices and their respective current portfolio. Based on this information on of the following
-actions with the wished quantity can be selected - however only if the respective stock is tradable at ILSE: Buy or 
-Sell.
+Each trader is implemented by a separate trader class (e.g., 'SimpleTrader' or 'DqlTrader') and responsible to tell ILSE which orders should be executed. Traders are provided with both the latest close prices and their current portfolio. Based on these informatiosn one of the following actions with the wished quantity can be selected: Buy or sell.
 
-Most times the Traders' decisions are not based on their own algorithms but rather get those information by one or more
-connected Predictors in the background. 
+Most times the traders' decisions are not based on their own algorithms but rather get those information by one or more
+connected predictors in the background. 
 
 ### Predictor
-A Predictor works behind a Trader and provides - if applicable - a price estimation for a specific stock. This for
-example can be accomplished by working based on a Neural Network, that has been trained on a set of stock prices. To
-receive an estimated stock price the Trader calls its specific Predictor with the latest stock prices and the Predictor
-in turn replies with the estimated stock price.   
+A predictor (implemented by separate predictor classes like 'PerfectPredictor') works behind a trader and provides - if applicable - a price estimation for a specific stock. Among other ways, providing a price estimate can be accomplished by using a neural network that has been trained on a set of past stock prices. To receive an estimated stock price the trader calls its specific predictor with the latest stock prices and the predictor in turn replies with the estimated future stock price.   
 
 ## Required Tools
 Trader AI's codebase relies on Python 3. To run Trader AI the following tools are required:
