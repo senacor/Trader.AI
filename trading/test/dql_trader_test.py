@@ -21,6 +21,12 @@ class DqlTraderTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testStateToString(self):
+        state = State(1000, 1, 2, 10.0, 20.0, 11.0, 22.0)
+        self.assertIsNotNone(state)
+
+        print(state.to_string())
+
     def testDqlTraderConstruction(self):
 
         # TODO A constructor can IMO never result in a `None` object. That would mean a failing object construction
