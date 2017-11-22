@@ -11,17 +11,25 @@ Python application to show AI functionality based on Keras and TensorFlow.
   * [Trader](#trader)
   * [Predictor](#predictor)
 * [Required Tools](#required-tools)
-  * [Installing Python 3 on Mac](#installing-python-3-on-mac)
-  * [Installing Python 3 on Windows](#installing-python-3-on-windows)
+  * [Installing Python and pip 3 on Mac](#installing-python-3-and-pip-on-mac)
+  * [Installing Python and pip 3 on Windows](#installing-python-3-and-pip-on-windows)
   * [Optional: Installing virtualenv](#optional-installing-virtualenv)
-  * [Run the Application](#run-the-application)
+* [Run the Application](#run-the-application)
+  * [Clone the Repository](#clone-the-repository)
+  * [Create a Virtual Environment (optional)](#create-a-virtual-environment-optional-)
+  * [Install All Dependencies](#install-all-dependencies)
+  * [Run](#run)
 * [Development](#development)
   * [IDE](#ide)
   * [Overview Of This Repository](#overview-of-this-repository)
 * [Authors](#authors)
 
 ## Overview
-This Python application comprises three components with which the functionality of Neural Networks is shown exemplarily. 
+This Python application simulates a computer-based stock trading program. It contains a Stock Exchange which manages the 
+transactions that connected Traders instruct it to do. The Traders itself may use a connected Predictor to receive
+information about future stock values. The goal of this application is to show the functionality of Neural Networks 
+exemplarily. 
+
 The following resources provide some basic introductions into the topic of Neural Networks:
 * \# TODO [Material aus Confluence](https://tech-projects.senacor.com/confluence/pages/viewpage.action?pageId=30638253) -> 
     sollten wir noch einzeln je nach Sinnhaftigkeit verlinken
@@ -78,11 +86,11 @@ in turn replies with the estimated stock price.
 Trader AI's codebase relies on Python 3. To run Trader AI the following tools are required:
 * Python 3
 * pip
-* virtualenv
+* virtualenv (optional)
 
 Details on how to install these tools are listed below.
 
-### Installing Python 3 on Mac
+### Installing Python 3 and pip on Mac
 On Mac there are two ways to install Python 3:
 * The installer way: Visit https://www.python.org/downloads/release/python-363/ to install Python 3
 * The Homebrew way: Visit http://docs.python-guide.org/en/latest/starting/install3/osx/ for a tutorial to install 
@@ -93,7 +101,7 @@ Check if *pip* is installed with running `$ pip --version`. In case it is not al
 [get-pip.py](https://bootstrap.pypa.io/get-pip.py)
 * When using Homebrew: Execute `$ brew install pip`
 
-### Installing Python 3 on Windows
+### Installing Python 3 and pip on Windows
 A good tutorial can be found here: http://docs.python-guide.org/en/latest/starting/install3/win/. To ease running Python
 in the Command Line you should consider adding the Python installation directory to the PATH environment variable.
 
@@ -107,34 +115,38 @@ version switching and shipping.
 
 To install *virtualenv* run `$ pip install virtualenv`
 
-### Run the Application
+## Run the Application
 After installing all required tools (Python, *pip*, *\[virtualenv]*) execute the following commands:
 
-* Clone the repository
+### Clone the Repository
 ```
 $ git clone https://github.com/senacor/Trader.AI.git
 $ cd Trader.AI
 ```
 
-* If you want to use *virtualenv*, create a virtual environment. The directory *virtual_env* is already added to 
-*.gitignore*
-  * On Mac:
+### Create a Virtual Environment (optional)
+If you want to use *virtualenv*, create a virtual environment. The directory *virtual_env* is already added to 
+*.gitignore*.
+
+#### On Mac
 ```
 $ virtualenv -p python3 virtual_env
 $ source virtual_env/bin/activate
 ```
-  * On Windows:
+
+#### On Windows
 ```
 $ virtualenv -p [path\to\python3\installation\dir\]python virtual_env
 $ virtual_env/Scripts/activate
 ```
 
-* Install all dependencies - this installs all required dependencies by Trader.AI
+### Install All Dependencies
+This installs all required dependencies by Trader.AI.
 ```
 $ pip install -r requirements.txt
 ```
 
-* Run the program
+### Run
 ```
 $ python stock_exchange.py
 ```
