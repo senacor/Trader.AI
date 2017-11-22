@@ -59,4 +59,4 @@ if __name__ == "__main__":
                                                     simple_trader_with_nn_binary_prediction_portfolio,
                                                     dql_trader_with_perfect_prediction_portfolio,
                                                     dql_trader_with_nn_binary_perfect_prediction_portfolio,
-                                                    dql_trader_with_nn_binary_prediction_portfolio], 400)
+                                                    dql_trader_with_nn_binary_prediction_portfolio], 1000)
