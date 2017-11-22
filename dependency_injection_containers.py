@@ -12,8 +12,8 @@ from predicting.predictor.random_predictor import RandomPredictor
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from model.CompanyEnum import CompanyEnum
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
-from predicting.predictor.nn_predictor import StockBNnPredictor,\
-    StockANnPredictor
+from predicting.predictor.nn_value_predictor import StockBNnValuePredictor,\
+    StockANnValuePredictor
 
 
 
@@ -25,8 +25,8 @@ class Predictors(containers.DeclarativeContainer):
     PerfectPredictor_stock_a = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_A)    
     PerfectPredictor_stock_b = providers.Factory(PerfectPredictor, CompanyEnum.COMPANY_B)
     
-    StockANnPredictor = providers.Factory(StockANnPredictor)
-    StockBNnPredictor = providers.Factory(StockBNnPredictor)
+    StockANnValuePredictor = providers.Factory(StockANnValuePredictor)
+    StockBNnValuePredictor = providers.Factory(StockBNnValuePredictor)
 
  
 class Traders(containers.DeclarativeContainer):
@@ -45,10 +45,10 @@ class Traders(containers.DeclarativeContainer):
         stock_b_predictor=Predictors.RandomPredictor
         )
     
-    SimpleTrader_with_nn_prediction = providers.Factory(
+    SimpleTrader_with_nn_value_prediction = providers.Factory(
         SimpleTrader, 
-        stock_a_predictor=Predictors.StockANnPredictor, 
-        stock_b_predictor=Predictors.StockBNnPredictor
+        stock_a_predictor=Predictors.StockANnValuePredictor, 
+        stock_b_predictor=Predictors.StockBNnValuePredictor
         )
 
     """Buy and Hold Trader"""
@@ -71,6 +71,6 @@ class Traders(containers.DeclarativeContainer):
     
     DqlTrader_with_nn_prediction = providers.Factory(
         DqlTrader,
-        stock_a_predictor=Predictors.StockANnPredictor, 
-        stock_b_predictor=Predictors.StockBNnPredictor
+        stock_a_predictor=Predictors.StockANnValuePredictor, 
+        stock_b_predictor=Predictors.StockBNnValuePredictor
         )
