@@ -1,7 +1,6 @@
 from typing import List
 
 import datetime
-
 from evaluating.evaluator_utils import draw, get_data_up_to_offset
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
@@ -29,7 +28,7 @@ class PortfolioEvaluator:
         self.draw_results = draw_results
 
     def inspect_over_time(self, market_data: StockMarketData, portfolios: PortfolioList, evaluation_offset: int = -1,
-                          date_offset=None):
+                          date_offset: datetime.date=None):
         """
         Lets the clock tick and executes this for every given `Portfolio` on every tick:
         * Notifies the trader which returns a list of trading actions
