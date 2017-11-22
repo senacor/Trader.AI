@@ -9,9 +9,10 @@ import unittest
 from model.Portfolio import Portfolio
 from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from predicting.predictor.perfect_predictor import PerfectPredictor
+
 from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 
 class SimpleTraderTest(unittest.TestCase):

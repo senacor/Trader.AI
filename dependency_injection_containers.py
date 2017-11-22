@@ -8,16 +8,15 @@ import dependency_injector.providers as providers
 
 from trading.trader.simple_trader import SimpleTrader
 from trading.trader.dql_trader import DqlTrader
-from predicting.predictor.random_predictor import RandomPredictor
-from predicting.predictor.perfect_predictor import PerfectPredictor
 from model.CompanyEnum import CompanyEnum
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
-from predicting.predictor.nn_value_predictor import StockBNnValuePredictor, \
-    StockANnValuePredictor
-from predicting.predictor.nn_binary_predictor import StockANnBinaryPredictor,\
+from predicting.predictor.reference.random_predictor import RandomPredictor
+from predicting.predictor.reference.perfect_predictor import PerfectPredictor
+from predicting.predictor.reference.nn_binary_predictor import StockANnBinaryPredictor,\
     StockBNnBinaryPredictor
-from predicting.predictor.nn_perfect_binary_predictor import StockANnPerfectBinaryPredictor,\
+from predicting.predictor.reference.nn_perfect_binary_predictor import StockANnPerfectBinaryPredictor,\
     StockBNnPerfectBinaryPredictor
+
 
 
 class Predictors(containers.DeclarativeContainer):

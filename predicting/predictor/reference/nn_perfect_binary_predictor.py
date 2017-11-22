@@ -17,9 +17,9 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau
 
-RELATIVE_PATH = 'predicting/predictor/nn_binary_predictor_data'
-MODEL_FILE_NAME_STOCK_A = 'nn_binary_predictor_stock_a_network'
-MODEL_FILE_NAME_STOCK_B = 'nn_binary_predictor_stock_b_network'
+MODEL_FILE_NAME_STOCK_A = 'nn_perfect_binary_predictor_stock_a_network'
+MODEL_FILE_NAME_STOCK_B = 'nn_perfect_binary_predictor_stock_b_network'
+RELATIVE_PATH = 'predicting/predictor/reference/nn_perfect_binary_predictor_data'
 
 # Neural network configuration
 INPUT_SIZE = 400
@@ -31,7 +31,7 @@ LOSS_FUNCTION = 'binary_crossentropy'
 OPTIMIZER = 'rmsprop'
 
 
-class BaseNnBinaryPredictor(IPredictor):
+class BaseNnPerfectBinaryPredictor(IPredictor):
     '''
     Perfect predictor based on an already trained neural network.
     '''
@@ -45,12 +45,10 @@ class BaseNnBinaryPredictor(IPredictor):
         self.model = load_keras_sequential(RELATIVE_PATH, nn_filename)
         # ... if that wasn't possible, then create a new untrained one
         if self.model is None:
-            logger.warn(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
+            logger.warn(f"Loading of trained neural network failed, creating a new untrained one.")
             self.trained = False
-            self.model = Sequential()
-            self.model.add(Dense(FIRST_LAYER_SIZE, activation='linear', input_dim=INPUT_SIZE))
-            self.model.add(Dense(SECOND_LAYER_SIZE, activation='linear'))
-            self.model.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
+            self.model = create_model()
+            
         self.model.compile(loss=LOSS_FUNCTION, optimizer=OPTIMIZER)
         
     def doPredict(self, data: StockData) -> float:
@@ -98,7 +96,7 @@ class BaseNnBinaryPredictor(IPredictor):
             return 0.0
 
 
-class StockANnBinaryPredictor(BaseNnBinaryPredictor):
+class StockANnPerfectBinaryPredictor(BaseNnPerfectBinaryPredictor):
     '''
     Perfect predictor for stock A based on an already trained neural network.
     '''
@@ -107,10 +105,10 @@ class StockANnBinaryPredictor(BaseNnBinaryPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        super().__init__(MODEL_FILE_NAME_STOCK_A)
+        super().__init__( MODEL_FILE_NAME_STOCK_A)
 
 
-class StockBNnBinaryPredictor(BaseNnBinaryPredictor):
+class StockBNnPerfectBinaryPredictor(BaseNnPerfectBinaryPredictor):
     '''
     Perfect predictor for stock B based on an already trained neural network.
     '''
@@ -119,7 +117,7 @@ class StockBNnBinaryPredictor(BaseNnBinaryPredictor):
         '''
         Constructor: Load the trained and stored neural network.
         '''
-        super().__init__(MODEL_FILE_NAME_STOCK_B)
+        super().__init__( MODEL_FILE_NAME_STOCK_B)
 
 ###############################################################################
 # The following code trains and stores the corresponding neural network
@@ -168,26 +166,12 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
         deltaPrice.append(direction)
 
     # Shape and configuration of network is optimized for binary classification problems - see: https://keras.io/getting-started/sequential-model-guide/ 
-    network = Sequential()
-    
-    # Input layer
-    network.add(Dense(FIRST_LAYER_SIZE, input_dim=INPUT_SIZE))
-    network.add(BatchNormalization())
-    network.add(LeakyReLU())
-     
-    # First hidden layer
-    network.add(Dense(SECOND_LAYER_SIZE))
-    network.add(BatchNormalization())
-    network.add(LeakyReLU())
-    
-    # Output layer
-    network.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
-    
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
+    network = create_model()
     
     network.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
     # Train the neural network
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
     history = network.fit(lastPrices, deltaPrice, epochs=500, batch_size=128, verbose=1, validation_data=(lastPrices, deltaPrice), shuffle=True, callbacks=[reduce_lr])
 
     # Evaluate the trained neural network and plot results
@@ -223,6 +207,24 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
     save_keras_sequential(network, RELATIVE_PATH, filename_to_save)
 
+def create_model() -> Sequential:
+    # Shape and configuration of network is optimized for binary classification problems - see: https://keras.io/getting-started/sequential-model-guide/ 
+    network = Sequential()
+    
+    # Input layer
+    network.add(Dense(FIRST_LAYER_SIZE, input_dim=INPUT_SIZE))
+    network.add(BatchNormalization())
+    network.add(LeakyReLU())
+     
+    # First hidden layer
+    network.add(Dense(SECOND_LAYER_SIZE))
+    network.add(BatchNormalization())
+    network.add(LeakyReLU())
+    
+    # Output layer
+    network.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
+    
+    return network
 
 def calculate_delta(nn_output) -> float:
     
@@ -237,7 +239,7 @@ def calculate_delta(nn_output) -> float:
 if __name__ == "__main__":
     # Load the training data; here: complete data about stock A (Disney)
     logger.debug("Data loading...")
-    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011'])
+    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
     
     company_a_stock_data: StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
     dates_a = company_a_stock_data.get_dates()
