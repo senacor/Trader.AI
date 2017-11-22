@@ -7,6 +7,7 @@ import random
 from collections import deque
 import numpy as np
 import datetime as dt
+from definitions import DQLTRADER_PERFECT_PREDICTOR
 
 from definitions import PERIOD_1, PERIOD_2
 from evaluating.portfolio_evaluator import PortfolioEvaluator
@@ -151,7 +152,7 @@ class DqlTrader(ITrader):
         """
         Save the trained neural network under a fixed name specific for this trader.
         """
-        save_keras_sequential(self.model, 'trading', 'dql_trader')
+        save_keras_sequential(self.model, 'trading', self.name)
         logger.info(f"DQL Trader: Saved trained model")
 
     def get_action(self, state: State) -> (float, float):
@@ -306,8 +307,8 @@ class DqlTrader(ITrader):
 EPISODES = 50
 if __name__ == "__main__":
     # Read the training data
-    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
-    final_day = dt.date(2015, 12, 30)
+    training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
+    final_day = dt.date(2011, 12, 29)
 
     # Define initial portfolio
     name = 'DQL trader portfolio'
@@ -315,13 +316,13 @@ if __name__ == "__main__":
 
     # Initialize trader: use perfect predictors, don't use an already trained model, but learn while trading
     trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B),
-                       False, True, 'dql_trader_perfect')
+                       False, True, DQLTRADER_PERFECT_PREDICTOR)
 
     # Start evaluation and train correspondingly; don't display the results in a plot but display final portfolio value
     evaluator = PortfolioEvaluator([trader], False)
     for i in range(EPISODES):
         logger.info(f"DQL Trader: Starting training episode {i}")
-        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 300)
+        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 1000)
         trader_portfolio_over_time = all_portfolios_over_time[name]
         final_portfolio_value = trader_portfolio_over_time[final_day].total_value(final_day, training_data)
         logger.info(f"DQL Trader: Finished training episode {i}, final portfolio value {final_portfolio_value}")
