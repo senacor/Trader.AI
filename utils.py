@@ -40,7 +40,8 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
         json_file.close()
 
         model.save_weights(weights_filename_with_path)
-        logger.info(f"save_keras_sequential: Saved Sequential from {model_filename_with_path} and {weights_filename_with_path}!")
+        logger.info(f"save_keras_sequential: Saved Sequential from {model_filename_with_path} "
+                    f"and {weights_filename_with_path}!")
         return True
     except:
         logger.error(f"save_keras_sequential: Writing of Sequential as file failed")
@@ -68,14 +69,15 @@ def load_keras_sequential(relative_path: str, file_name_without_extension: str) 
             json_file.close()
             model = model_from_json(loaded_model_json)
             model.load_weights(weights_filename_with_path)
-            logger.info(f"load_keras_sequential: Loaded Sequential from {model_filename_with_path} and {weights_filename_with_path}!")
+            logger.info(f"load_keras_sequential: Loaded Sequential from {model_filename_with_path} "
+                        f"and {weights_filename_with_path}!")
             return model
         except:
             logger.error(f"load_keras_sequential: Loading of Sequential {model_filename_with_path} failed!")
             return None
     else:
-        logger.error(
-            f"load_keras_sequential: model File {model_filename_with_path} or weights file {weights_filename_with_path} not found!")
+        logger.error(f"load_keras_sequential: model File {model_filename_with_path} "
+                     f"or weights file {weights_filename_with_path} not found!")
         return None
 
 
@@ -100,13 +102,13 @@ def read_stock_market_data(stocks: StockList, periods: PeriodList) -> StockMarke
         * Preface: Provided stock names are supposed to be part to `CompanyEnum`. They are stated plaintext-ish here to show the point:
         * `(['stock_a', 'stock_b'], ['1962-2011', '2012-2017'])` reads:
             * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
+            * 'stock_a_2012-2015.csv'
             * 'stock_b_1962-2011.csv'
-            * 'stock_b_2012-2017.csv'
+            * 'stock_b_2012-2015.csv'
           into a dict with keys `CompanyEnum.COMPANY_A` and `CompanyEnum.COMPANY_B` respectively
         * `(['stock_a'], ['1962-2011', '2012-2017'])` reads:
             * 'stock_a_1962-2011.csv'
-            * 'stock_a_2012-2017.csv'
+            * 'stock_a_2012-2015.csv'
           into a dict with a key `CompanyEnum.COMPANY_A`
         * `(['stock_a', 'stock_b'], ['1962-2011'])` reads:
             * 'stock_a_1962-2011.csv'
@@ -129,7 +131,8 @@ def read_stock_market_data(stocks: StockList, periods: PeriodList) -> StockMarke
             period_data = list()
             for period in periods:
                 period_data.append(__read_stock_market_data([[stock, ('%s_%s' % (filename, period))]]))
-            data[stock] = StockData([item for period_dict in period_data for item in period_dict[stock]])
+            data[stock] = StockData(
+                [item for period_dict in period_data if period_dict is not None for item in period_dict[stock]])
 
     return StockMarketData(data)
 
@@ -154,7 +157,8 @@ def __read_stock_market_data(names_and_filenames: list) -> Dict[CompanyEnum, Lis
     for company_enum, filename in names_and_filenames:
         filepath = os.path.join(DATASETS_DIR, filename + '.csv')
 
-        assert os.path.exists(filepath)
+        if not os.path.exists(filepath):
+            continue
 
         na_portfolio = numpy.loadtxt(filepath, dtype='|S15,f8,f8,f8,f8,f8,i8',
                                      delimiter=',', comments="#", skiprows=1)
@@ -165,4 +169,4 @@ def __read_stock_market_data(names_and_filenames: list) -> Dict[CompanyEnum, Lis
 
         data[company_enum] = dates
 
-    return data
+    return data if len(data) > 0 else None

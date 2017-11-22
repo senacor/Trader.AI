@@ -1,3 +1,4 @@
 .idea
 *.pyc
 virtual_env
+.cache

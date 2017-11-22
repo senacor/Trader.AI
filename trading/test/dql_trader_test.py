@@ -7,11 +7,12 @@ Module for testing of deep q-learning trader.
 '''
 import unittest
 
+from definitions import PERIOD_3
 from utils import read_stock_market_data
 from model.SharesOfCompany import SharesOfCompany
 from model.Portfolio import Portfolio
 from model.trader_actions import CompanyEnum, TradingActionEnum
-from trading.trader.dql_trader import DqlTrader, State, STOCKACTIONS
+from trading.trader.dql_trader import DqlTrader, State
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 
 class DqlTraderTest(unittest.TestCase):
@@ -20,11 +21,6 @@ class DqlTraderTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-
-    def testStateToString(self):
-        state = State(1000, 1, 2, 10.0, 20.0, 11.0, 22.0)
-        self.assertIsNotNone(state)
-        print(state.to_string())
 
     def testGetAction(self):
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
@@ -49,72 +45,11 @@ class DqlTraderTest(unittest.TestCase):
             self.assertLessEqual(actionA, 1.0)
             self.assertLessEqual(actionB, 1.0)
 
-    def testGet_actions_from_index(self):
-        trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
-        self.assertIsNotNone(trader)
-        # self.assertEqual(trader.get_actions_from_index(0), (+1.0, +1.0))
-        # self.assertEqual(trader.get_actions_from_index(1), (+1.0, +0.5))
-        # self.assertEqual(trader.get_actions_from_index(2), (+1.0, 0.0))
-        # self.assertEqual(trader.get_actions_from_index(3), (+1.0, -0.5))
-        # self.assertEqual(trader.get_actions_from_index(4), (+1.0, -1.0))
-        # self.assertEqual(trader.get_actions_from_index(5), (+0.5, +1.0))
-        # self.assertEqual(trader.get_actions_from_index(6), (+0.5, +0.5))
-        # self.assertEqual(trader.get_actions_from_index(7), (+0.5, 0.0))
-        # self.assertEqual(trader.get_actions_from_index(8), (+0.5, -0.5))
-        # self.assertEqual(trader.get_actions_from_index(9), (+0.5, -1.0))
-        # self.assertEqual(trader.get_actions_from_index(10), (0.0, +1.0))
-        # self.assertEqual(trader.get_actions_from_index(11), (0.0, +0.5))
-        # self.assertEqual(trader.get_actions_from_index(12), (0.0, 0.0))
-        # self.assertEqual(trader.get_actions_from_index(13), (0.0, -0.5))
-        # self.assertEqual(trader.get_actions_from_index(14), (0.0, -1.0))
-        self.assertEqual(trader.get_actions_from_index(0), (+1.0, +1.0))
-        self.assertEqual(trader.get_actions_from_index(1), (+1.0, -1.0))
-        self.assertEqual(trader.get_actions_from_index(2), (-1.0, +1.0))
-        self.assertEqual(trader.get_actions_from_index(3), (-1.0, -1.0))
-
-    def testGet_index_from_actions(self):
-        trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
-        self.assertIsNotNone(trader)
-        # self.assertEqual(trader.get_index_from_actions(+1.0, +1.0), 0)
-        # self.assertEqual(trader.get_index_from_actions(+1.0, +0.5), 1)
-        # self.assertEqual(trader.get_index_from_actions(+1.0, 0.0), 2)
-        # self.assertEqual(trader.get_index_from_actions(+1.0, -0.5), 3)
-        # self.assertEqual(trader.get_index_from_actions(+1.0, -1.0), 4)
-        # self.assertEqual(trader.get_index_from_actions(+0.5, +1.0), 5)
-        # self.assertEqual(trader.get_index_from_actions(+0.5, +0.5), 6)
-        # self.assertEqual(trader.get_index_from_actions(+0.5, 0.0), 7)
-        # self.assertEqual(trader.get_index_from_actions(+0.5, -0.5), 8)
-        # self.assertEqual(trader.get_index_from_actions(+0.5, -1.0), 9)
-        # self.assertEqual(trader.get_index_from_actions(0.0, +1.0), 10)
-        # self.assertEqual(trader.get_index_from_actions(0.0, +0.5), 11)
-        # self.assertEqual(trader.get_index_from_actions(0.0, 0.0), 12)
-        # self.assertEqual(trader.get_index_from_actions(0.0, -0.5), 13)
-        # self.assertEqual(trader.get_index_from_actions(0.0, -1.0), 14)
-        self.assertEqual(trader.get_index_from_actions(+1.0, +1.0), 0)
-        self.assertEqual(trader.get_index_from_actions(+1.0, -1.0), 1)
-        self.assertEqual(trader.get_index_from_actions(-1.0, +1.0), 2)
-        self.assertEqual(trader.get_index_from_actions(-1.0, -1.0), 3)
-
-    def testIndexConversion(self):
-        trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
-        self.assertIsNotNone(trader)
-        for index in range(len(STOCKACTIONS) * len(STOCKACTIONS)):
-            actionA, actionB = trader.get_actions_from_index(index)
-            self.assertEqual(trader.get_index_from_actions(actionA, actionB), index)
-
-    def testActionConversion(self):
-        trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
-        self.assertIsNotNone(trader)
-        for actionA in STOCKACTIONS:
-            for actionB in STOCKACTIONS:
-                index = trader.get_index_from_actions(actionA, actionB)
-                self.assertEqual(trader.get_actions_from_index(index), (actionA, actionB))
-
     def testCreateActionList(self):
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
         self.assertIsNotNone(trader)
         portfolio = Portfolio(10000, [])
-        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['2012-2017'])
+        stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_3])
         self.assertIsNotNone(stock_market_data)
 
         # Check doing nothing

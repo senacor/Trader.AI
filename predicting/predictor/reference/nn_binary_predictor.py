@@ -16,6 +16,7 @@ from keras.layers import Dense
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau
+from definitions import PERIOD_1, PERIOD_2, PERIOD_3
 
 RELATIVE_PATH = 'predicting/predictor/reference/nn_binary_predictor_data'
 MODEL_FILE_NAME_STOCK_A = 'nn_binary_predictor_stock_a_network'
@@ -124,13 +125,16 @@ class StockBNnBinaryPredictor(BaseNnBinaryPredictor):
 ###############################################################################
 
 
-def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
+def learn_nn_and_save(training_data: StockData, test_data: StockData, filename_to_save:str):
     
-    # Build chunks of prices from 100 consecutive days (lastPrices) and 101th day (currentPrice)
-    lastPrices, currentPrice, deltaPrice = [], [], []
+    training_dates = training_data.get_dates()
+    training_prices = training_data.get_values()
+    
+    # Build chunks of prices from 100 consecutive days (input_training_prices) and 101th day (current_prices_for_plot)
+    input_training_prices, current_prices_for_plot, wanted_results = [], [], []
 
-    for i in range(0, len(prices) - INPUT_SIZE):
-        last_price_vector = prices[i:INPUT_SIZE + i]
+    for i in range(0, len(training_prices) - INPUT_SIZE):
+        last_price_vector = training_prices[i:INPUT_SIZE + i]
         
         normalized_prices = []
         normalized_prices_sigma = []
@@ -146,12 +150,12 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
 
         last_price_vector = normalized_prices
         
-        lastPrices.append(last_price_vector)
+        input_training_prices.append(last_price_vector)
         
-        current_price = prices[INPUT_SIZE + i]
-        currentPrice.append(current_price)
+        current_price = training_prices[INPUT_SIZE + i]
+        current_prices_for_plot.append(current_price)
         
-        previous_price = prices[INPUT_SIZE + i - 1 ]
+        previous_price = training_prices[INPUT_SIZE + i - 1 ]
         
         delta = (current_price - previous_price)
             
@@ -163,7 +167,41 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
             # Buy
             direction = 1.0
         
-        deltaPrice.append(direction)
+        wanted_results.append(direction)
+        
+    test_prices = test_data.get_values()
+    input_test_prices, wanted_test_results = [], []
+    for i in range(0, len(test_prices) - INPUT_SIZE):
+        last_price_vector = test_prices[i:INPUT_SIZE + i]
+        
+        normalized_prices = []
+
+        vector_min = np.min(last_price_vector)
+        vector_max = np.max(last_price_vector)
+        mean = np.mean(last_price_vector)
+        std = np.std(last_price_vector)
+        
+        for price in last_price_vector:
+            normalized_prices.append((price - vector_min) / (vector_max - vector_min))
+
+        last_price_vector = normalized_prices
+        
+        input_test_prices.append(last_price_vector)
+        
+        current_price = training_prices[INPUT_SIZE + i]
+        previous_price = training_prices[INPUT_SIZE + i - 1 ]
+        delta = (current_price - previous_price)
+            
+        direction = 0.5    
+        if(delta <= -0.0000001) :
+            # Sell
+            direction = 0.0
+        elif (delta >= 0.0000001):
+            # Buy
+            direction = 1.0
+        
+        wanted_test_results.append(direction)   
+    
 
     # Shape and configuration of network is optimized for binary classification problems - see: https://keras.io/getting-started/sequential-model-guide/ 
     network = create_model()
@@ -172,10 +210,10 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
 
     # Train the neural network
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
-    history = network.fit(lastPrices, deltaPrice, epochs=500, batch_size=128, verbose=1, validation_data=(lastPrices, deltaPrice), shuffle=True, callbacks=[reduce_lr])
+    history = network.fit(input_training_prices, wanted_results, epochs=500, batch_size=128, verbose=1, validation_data=(input_test_prices, wanted_test_results), shuffle=True, callbacks=[reduce_lr])
 
     # Evaluate the trained neural network and plot results
-    score = network.evaluate(lastPrices, deltaPrice, batch_size=128, verbose=0)
+    score = network.evaluate(input_training_prices, wanted_results, batch_size=128, verbose=0)
     logger.debug(f"Test score: {score}")
     
     # Draw
@@ -188,7 +226,7 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     plt.xlabel('epoch')
     plt.legend(['loss', 'val_loss', 'acc'], loc='best')
     plt.figure()
-    currentPrice_prediction = network.predict(lastPrices, batch_size=128)
+    currentPrice_prediction = network.predict(input_training_prices, batch_size=128)
         
     logger.debug(f"currentPrice_prediction:")
     iteration = 0
@@ -196,8 +234,8 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
         logger.debug(f"iteration {iteration} - output: {x}")
         iteration = iteration + 1
         
-    plt.plot(dates[INPUT_SIZE:], currentPrice, color="black")  # current prices in reality
-    plt.plot(dates[INPUT_SIZE:], [calculate_delta(x) for x in currentPrice_prediction], color="green")  # predicted prices by neural network
+    plt.plot(training_dates[INPUT_SIZE:], current_prices_for_plot, color="black")  # current prices in reality
+    plt.plot(training_dates[INPUT_SIZE:], [calculate_delta(x) for x in currentPrice_prediction], color="green")  # predicted prices by neural network
     plt.title('current prices / predicted prices by date')
     plt.ylabel('price')
     plt.xlabel('date')
@@ -240,18 +278,18 @@ def calculate_delta(nn_output) -> float:
 if __name__ == "__main__":
     # Load the training data; here: complete data about stock A (Disney)
     logger.debug("Data loading...")
-    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011'])
+    training_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
+    test_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_3])
     
-    company_a_stock_data: StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
-    dates_a = company_a_stock_data.get_dates()
-    prices_a = company_a_stock_data.get_values()
+    company_a_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    company_a_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
     
-    logger.debug(f"Data for Stock A loaded: {len(prices_a)} prices and {len(dates_a)} dates read.")
-    learn_nn_and_save(dates_a, prices_a, MODEL_FILE_NAME_STOCK_A)
+    logger.debug(f"Data for Stock A loaded")
+    learn_nn_and_save(company_a_training_stock_data, company_a_test_stock_data, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_stock_data: StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
-    dates_b = company_b_stock_data.get_dates()
-    prices_b = company_b_stock_data.get_values()
-    logger.debug(f"Data for Stock B loaded: {len(prices_b)} prices and {len(dates_b)} dates read.")
-    learn_nn_and_save(dates_b, prices_b, MODEL_FILE_NAME_STOCK_B)
+    company_b_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    company_b_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    
+    logger.debug(f"Data for Stock B loaded")
+    learn_nn_and_save(company_b_training_stock_data, company_b_test_stock_data, MODEL_FILE_NAME_STOCK_B)
 
