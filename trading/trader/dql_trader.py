@@ -32,44 +32,49 @@ STOCKACTIONS = [+1.0, +0.9, +0.8, +0.2, +0.1, -1.0]
 
 class State:
     """
-    Represents state from the trader's viewpoint
+    Represents a state from the trader's viewpoint.
     """
-    def __init__(self, cash: float, stockA: int, stockB: int, priceA: float, priceB: float, predictedA: float,
-                 predictedB: float):
-        assert stockA >= 0 and stockB >= 0
+    def __init__(self, cash: float, stock_a: int, stock_b: int, price_a: float, price_b: float, predicted_a: float,
+                 predicted_b: float):
+        """
+        Constructor: Creates the state.
+        Args:
+            cash: Current amount of cash
+            stock_a: Current amount of owned stock A
+            stock_b: Current amount of owned stock B
+            price_a: Current price of stock A
+            price_b: Current price of stock B
+            predicted_a: Predicted price of stock A
+            predicted_b: Predicted price of stock B
+        """
         self.cash = cash
-        self.stockA = stockA
-        self.stockB = stockB
-        self.priceA = priceA
-        self.priceB = priceB
-        self.predictedA = predictedA
-        self.predictedB = predictedB
+        self.stock_a = stock_a
+        self.stock_b = stock_b
+        self.price_a = price_a
+        self.price_b = price_b
+        self.predicted_a = predicted_a
+        self.predicted_b = predicted_b
 
-    def print(self):
-        print(f"cash: {self.cash}, "
-              f"A: {self.stockA} x {self.priceA} ({self.predictedA}), "
-              f"B: {self.stockB} x {self.priceB} ({self.predictedB})")
+    def __repr__(self) -> str:
+        """
+        Outputs readable representation of this state.
+        Returns:
+            Readable representation as string
+        """
+        return f"Cash: {self.cash}, A: {self.stock_a} x {self.price_a} ({self.predicted_a})," \
+               f" B: {self.stock_b} x {self.price_b} ({self.predicted_b})"
 
-    #TODO rm Instead of custom `to_string` you should rather use `__repr__`. This method is then automatically called
-    # by `format()` and `print()`. See example in `Portfolio`
-    # -> https://docs.python.org/3.6/reference/datamodel.html#object.__str__
-    def to_string(self) -> str:
-        return 'cash: ' + str(self.cash) + ', A: ' + str(self.stockA) + ' x ' + str(self.priceA) + ' (' + str(self.predictedA) + '), B: ' + str(self.stockB) + ' x ' + str(self.priceB) + ' (' + str(self.predictedB) + ')'
-
-    def get_input_array(self):
-        # Only use prices and predicted prices
-        #return np.array([[self.cash, self.stockA, self.stockB, self.priceA, self.priceB, self.predictedA, self.predictedB]])
-        #return np.array([[self.priceA, self.predictedA, self.priceB, self.predictedB]])
-        if self.priceA <= self.predictedA:
-            movement_a = 1 # up or equal
-        else:
-            movement_a = 0 # down
-        if self.priceB <= self.predictedB:
-            movement_b = 1 # up or equal
-        else:
-            movement_b = 0 # down
-        #return np.array([[self.stockA, self.stockB, movement_a, movement_b]])
-        return np.array([[movement_a, movement_b]])
+    def to_model_input(self):
+        """
+        Converts this state to an input for the DQL trader neural network.
+        ATTENTION: If you change this, then you also have to change the value of 'self.state_size' in DqlTrader!
+        Returns:
+            The State as input vector for the trader's neural network
+        """
+        # We only input price movements to a DqlTrader
+        movement_up_stock_a = self.predicted_a >= self.price_a
+        movement_up_stock_b = self.predicted_b >= self.price_b
+        return np.array([[movement_up_stock_a, movement_up_stock_b]])
 
 
 
@@ -79,7 +84,7 @@ class DqlTrader(ITrader):
     """
     def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor, load_trained_model: bool = True, train_while_trading: bool = False):
         """
-        TODO
+        Constructor
         Args:
             stock_a_predictor:
             stock_b_predictor:
@@ -101,10 +106,11 @@ class DqlTrader(ITrader):
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 64
+        self.train_start = 1000 # should be way bigger than batch_size, but smaller
+        self.memory = deque(maxlen=2000)
 
         # Parameters for experience memory
-        self.memory = deque(maxlen=2000)
-        self.train_start = 100 # TODO Rich get rid of train_start
+
         self.lastPortfolioValue = None
         self.lastActionA = None
         self.lastActionB = None
@@ -151,7 +157,7 @@ class DqlTrader(ITrader):
             return random.choice(STOCKACTIONS), random.choice(STOCKACTIONS)
         else:
             # Generate values per action by calling neural network with current state
-            action_values = self.model.predict(state.get_input_array())
+            action_values = self.model.predict(state.to_model_input())
             logger.debug(f"DQL Trader: Use trained model to choose from {action_values}")
             # Get index with highest value (if there are more than one, get the first), and return corresponding actions
             index = np.argmax(action_values[0])
@@ -258,16 +264,18 @@ class DqlTrader(ITrader):
             target = reward
 
             # Build target action values and exchange value for the chosen actions
-            output_values = self.model.predict(state.get_input_array())
+            output_values = self.model.predict(state.to_model_input())
             index = self.get_index_from_actions(actionA, actionB)
-            target_action_values = self.model.predict(state.get_input_array())
+            target_action_values = self.model.predict(state.to_model_input())
             target_action_values[0][index] = target
-            logger.debug(f"DQL Trader: Before training: Input {state.get_input_array()} Output {output_values} Expected {target_action_values}")
+            logger.debug(
+                f"DQL Trader: Before training: Input {state.to_model_input()} Output {output_values} Expected {target_action_values}")
 
             # Finally train the model for one epoch
-            self.model.fit(state.get_input_array(), target_action_values, batch_size=self.batch_size, epochs=1, verbose=0)
-            output_values = self.model.predict(state.get_input_array())
-            logger.debug(f"DQL Trader: After training: Input {state.get_input_array()} Output {output_values} Expected {target_action_values}")
+            self.model.fit(state.to_model_input(), target_action_values, batch_size=self.batch_size, epochs=1, verbose=0)
+            output_values = self.model.predict(state.to_model_input())
+            logger.debug(
+                f"DQL Trader: After training: Input {state.to_model_input()} Output {output_values} Expected {target_action_values}")
 
     def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
                 stock_market_data: StockMarketData) -> TradingActionList:
@@ -292,7 +300,7 @@ class DqlTrader(ITrader):
                               stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B),
                               predicted_stock_a,
                               predicted_stock_b)
-        logger.debug(f"DQL Trader: Current state {current_state.to_string()}")
+        logger.debug(f"DQL Trader: Current state: {current_state}")
 
         if self.train_while_trading and self.lastState is not None:  # doTrade was called before at least once
             assert self.lastActionA is not None and self.lastActionB is not None and self.lastPortfolioValue is not None

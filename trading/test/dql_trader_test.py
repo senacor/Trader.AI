@@ -21,11 +21,6 @@ class DqlTraderTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testStateToString(self):
-        state = State(1000, 1, 2, 10.0, 20.0, 11.0, 22.0)
-        self.assertIsNotNone(state)
-        print(state.to_string())
-
     def testGetAction(self):
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
         self.assertIsNotNone(trader)
