@@ -50,6 +50,9 @@ class State:
               f"A: {self.stockA} x {self.priceA} ({self.predictedA}), "
               f"B: {self.stockB} x {self.priceB} ({self.predictedB})")
 
+    #TODO rm Instead of custom `to_string` you should rather use `__repr__`. This method is then automatically called
+    # by `format()` and `print()`. See example in `Portfolio`
+    # -> https://docs.python.org/3.6/reference/datamodel.html#object.__str__
     def to_string(self) -> str:
         return 'cash: ' + str(self.cash) + ', A: ' + str(self.stockA) + ' x ' + str(self.priceA) + ' (' + str(self.predictedA) + '), B: ' + str(self.stockB) + ' x ' + str(self.priceB) + ' (' + str(self.predictedB) + ')'
 

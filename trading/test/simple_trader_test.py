@@ -7,19 +7,8 @@ Module for testing the SimpleTrader.
 '''
 import unittest
 from model.Portfolio import Portfolio
-from model.StockMarketData import StockMarketData
-from model.ITrader import ITrader
-
-from model.trader_actions import SharesOfCompany
-from model.trader_actions import TradingActionList
 from model.trader_actions import TradingActionEnum
 from model.trader_actions import CompanyEnum
-from dependency_injection_containers import Traders
-
-from datetime import date
-
-import numpy as np
-from  definitions import DATASETS_DIR
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
@@ -58,7 +47,7 @@ class SimpleTraderTest(unittest.TestCase):
 
         # Buy stocks based on prediction:
         # SimpleTrader buys only stocks A again
-        # TODO @Janusz Why doesn't SimpleTrader buy stocks B?
+        # Why doesn't SimpleTrader buy stocks B?
         # This is because `SimpleTrader` buys sequentially without considering future/earlier trade actions. So in case
         # of two BUY actions, all available cash is spent for buying the first stock - an issue I already raised (jh)
         trading_action_list = trader.doTrade(portfolio, 0.0, stock_market_data)

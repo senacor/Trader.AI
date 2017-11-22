@@ -82,8 +82,8 @@ class BaseNnPerfectBinaryPredictor(IPredictor):
 
         try:
             # Let network predict the next stock value based on last 100 stock values
-            prediction = self.model.doPredict(self, data)[0][0]
-            return data.get_last()[1] + self.convert_nn_output_to_value(self, prediction)
+            prediction = self.model.predict(input_values)[0][0]
+            return data.get_last()[1] + self.convert_nn_output_to_value(prediction)
         except:
             logger.error("Error in predicting next stock value.")
             assert False

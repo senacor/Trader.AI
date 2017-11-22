@@ -105,7 +105,7 @@ class Portfolio:
         """
         updated_portfolio = copy.deepcopy(self)
 
-        logger.debug(f"\nUpdate portfolio {self.name}")
+        logger.debug(f"Updating portfolio {self.name}:")
 
         if trade_action_list.is_empty():
             logger.info("trade_action_list.is_empty -> No action this time")
@@ -246,3 +246,6 @@ class Portfolio:
                 return False
 
         return True
+
+    def __repr__(self) -> str:
+        return f"<Portfolio(name=\"{self.name}\", cash={self.cash}, shares={self.shares})>"

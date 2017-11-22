@@ -82,8 +82,8 @@ class BaseNnBinaryPredictor(IPredictor):
 
         try:
             # Let network predict the next stock value based on last 100 stock values
-            prediction = self.model.doPredict(self, data)[0][0]
-            return data.get_last()[1] + self.convert_nn_output_to_value(self, prediction)
+            prediction = self.model.predict(input_values)[0][0]
+            return data.get_last()[1] + self.convert_nn_output_to_value(prediction)
         except:
             logger.error("Error in predicting next stock value.")
             assert False
@@ -237,7 +237,7 @@ def calculate_delta(nn_output) -> float:
 if __name__ == "__main__":
     # Load the training data; here: complete data about stock A (Disney)
     logger.debug("Data loading...")
-    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011', '2012-2017'])
+    full_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], ['1962-2011'])
     
     company_a_stock_data: StockData = full_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
     dates_a = company_a_stock_data.get_dates()

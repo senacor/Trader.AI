@@ -86,10 +86,11 @@ class PortfolioEvaluator:
 
             # Retrieve the current date
             current_date = current_market_data.get_most_recent_trade_day()
-            logger.info(f"inspect_over_time: >>>>>>>>>>>>>>>>>> current_tick: {current_tick}, current_date: {current_date}")
+
+            portfolio_list = [p_t[0] for p_t in portfolio_trader_mapping]
+            logger.debug(f"Start updating portfolios {portfolio_list} on {current_date} (tick {current_tick})")
 
             for portfolio, trader in portfolio_trader_mapping:
-                logger.info(f"inspect_over_time: >>>>>>>>>>>>>>>>>> Trading for: {portfolio.name}, cash: {portfolio.cash}")
                 if current_tick == -evaluation_offset:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)
@@ -111,6 +112,8 @@ class PortfolioEvaluator:
                 # Save the updated portfolio in our dict under the current date as key
                 all_portfolios[updated_portfolio.name][current_date] = updated_portfolio
                 portfolio_cache.update({portfolio.name: updated_portfolio})
+
+            logger.debug(f"End updating portfolios {portfolio_list} on {current_date} (tick {current_tick})\n")
 
         # Draw a diagram of the portfolios' changes over time - if we're not unit testing
         if self.draw_results:
