@@ -6,6 +6,7 @@ from evaluating.evaluator_utils import draw, get_data_up_to_offset
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.ITrader import ITrader
+from logger import logger
 
 PortfolioList = List[Portfolio]
 TraderList = List[ITrader]
@@ -85,8 +86,10 @@ class PortfolioEvaluator:
 
             # Retrieve the current date
             current_date = current_market_data.get_most_recent_trade_day()
+            logger.info(f"inspect_over_time: >>>>>>>>>>>>>>>>>> current_tick: {current_tick}, current_date: {current_date}")
 
             for portfolio, trader in portfolio_trader_mapping:
+                logger.info(f"inspect_over_time: >>>>>>>>>>>>>>>>>> Trading for: {portfolio.name}, cash: {portfolio.cash}")
                 if current_tick == -evaluation_offset:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)

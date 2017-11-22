@@ -8,6 +8,7 @@ from model.Portfolio import Portfolio
 from predicting.predictor.perfect_predictor import PerfectPredictor
 from trading.trader.buy_and_hold_trader import BuyAndHoldTrader
 from trading.trader.dql_trader import DqlTrader
+from dependency_injection_containers import Traders
 
 if __name__ == "__main__":
     # Load stock market data for training and testing period
@@ -16,17 +17,19 @@ if __name__ == "__main__":
                                                [training_period, testing_period])
 
     # Define traders
-    buy_and_hold_trader = BuyAndHoldTrader()
-    simple_trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
-    dql_trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True, False)
+    buy_and_hold_trader = Traders.BuyAndHoldTrader()
+    simple_trader = Traders.SimpleTrader_with_perfect_prediction()
+    #dql_trader = Traders.DqlTrader_with_perfect_prediction()
+    simple_trader_with_nn_value_prediction =Traders.SimpleTrader_with_nn_value_prediction()
 
     # Define portfolios for the traders
     benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')
-    simple_trader_portfolio = Portfolio(10000, [], 'SimpleTrader')
-    dql_trader_portfolio = Portfolio(10000, [], 'DqlTrader')
+    simple_trader_portfolio = Portfolio(10000, [], 'SimpleTrader_with_perfect_prediction')
+    #dql_trader_portfolio = Portfolio(10000, [], 'DqlTrader_with_perfect_prediction')
+    simple_trader_nn_portfolio = Portfolio(10000, [], 'SimpleTrader_with_nn_prediction')
 
     # Evaluate their performance over the testing period
-    evaluator = PortfolioEvaluator([buy_and_hold_trader, simple_trader, dql_trader], True)
+    evaluator = PortfolioEvaluator([buy_and_hold_trader,simple_trader, simple_trader_with_nn_value_prediction], True)
     #evaluator = PortfolioEvaluator([buy_and_hold_trader, dql_trader], True)
     # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen berechnen
     # TODO kriegen wir das eleganter hin?
@@ -34,5 +37,4 @@ if __name__ == "__main__":
     # TODO `EvaluatorTest#test_inspect_with_date_offset` (jh)
     stock_data_testing_period = read_stock_market_data([CompanyEnum.COMPANY_A], [testing_period])
     days_of_testing_period = stock_data_testing_period.get_for_company(CompanyEnum.COMPANY_A).get_row_count()
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, dql_trader_portfolio], 600)
-    #evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, dql_trader_portfolio], days_of_testing_period)
+    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, simple_trader_nn_portfolio], 400)
