@@ -35,10 +35,8 @@ class BaseNnValuePredictor(IPredictor):
         if self.model is None:
             logger.warn(f"Loading of trained neural network failed, creating a new untrained one.")
             self.trained = False
-            self.model = Sequential()
-            self.model.add(Dense(500, activation='relu', input_dim=100))
-            self.model.add(Dense(500, activation='relu'))
-            self.model.add(Dense(1, activation='linear'))
+            self.model = create_model()
+            
         self.model.compile(loss='mean_squared_error', optimizer='adam')
         
     def doPredict(self, data: StockData) -> float:
@@ -96,10 +94,8 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
         lastPrices.append(prices[i:100 + i])
         currentPrice.append(float(prices[100 + i]))
 
-    network = Sequential()
-    network.add(Dense(500, activation='relu', input_dim=100))
-    network.add(Dense(500, activation='relu'))
-    network.add(Dense(1, activation='linear'))
+    network = create_model()
+    
     network.compile(loss='mean_squared_error', optimizer='adam')
 
     # Train the neural network
@@ -127,6 +123,13 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
     save_keras_sequential(network, RELATIVE_PATH, filename_to_save)
 
+def create_model() -> Sequential:
+    network = Sequential()
+    network.add(Dense(500, activation='relu', input_dim=100))
+    network.add(Dense(500, activation='relu'))
+    network.add(Dense(1, activation='linear'))
+    
+    return network
 
 if __name__ == "__main__":
     # Load the training data; here: complete data about stock A (Disney)

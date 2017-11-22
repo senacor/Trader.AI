@@ -29,7 +29,7 @@ OUTPUT_SIZE = 1
 ACTIVATION_FUNCTION_FOR_OUTPUT = 'sigmoid'
 LOSS_FUNCTION = 'binary_crossentropy'
 OPTIMIZER = 'rmsprop'
-
+METRICS = ['accuracy']
 
 class BaseNnBinaryPredictor(IPredictor):
     '''
@@ -47,11 +47,9 @@ class BaseNnBinaryPredictor(IPredictor):
         if self.model is None:
             logger.warn(f"BaseNnPredictor: Loading of trained neural network failed, creating a new untrained one.")
             self.trained = False
-            self.model = Sequential()
-            self.model.add(Dense(FIRST_LAYER_SIZE, activation='linear', input_dim=INPUT_SIZE))
-            self.model.add(Dense(SECOND_LAYER_SIZE, activation='linear'))
-            self.model.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
-        self.model.compile(loss=LOSS_FUNCTION, optimizer=OPTIMIZER)
+            self.model = create_model()
+            
+        self.model.compile(loss=LOSS_FUNCTION, optimizer=OPTIMIZER, metrics=METRICS)
         
     def doPredict(self, data: StockData) -> float:
         """ Use the loaded trained neural network to predict the next stock value.
@@ -168,26 +166,12 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
         deltaPrice.append(direction)
 
     # Shape and configuration of network is optimized for binary classification problems - see: https://keras.io/getting-started/sequential-model-guide/ 
-    network = Sequential()
-    
-    # Input layer
-    network.add(Dense(FIRST_LAYER_SIZE, input_dim=INPUT_SIZE))
-    network.add(BatchNormalization())
-    network.add(LeakyReLU())
+    network = create_model()
      
-    # First hidden layer
-    network.add(Dense(SECOND_LAYER_SIZE))
-    network.add(BatchNormalization())
-    network.add(LeakyReLU())
-    
-    # Output layer
-    network.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
-    
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
-    
-    network.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+    network.compile(optimizer=OPTIMIZER, loss=LOSS_FUNCTION, metrics=METRICS)
 
     # Train the neural network
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
     history = network.fit(lastPrices, deltaPrice, epochs=500, batch_size=128, verbose=1, validation_data=(lastPrices, deltaPrice), shuffle=True, callbacks=[reduce_lr])
 
     # Evaluate the trained neural network and plot results
@@ -222,6 +206,25 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
 
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
     save_keras_sequential(network, RELATIVE_PATH, filename_to_save)
+
+def create_model() -> Sequential:
+    # Shape and configuration of network is optimized for binary classification problems - see: https://keras.io/getting-started/sequential-model-guide/ 
+    network = Sequential()
+    
+    # Input layer
+    network.add(Dense(FIRST_LAYER_SIZE, input_dim=INPUT_SIZE))
+    network.add(BatchNormalization())
+    network.add(LeakyReLU())
+     
+    # First hidden layer
+    network.add(Dense(SECOND_LAYER_SIZE))
+    network.add(BatchNormalization())
+    network.add(LeakyReLU())
+    
+    # Output layer
+    network.add(Dense(OUTPUT_SIZE, activation=ACTIVATION_FUNCTION_FOR_OUTPUT))
+    
+    return network
 
 
 def calculate_delta(nn_output) -> float:
