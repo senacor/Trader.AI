@@ -11,7 +11,7 @@ from model.trader_actions import TradingActionList
 
 
 class TestPortfolio(TestCase):
-    def testPortfolioConstruction(self):
+    def test_portfolio_construction(self):
         portfolio = Portfolio(1000.0,
                               [SharesOfCompany(CompanyEnum.COMPANY_A, 10), SharesOfCompany(CompanyEnum.COMPANY_B, 50)])
 
@@ -114,6 +114,33 @@ class TestPortfolio(TestCase):
 
         # The portfolios should still be equal after applying the actions
         self.assertEqual(updated_portfolio_order1, updated_portfolio_order2)
+
+    def test_update__do_not_drop_below_cash_0(self):
+        """
+        Tests: Portfolio#update
+
+        Flavour: When receiving two BUY actions the `#update` method should regard the available cash and NEVER drop
+         below 0
+
+        Creates a portfolio, a stock market data object and a arbitrary `TradingActionList` and executes this trading
+        actions on the portfolio. Checks if those are applied correctly
+        """
+        cash_reserve = 16000.0
+
+        data = StockData([(date(2017, 1, 1), 150.0)])
+        stock_market_data = StockMarketData({CompanyEnum.COMPANY_A: data})
+
+        portfolio = Portfolio(cash_reserve, [])
+
+        # Create a trading action list whose individual actions are within the limit but in sum are over the limit
+        # Stock price: 150.0, quantity: 100 -> trade volume: 15000.0; cash: 16000.0
+        trading_action_list = TradingActionList()
+        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
+        trading_action_list.buy(CompanyEnum.COMPANY_A, 100)
+
+        updated_portfolio = portfolio.update(stock_market_data, trading_action_list)
+
+        self.assertTrue(updated_portfolio.cash >= 0)
 
     def test_eq__wrong_instance(self):
         portfolio = Portfolio(10.0, [SharesOfCompany(CompanyEnum.COMPANY_A, 200)])
