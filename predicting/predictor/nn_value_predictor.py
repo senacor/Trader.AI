@@ -94,7 +94,7 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     lastPrices, currentPrice = [], []
     for i in range(0, len(prices) - 100):
         lastPrices.append(prices[i:100 + i])
-        currentPrice.append(prices[100 + i])
+        currentPrice.append(float(prices[100 + i]))
 
     network = Sequential()
     network.add(Dense(500, activation='relu', input_dim=100))
@@ -106,7 +106,7 @@ def learn_nn_and_save(dates: list, prices: list, filename_to_save:str):
     history = network.fit(lastPrices, currentPrice, epochs=10, batch_size=128, verbose=1)
 
     # Evaluate the trained neural network and plot results
-    score = network.evaluate(lastPrices, currentPrice, batch_size=128, verbose=0)
+    score = network.evaluate(np.array(lastPrices), currentPrice, batch_size=128, verbose=0)
     logger.debug(f"Test score: {score}")
     plt.figure()
     plt.plot(history.history['loss'])
