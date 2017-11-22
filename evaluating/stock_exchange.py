@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # Define traders
     buy_and_hold_trader = BuyAndHoldTrader()
     simple_trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
-    dql_trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True)
+    dql_trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True, False)
 
     # Define portfolios for the traders
     benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')
@@ -27,8 +27,10 @@ if __name__ == "__main__":
 
     # Evaluate their performance over the testing period
     evaluator = PortfolioEvaluator([buy_and_hold_trader, simple_trader, dql_trader], True)
+    #evaluator = PortfolioEvaluator([buy_and_hold_trader, dql_trader], True)
     # TODO @jonas ich möchte über die testing_period testen, muss hier aber manuell einen offset in Tagen berechnen
     # TODO kriegen wir das eleganter hin?
     stock_data_testing_period = read_stock_market_data([CompanyEnum.COMPANY_A], [testing_period])
     days_of_testing_period = stock_data_testing_period.get_for_company(CompanyEnum.COMPANY_A).get_row_count()
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, dql_trader_portfolio], days_of_testing_period)
+    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, simple_trader_portfolio, dql_trader_portfolio], 600)
+    #evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, dql_trader_portfolio], days_of_testing_period)
