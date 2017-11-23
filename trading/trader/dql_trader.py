@@ -15,11 +15,11 @@ from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from model.IPredictor import IPredictor
 from model.ITrader import ITrader
-from model.trader_actions import TradingActionList
+from model.Order import OrderList
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
-from model.trader_actions import CompanyEnum
+from model.Order import CompanyEnum
 
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
@@ -27,10 +27,12 @@ from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from predicting.predictor.reference.nn_perfect_binary_predictor import StockANnPerfectBinaryPredictor
 from predicting.predictor.reference.nn_perfect_binary_predictor import StockBNnPerfectBinaryPredictor
 
+
 class State:
     """
     Represents a state from the trader's viewpoint.
     """
+
     def __init__(self, cash: float, stock_a: int, stock_b: int, price_a: float, price_b: float, predicted_a: float,
                  predicted_b: float):
         """
@@ -74,7 +76,6 @@ class State:
         return np.array([[movement_up_stock_a, movement_up_stock_b]])
 
 
-
 class DqlTrader(ITrader):
     """
     Implementation of ITrader based on reinforced Q-learning (RQL).
@@ -86,7 +87,7 @@ class DqlTrader(ITrader):
     # A float between 0.0 and +1.0 encodes buying a stock, measured in percent of cash of the current portfolio.
     # A float between -1.0 and 0.0 encodes selling a stock, measured in percent of the amount this stock is present
     # in the current portfolio.
-    # A float of 0.0 encodes "do nothing", so: no trading action at all.
+    # A float of 0.0 encodes "do nothing", so: no orders at all.
     # ATTENTION: These stock actions vastly reduce the action space of the neural network and directly influence
     # its training performance. So choose wisely ;-)
     STOCK_ACTIONS = [(+1.00, +0.00), (+0.00, +1.00),
@@ -104,7 +105,8 @@ class DqlTrader(ITrader):
                      (-1.0, -1.0)]
 
     def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor,
-                 load_trained_model: bool = True, train_while_trading: bool = False, name: str = 'dql_trader'):
+                 load_trained_model: bool = True,
+                 train_while_trading: bool = False, name: str = 'dql_trader'):
         """
         Constructor
         Args:
@@ -131,7 +133,7 @@ class DqlTrader(ITrader):
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 64
-        self.min_size_of_memory_before_training = 1000 # should be way bigger than batch_size, but smaller than memory
+        self.min_size_of_memory_before_training = 1000  # should be way bigger than batch_size, but smaller than memory
         self.memory = deque(maxlen=2000)
 
         # Attributes necessary to remember our last actions and fill our memory with experiences
@@ -146,7 +148,7 @@ class DqlTrader(ITrader):
             logger.debug(f"DQL Trader: Try to load trained model")
             self.model = load_keras_sequential('trading', self.name)
             logger.debug(f"DQL Trader: Loaded trained model")
-        if self.model is None: # loading failed or we didn't want to use a trained model
+        if self.model is None:  # loading failed or we didn't want to use a trained model
             self.model = Sequential()
             self.model.add(Dense(self.hidden_size * 2, input_dim=self.state_size, activation='relu'))
             self.model.add(Dense(self.hidden_size, activation='relu'))
@@ -190,7 +192,7 @@ class DqlTrader(ITrader):
         Implements the rewards function by comparing last portfolio value and current portfolio value.
         The reward will be positive if we gained portfolio value and negative if we lost portfolio value.
         This function overproportionally rewards gains by squaring the positive returns.
-        
+
         Args:
             last_portfolio_value: Last value of Portfolio
             current_portfolio_value: Current value of Portfolio
@@ -222,13 +224,14 @@ class DqlTrader(ITrader):
                 f"DQL Trader: Before training: Input {state.to_model_input()} Output {output_values} Expected {target_action_values}")
 
             # Finally train the model for one epoch
-            self.model.fit(state.to_model_input(), target_action_values, batch_size=self.batch_size, epochs=1, verbose=0)
+            self.model.fit(state.to_model_input(), target_action_values, batch_size=self.batch_size, epochs=1,
+                           verbose=0)
             output_values = self.model.predict(state.to_model_input())
             logger.debug(
                 f"DQL Trader: After training: Input {state.to_model_input()} Output {output_values} Expected {target_action_values}")
 
     def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
-                stock_market_data: StockMarketData) -> TradingActionList:
+                stock_market_data: StockMarketData) -> OrderList:
         """ Generate action to be taken on the "stock market"
     
         Args:
@@ -236,7 +239,7 @@ class DqlTrader(ITrader):
           current_portfolio_value : value of Portfolio at given moment
           stock_market_data : StockMarketData for evaluation
         Returns:
-          A TradingActionList instance, may be empty never None
+          A OrderList instance, may be empty never None
         """
         # build current state object
         stock_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
@@ -263,18 +266,19 @@ class DqlTrader(ITrader):
         # Create actions for current state and decrease epsilon for fewer random actions
         (action_a, action_b) = self.get_action(current_state)
         self.epsilon = max([self.epsilon_min, self.epsilon * self.epsilon_decay])
-        logger.debug(f"DQL Trader: Computed trading actions {action_a} and {action_b} with epsilon {self.epsilon}")
+        logger.debug(f"DQL Trader: Computed orders {action_a} and {action_b} with epsilon {self.epsilon}")
 
         # Save created state, actions and portfolio value for the next call of doTrade
         self.last_state, self.last_action_a, self.last_action_b = current_state, action_a, action_b
         self.last_portfolio_value = current_portfolio_value
-        return self.create_trading_actions(action_a, action_b, portfolio, stock_market_data)
+        return self.create_order_list(action_a, action_b, portfolio, stock_market_data)
 
-    def create_trading_actions(self, action_a: float, action_b: float,
-                               portfolio: Portfolio, stock_market_data: StockMarketData) -> TradingActionList:
+    def create_order_list(self, action_a: float, action_b: float,
+                          portfolio: Portfolio, stock_market_data: StockMarketData) -> OrderList:
         """
         Take two floats between -1.0 and +1.0 (one for stock A and one for stock B) and convert them into corresponding
-        trading actions.
+        orders.
+
         Args:
             action_a: float between -1.0 and 1.0, representing buy(positive) / sell(negative) for Company A
             action_b: float between -1.0 and 1.0, representing buy(positive) / sell(negative) for Company B
@@ -282,32 +286,32 @@ class DqlTrader(ITrader):
             stock_market_data: current stock market data
 
         Returns:
-            List of corresponding TradingActions
+            List of corresponding orders
         """
         assert -1.0 <= action_a <= +1.0 and -1.0 <= action_b <= +1.0
         assert portfolio is not None and stock_market_data is not None
-        trading_actions = TradingActionList()
+        order_list = OrderList()
 
-        # Create trading actions for stock A
+        # Create orders for stock A
         owned_amount_a = portfolio.get_amount(CompanyEnum.COMPANY_A)
         if action_a > 0.0:
             current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
             amount_to_buy = int(action_a * (portfolio.cash // current_price))
-            trading_actions.buy(CompanyEnum.COMPANY_A, amount_to_buy)
+            order_list.buy(CompanyEnum.COMPANY_A, amount_to_buy)
         if action_a < 0.0 and owned_amount_a > 0:
             amount_to_sell = int(abs(action_a) * owned_amount_a)
-            trading_actions.sell(CompanyEnum.COMPANY_A, amount_to_sell)
-        # Create trading actions for stock B
+            order_list.sell(CompanyEnum.COMPANY_A, amount_to_sell)
+
+        # Create orders for stock B
         owned_amount_b = portfolio.get_amount(CompanyEnum.COMPANY_B)
         if action_b > 0.0:
             current_price = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
             amount_to_buy = int(action_b * (portfolio.cash // current_price))
-            trading_actions.buy(CompanyEnum.COMPANY_B, amount_to_buy)
+            order_list.buy(CompanyEnum.COMPANY_B, amount_to_buy)
         if action_b < 0.0 and owned_amount_b > 0:
             amount_to_sell = int(abs(action_b) * owned_amount_b)
-            trading_actions.sell(CompanyEnum.COMPANY_B, amount_to_sell)
-        return trading_actions
-
+            order_list.sell(CompanyEnum.COMPANY_B, amount_to_sell)
+        return order_list
 
 
 # This method retrains the trader from scratch using training data from PERIOD_1 and test data from PERIOD_2
