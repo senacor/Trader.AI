@@ -352,7 +352,7 @@ if __name__ == "__main__":
         logger.info(f"DQL Trader: Finished training episode {i}, "
                     f"final portfolio value training {final_values_training[-1]} vs. "
                     f"final portfolio value test {final_values_test[-1]}")
-        if final_values_test[-1] > 250000:
+        if final_values_test[-1] > 170000:
             break
 
     from matplotlib import pyplot as plt
