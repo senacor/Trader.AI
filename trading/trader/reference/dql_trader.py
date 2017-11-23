@@ -145,7 +145,7 @@ class DqlTrader(ITrader):
         self.model = None
         if load_trained_model:
             logger.debug(f"DQL Trader: Try to load trained model")
-            self.model = load_keras_sequential('trading', self.name)
+            self.model = load_keras_sequential('trading/trader/dql_trader_data', self.name)
             logger.debug(f"DQL Trader: Loaded trained model")
         if self.model is None:  # loading failed or we didn't want to use a trained model
             self.model = Sequential()
@@ -160,7 +160,7 @@ class DqlTrader(ITrader):
         """
         Save the trained neural network under a fixed name specific for this trader.
         """
-        save_keras_sequential(self.model, 'trading', self.name)
+        save_keras_sequential(self.model, 'trading/trader/dql_trader_data', self.name)
         logger.info(f"DQL Trader: Saved trained model")
 
     def get_action(self, state: State) -> (float, float):
