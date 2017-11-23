@@ -11,7 +11,7 @@ from definitions import PERIOD_1, PERIOD_2, PERIOD_3
 if __name__ == "__main__":
     # Load stock market data for training and testing period
     stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                               [PERIOD_1, PERIOD_2, PERIOD_3])
+                                               [PERIOD_1, PERIOD_2])
 
     # Define traders
     buy_and_hold_trader = Traders.BuyAndHoldTrader()
