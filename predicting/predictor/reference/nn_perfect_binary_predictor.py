@@ -60,7 +60,6 @@ class BaseNnPerfectBinaryPredictor(IPredictor):
         Returns:
           predicted next stock value for that company
         """
-        # TODO diese Assumptions hier sind Mist, da fehlt uns eine Klasse für
         # Assumptions about data: at least INPUT_SIZE pairs of type (_, float)
         assert data.get_row_count() >= INPUT_SIZE
         assert len(data.get_first()) == 2

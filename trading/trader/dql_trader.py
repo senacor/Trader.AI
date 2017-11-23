@@ -7,7 +7,7 @@ import random
 from collections import deque
 import numpy as np
 import datetime as dt
-from definitions import DQLTRADER_PERFECT_PREDICTOR
+from definitions import DQLTRADER_PERFECT_PREDICTOR, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR
 
 from definitions import PERIOD_1, PERIOD_2
 from evaluating.portfolio_evaluator import PortfolioEvaluator
@@ -24,6 +24,8 @@ from model.trader_actions import CompanyEnum
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
+from predicting.predictor.reference.nn_perfect_binary_predictor import StockANnPerfectBinaryPredictor
+from predicting.predictor.reference.nn_perfect_binary_predictor import StockBNnPerfectBinaryPredictor
 
 class State:
     """
@@ -87,12 +89,17 @@ class DqlTrader(ITrader):
     # A float of 0.0 encodes "do nothing", so: no trading action at all.
     # ATTENTION: These stock actions vastly reduce the action space of the neural network and directly influence
     # its training performance. So choose wisely ;-)
-    STOCK_ACTIONS = [(+1.0, +0.0), (+0.0, +1.0),
-                     (+0.9, +0.1), (+0.1, +0.9),
-                     (+0.8, +0.2), (+0.2, +0.8),
-                     (+0.7, +0.3), (+0.3, +0.7),
-                     (+0.6, +0.4), (+0.4, +0.6),
-                     (+0.5, +0.5),
+    STOCK_ACTIONS = [(+1.00, +0.00), (+0.00, +1.00),
+                     (+0.95, +0.05), (+0.05, +0.95),
+                     (+0.90, +0.10), (+0.10, +0.90),
+                     (+0.85, +0.15), (+0.15, +0.85),
+                     (+0.80, +0.20), (+0.20, +0.80),
+                     (+0.75, +0.25), (+0.25, +0.75),
+                     (+0.70, +0.30), (+0.30, +0.70),
+                     (+0.65, +0.35), (+0.35, +0.65),
+                     (+0.60, +0.40), (+0.40, +0.60),
+                     (+0.55, +0.45), (+0.45, +0.55),
+                     (+0.50, +0.50),
                      (+1.0, -1.0), (-1.0, +1.0),
                      (-1.0, -1.0)]
 
@@ -303,27 +310,51 @@ class DqlTrader(ITrader):
 
 
 
-# This method retrains the trader from scratch using training data from 1962-2011
+# This method retrains the trader from scratch using training data from PERIOD_1 and test data from PERIOD_2
 EPISODES = 50
 if __name__ == "__main__":
     # Read the training data
     training_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
-    final_day = dt.date(2011, 12, 29)
+    test_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
+    start_training_day, final_training_day = dt.date(2009, 1, 2), dt.date(2011, 12, 29)
+    start_test_day, final_test_day = dt.date(2012, 1, 3), dt.date(2015, 12, 30)
 
     # Define initial portfolio
     name = 'DQL trader portfolio'
     portfolio = Portfolio(10000.0, [], name)
 
     # Initialize trader: use perfect predictors, don't use an already trained model, but learn while trading
-    trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B),
-                       False, True, DQLTRADER_PERFECT_PREDICTOR)
+    #trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False, True, DQLTRADER_PERFECT_PREDICTOR)
+    trader = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), False, True, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
 
     # Start evaluation and train correspondingly; don't display the results in a plot but display final portfolio value
     evaluator = PortfolioEvaluator([trader], False)
+    final_values_training, final_values_test = [], []
     for i in range(EPISODES):
         logger.info(f"DQL Trader: Starting training episode {i}")
-        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], 1000)
-        trader_portfolio_over_time = all_portfolios_over_time[name]
-        final_portfolio_value = trader_portfolio_over_time[final_day].total_value(final_day, training_data)
-        logger.info(f"DQL Trader: Finished training episode {i}, final portfolio value {final_portfolio_value}")
+        all_portfolios_over_time = evaluator.inspect_over_time(training_data, [portfolio], date_offset=start_training_day)
+        portfolio_over_time = all_portfolios_over_time[name]
+        final_values_training.append(portfolio_over_time[final_training_day].total_value(final_training_day, training_data))
         trader.save_trained_model()
+
+        # Evaluation over training and visualization
+        #trader_test = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True, False, DQLTRADER_PERFECT_PREDICTOR)
+        trader_test = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), True, False, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
+        evaluator_test = PortfolioEvaluator([trader_test], False)
+        all_portfolios_over_time = evaluator_test.inspect_over_time(test_data, [portfolio], date_offset=start_test_day)
+        portfolio_over_time = all_portfolios_over_time[name]
+        final_values_test.append(portfolio_over_time[final_test_day].total_value(final_test_day, test_data))
+        logger.info(f"DQL Trader: Finished training episode {i}, "
+                    f"final portfolio value training {final_values_training[-1]} vs. "
+                    f"final portfolio value test {final_values_test[-1]}")
+        if final_values_test[-1] > 1700000:
+            break
+
+    from matplotlib import pyplot as plt
+    plt.figure()
+    plt.plot(final_values_training, color="black")
+    plt.plot(final_values_test, color="green")
+    plt.title('final portfolio value training vs. final portfolio value test')
+    plt.ylabel('final portfolio value')
+    plt.xlabel('episode')
+    plt.show()
