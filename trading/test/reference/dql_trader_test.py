@@ -1,10 +1,10 @@
-'''
+"""
 Created on 19.11.2017
 
 Module for testing of deep q-learning trader.
 
 @author: rmueller
-'''
+"""
 import unittest
 
 from definitions import PERIOD_3
@@ -14,6 +14,7 @@ from model.Portfolio import Portfolio
 from model.Order import CompanyEnum, OrderType
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from trading.trader.reference.dql_trader import DqlTrader, State
+
 
 class DqlTraderTest(unittest.TestCase):
     def setUp(self):
@@ -31,19 +32,19 @@ class DqlTraderTest(unittest.TestCase):
         # Check random actions because epsilon is 1.0
         trader.epsilon = 1.0
         for i in range(100):
-            actionA, actionB = trader.get_action(state)
-            self.assertGreaterEqual(actionA, -1.0)
-            self.assertGreaterEqual(actionB, -1.0)
-            self.assertLessEqual(actionA, 1.0)
-            self.assertLessEqual(actionB, 1.0)
+            action_a, action_b = trader.get_action(state)
+            self.assertGreaterEqual(action_a, -1.0)
+            self.assertGreaterEqual(action_b, -1.0)
+            self.assertLessEqual(action_a, 1.0)
+            self.assertLessEqual(action_b, 1.0)
         # Check predicted actions because epsilon is 0.0
         trader.epsilon = 0.0
         for i in range(100):
-            actionA, actionB = trader.get_action(state)
-            self.assertGreaterEqual(actionA, -1.0)
-            self.assertGreaterEqual(actionB, -1.0)
-            self.assertLessEqual(actionA, 1.0)
-            self.assertLessEqual(actionB, 1.0)
+            action_a, action_b = trader.get_action(state)
+            self.assertGreaterEqual(action_a, -1.0)
+            self.assertGreaterEqual(action_b, -1.0)
+            self.assertLessEqual(action_a, 1.0)
+            self.assertLessEqual(action_b, 1.0)
 
     def testCreateActionList(self):
         trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False)
@@ -106,7 +107,8 @@ class DqlTraderTest(unittest.TestCase):
         # self.assertEqual(order_list.get(1).shares.amount, 1)
 
         # Check selling full stock with enough owned shares
-        portfolio = Portfolio(10000, [SharesOfCompany(CompanyEnum.COMPANY_A, 2), SharesOfCompany(CompanyEnum.COMPANY_B, 2)])
+        portfolio = Portfolio(10000,
+                              [SharesOfCompany(CompanyEnum.COMPANY_A, 2), SharesOfCompany(CompanyEnum.COMPANY_B, 2)])
         action_a, action_b = -1.0, -1.0
         order_list = trader.create_order_list(action_a, action_b, portfolio, stock_market_data)
         self.assertIsNotNone(order_list)

@@ -1,16 +1,17 @@
-'''
+"""
 Created on 19.11.2017
 
 Module for testing of BuyAndHoldTrader.
 
 @author: rmueller
-'''
+"""
 from unittest import TestCase
 from model.Portfolio import Portfolio
 from model.Order import CompanyEnum, OrderType
 from utils import read_stock_market_data
 from definitions import PERIOD_1
 from trading.trader.reference.buy_and_hold_trader import BuyAndHoldTrader
+
 
 class BuyAndHoldTraderTest(TestCase):
     def setUp(self):

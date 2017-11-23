@@ -1,10 +1,10 @@
-'''
+"""
 Created on 16.11.2017
 
 Module for testing of PerfectPredictor
 
 @author: rmueller
-'''
+"""
 import unittest
 
 import datetime as dt

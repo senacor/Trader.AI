@@ -1,10 +1,10 @@
-'''
+"""
 Created on 19.11.2017
 
 Module for testing the SimpleTrader.
 
 @author: rmueller
-'''
+"""
 import unittest
 from model.Portfolio import Portfolio
 from model.Order import OrderType
@@ -14,6 +14,7 @@ from utils import read_stock_market_data
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from definitions import PERIOD_1
 from trading.trader.reference.simple_trader import SimpleTrader
+
 
 class SimpleTraderTest(unittest.TestCase):
     def setUp(self):

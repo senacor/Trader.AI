@@ -1,18 +1,18 @@
-'''
+"""
 Created on 23.11.2017
 
 Module for testing of predicting components
 
 @author: jtymoszuk
-'''
+"""
 import unittest
+from predicting.predictor.team_green.team_green_predictor import TeamGreenStockAPredictor
 from model.CompanyEnum import CompanyEnum
 from definitions import PERIOD_1
 from utils import read_stock_market_data
-from predicting.predictor.team_green.team_green_predictor import TeamGreenStockAPredictor
+
 
 class TeamGreenPredictorTest(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -31,6 +31,7 @@ class TeamGreenPredictorTest(unittest.TestCase):
         stock_prediction = predictor.doPredict(stock_data)
         self.assertEqual(stock_prediction, 0.0)
 
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TeamGreenPredictorTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)      
+    unittest.TextTestRunner(verbosity=2).run(suite)
