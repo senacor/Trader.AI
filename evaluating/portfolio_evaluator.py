@@ -13,7 +13,8 @@ TraderList = List[ITrader]
 
 class PortfolioEvaluator:
     """
-    Given an `ITrader` implementation and `StockMarketData` this evaluator watches a list of `Portfolios` over time
+    Given `ITrader` implementations and `StockMarketData` this evaluator watches a list of `Portfolios` over time and
+    optionally demonstrates the results in a diagram
     """
 
     def __init__(self, trader_list: TraderList, draw_results: bool = False):
@@ -21,7 +22,7 @@ class PortfolioEvaluator:
         Constructor
 
         Args:
-            trader: The `ITrader` implementations to use for each portfolio respectively
+            trader_list: The `ITrader` implementations to use for each portfolio respectively
             draw_results: If this is set to `True` a diagram is drawn. Default: `False`
         """
         self.trader_list = trader_list
@@ -67,7 +68,8 @@ class PortfolioEvaluator:
 
         if date_offset is not None:
             # `date_offset` is set, so the `evaluation_offset` is calculated based on the given date
-            market_data_for_company = market_data.get_for_company(next(iter(market_data.get_companies())))
+            first_company = next(iter(market_data.get_companies()))
+            market_data_for_company = market_data[first_company]
             index = market_data_for_company.get_dates().index(date_offset)
             evaluation_offset = market_data.get_row_count() - index
 

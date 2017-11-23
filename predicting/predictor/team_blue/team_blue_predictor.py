@@ -166,14 +166,14 @@ if __name__ == "__main__":
     training_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
     test_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_2])
     
-    company_a_StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    company_a_StockData = training_stock_market_data[CompanyEnum.COMPANY_A]
     datesA = company_a_StockData.get_dates()
     pricesA = company_a_StockData.get_values()
     
     logger.debug(f"Data for Stock A loaded: {len(pricesA)} prices and {len(datesA)} dates read.")
     learn_nn_and_save(datesA, pricesA, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    company_b_StockData = training_stock_market_data[CompanyEnum.COMPANY_B]
     datesB = company_b_StockData.get_dates()
     pricesB = company_b_StockData.get_values()
     

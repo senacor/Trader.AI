@@ -1,26 +1,25 @@
 import datetime as dt
-import json
 from typing import Dict
 
 from matplotlib import pyplot as plt
-import os
 
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from model.SharesOfCompany import SharesOfCompany
-from model.CompanyEnum import CompanyEnum
+
+PortfoliosOverTime = Dict[str, Dict[dt.datetime.date, Portfolio]]
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
 """
 
-def draw(portfolio_over_time: Dict[str, Dict[dt.datetime.date, Portfolio]], prices: StockMarketData):
+
+def draw(portfolio_over_time: PortfoliosOverTime, prices: StockMarketData):
     """
-    Draws all given `Portfolios` based on the given `prices`
+    Draws all given portfolios based on the given `prices`
 
     Args:
-        portfolio_over_time:
-        prices:
+        portfolio_over_time: The portfolios to draw. Structure: `Dict[str, Dict[dt.datetime.date, Portfolio]]`
+        prices: The prices on which the portfolios' performances should be calculated
     """
     plt.figure()
 
@@ -42,13 +41,13 @@ def get_data_up_to_offset(stock_market_data: StockMarketData, offset: int):
         offset: The offset to apply
 
     Returns:
-        A copied `StockMarketData` object which only reaches to position `offset`
+        A copied `StockMarketData` object which only reaches from start to `offset`
     """
     if offset == 0:
         return stock_market_data
 
     offset_data = {}
     for company in stock_market_data.get_companies():
-        offset_data[company] = stock_market_data.get_for_company(company).copy_to_offset(offset)
+        offset_data[company] = stock_market_data[company].copy_to_offset(offset)
 
     return StockMarketData(offset_data)

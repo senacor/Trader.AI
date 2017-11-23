@@ -281,14 +281,14 @@ if __name__ == "__main__":
     training_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
     test_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_3])
     
-    company_a_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
-    company_a_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    company_a_training_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_A]
+    company_a_test_stock_data: StockData = test_stock_market_data[CompanyEnum.COMPANY_A]
     
     logger.debug(f"Data for Stock A loaded")
     learn_nn_and_save(company_a_training_stock_data, company_a_test_stock_data, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
-    company_b_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    company_b_training_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_B]
+    company_b_test_stock_data: StockData = test_stock_market_data[CompanyEnum.COMPANY_B]
     
     logger.debug(f"Data for Stock B loaded")
     learn_nn_and_save(company_b_training_stock_data, company_b_test_stock_data, MODEL_FILE_NAME_STOCK_B)
