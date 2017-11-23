@@ -8,7 +8,6 @@ from model.StockData import StockData
 from model.StockMarketData import StockMarketData
 from model.ITrader import ITrader
 from model.Order import OrderList
-from model.Order import Order
 from model.Order import OrderType
 from model.Order import SharesOfCompany
 from model.Order import CompanyEnum
@@ -44,16 +43,16 @@ class SimpleTrader(ITrader):
 
         result = OrderList()
 
-        company_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
-        if (self.stock_a_predictor is not None and company_a_data is not None):
+        company_a_data = stock_market_data[CompanyEnum.COMPANY_A]
+        if self.stock_a_predictor is not None and company_a_data is not None:
             self.__trade_for_company(CompanyEnum.COMPANY_A, company_a_data, self.stock_a_predictor, local_portfolio,
                                      result)
         else:
             logger.warning(
                 f" stock_a_predictor:  {self.stock_a_predictor} or company_a_data: {company_a_data} is None -> No prediction for Company A")
 
-        company_b_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
-        if (self.stock_b_predictor is not None and company_b_data is not None):
+        company_b_data = stock_market_data[CompanyEnum.COMPANY_B]
+        if self.stock_b_predictor is not None and company_b_data is not None:
             self.__trade_for_company(CompanyEnum.COMPANY_B, company_b_data, self.stock_b_predictor, local_portfolio,
                                      result)
         else:
@@ -70,22 +69,20 @@ class SimpleTrader(ITrader):
         order = self.__determine_action(company_data, predictor, lastValue)
 
         if order == OrderType.BUY:
-            if (portfolio.cash > lastValue):
+            if portfolio.cash > lastValue:
                 # We can buy something
                 amount_of_units_to_buy = int(portfolio.cash // lastValue)
-                shares_of_company = SharesOfCompany(company_enum, amount_of_units_to_buy);
-                result_order_list.add_order(Order(order, shares_of_company))
+                result_order_list.buy(company_enum, amount_of_units_to_buy)
 
                 # Update Cash in portfolio
                 portfolio.cash = portfolio.cash - (amount_of_units_to_buy * lastValue)
 
         elif order == OrderType.SELL:
             # Check if something can be selled
-            shares_of_apple_in_portfolio = self.__find_shares_of_company(company_enum, portfolio.shares)
-            if (shares_of_apple_in_portfolio is not None):
+            shares_in_portfolio = self.__find_shares_of_company(company_enum, portfolio.shares)
+            if shares_in_portfolio is not None:
                 # Sell everything
-                shares_of_company = SharesOfCompany(company_enum, shares_of_apple_in_portfolio.amount);
-                result_order_list.add_order(Order(order, shares_of_company))
+                result_order_list.sell(company_enum, shares_in_portfolio.amount)
 
     def __determine_action(self, company_data, predictor, last_value):
         predicted_next_apple_value = predictor.doPredict(company_data)
@@ -103,7 +100,7 @@ class SimpleTrader(ITrader):
     
         Args:
           company_enum : company to find
-          list : list with SharesOfCompany
+          shares: list with SharesOfCompany
         Returns:
           SharesOfCompany for given company or None 
         """

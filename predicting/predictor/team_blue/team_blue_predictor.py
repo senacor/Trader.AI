@@ -21,7 +21,7 @@ MODEL_FILE_NAME_STOCK_A = TEAM_NAME + '_predictor_stock_a_network'
 MODEL_FILE_NAME_STOCK_B = TEAM_NAME + '_predictor_stock_b_network'
 
 # Neural network configuration -> TODO see Keras Documentation
-INPUT_SIZE = 42  # TODO 
+INPUT_SIZE = 42  # TODO
 
 class TeamBlueBasePredictor(IPredictor):
     '''
@@ -46,7 +46,7 @@ class TeamBlueBasePredictor(IPredictor):
         Returns:
           predicted next stock value for that company
         """
-        
+
         # TODO: extract needed data for neural network and predict result
         return 0.0
 
@@ -80,18 +80,18 @@ class TeamBlueStockBPredictor(TeamBlueBasePredictor):
 
 
 def learn_nn_and_save(training_data: StockData, test_data: StockData, filename_to_save:str):
-           
+
     network = create_model()
     
     # TODO: learn network and draw results
-    
+
     # Save trained model: separate network structure (stored as JSON) and trained weights (stored as HDF5)
     save_keras_sequential(network, RELATIVE_PATH, filename_to_save)
 
 
 def create_model() -> Sequential:
     network = Sequential()
-    
+
     # TODO: build model
 
     return network
@@ -105,8 +105,8 @@ def draw_history(history: History):
     plt.xlabel('epoch')
     plt.legend(['training', 'testing'], loc='best')
 
-  
-def draw_prediction(dates: list, awaited_results: list, prediction_results: list):  
+
+def draw_prediction(dates: list, awaited_results: list, prediction_results: list):
     plt.figure()
 
     plt.plot(dates[INPUT_SIZE:], awaited_results, color="black")  # current prices in reality
@@ -124,14 +124,14 @@ if __name__ == "__main__":
     training_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1])
     test_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_2])
     
-    company_a_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
-    company_a_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    company_a_training_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_A]
+    company_a_test_stock_data: StockData = test_stock_market_data[CompanyEnum.COMPANY_A]
     
     logger.debug(f"Data for Stock A loaded")
     learn_nn_and_save(company_a_training_stock_data, company_a_test_stock_data, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_training_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
-    company_b_test_stock_data: StockData = test_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    company_b_training_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_B]
+    company_b_test_stock_data: StockData = test_stock_market_data[CompanyEnum.COMPANY_B]
     
     logger.debug(f"Data for Stock B loaded")
     learn_nn_and_save(company_b_training_stock_data, company_b_test_stock_data, MODEL_FILE_NAME_STOCK_B)

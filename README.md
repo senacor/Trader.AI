@@ -1,4 +1,7 @@
-# Trader AI
+Trader AI
+===
+[![Build Status](https://travis-ci.org/senacor/Trader.AI.svg?branch=master)](https://travis-ci.org/senacor/Trader.AI.svg?branch=master)
+
 ## Abstract
 Python application to show AI functionality based on Keras and TensorFlow.
 
@@ -89,7 +92,7 @@ the estimated future stock price.
 ## Required Tools
 Trader AI's codebase relies on Python 3. To run Trader AI the following tools are required:
 * Python 3
-* pip
+* pip (may come with your Python installation)
 * virtualenv (optional)
 
 Details on how to install these tools are listed below.
@@ -161,19 +164,6 @@ Furthermore you can execute the test suite to see if all works well:
 ```
 $ python test_suite_all.py
 ```
-
-## Preparations for the Code Camp
-1. Install Python, pip and (optional) virtualenv. See [Required Tools](#required-tools)
-2. Create a virtual environment. This is optional, however recommended. It allows for easier dependency management and
-prevents messing up your system's Python installation and dependencies. The recommended way is to create *one* virtual
-environment for this Code Camp. See [Create a Virtual Environment (optional)](#create-a-virtual-environment-optional-)
-3. Install all dependencies. Download `requirements.txt` and install all Code Camp-related dependencies (in the newly
-created virtual environment):
-```
-$ wget https://raw.githubusercontent.com/senacor/Trader.AI/master/requirements.txt
-$ pip install -r requirements.txt
-```
-4. Install an IDE. We recommend either JetBrains PyCharm or PyDev (based on Eclipse)
 
 ## Development
 ### IDE

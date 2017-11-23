@@ -241,8 +241,8 @@ class DqlTrader(ITrader):
           A OrderList instance, may be empty never None
         """
         # build current state object
-        stock_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
-        stock_b_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+        stock_a_data = stock_market_data[CompanyEnum.COMPANY_A]
+        stock_b_data = stock_market_data[CompanyEnum.COMPANY_B]
         predicted_stock_a = self.stock_a_predictor.doPredict(stock_a_data)
         predicted_stock_b = self.stock_b_predictor.doPredict(stock_b_data)
         current_state = State(portfolio.cash,
@@ -352,7 +352,7 @@ if __name__ == "__main__":
         logger.info(f"DQL Trader: Finished training episode {i}, "
                     f"final portfolio value training {final_values_training[-1]} vs. "
                     f"final portfolio value test {final_values_test[-1]}")
-        if final_values_test[-1] > 250000:
+        if final_values_test[-1] > 170000:
             break
 
     from matplotlib import pyplot as plt
