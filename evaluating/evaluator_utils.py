@@ -1,12 +1,14 @@
 import datetime as dt
-from typing import Dict
+from typing import Dict, List, Tuple
 
 from matplotlib import pyplot as plt
 
+from model.ITrader import ITrader
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 
 PortfoliosOverTime = Dict[str, Dict[dt.datetime.date, Portfolio]]
+PortfolioNameTraderMappingList = List[Tuple[str, ITrader]]
 
 """
 This file comprises some helpful functions to work with `Portfolios` and `StockMarketData`
@@ -51,3 +53,23 @@ def get_data_up_to_offset(stock_market_data: StockMarketData, offset: int):
         offset_data[company] = stock_market_data[company].copy_to_offset(offset)
 
     return StockMarketData(offset_data)
+
+
+def initialize_portfolios(cash: float, portfolio_trader_mappings: PortfolioNameTraderMappingList):
+    """
+    Creates a list of portfolios/trader tuples conveniently. Returns as many portfolios as `portfolio_trader_mappings`
+    are given. Each portfolio is initialized with `cash` initial cash and an empty list of stocks
+
+    Args:
+        cash: The initial cash amount for *each* portfolio
+        portfolio_trader_mappings: The portfolio name/trader mappings
+
+    Returns:
+        A list of tuples of portfolios and traders, one for/with each `portfolio_trader_mapping`
+    """
+    portfolios = list()
+
+    for name, trader in portfolio_trader_mappings:
+        portfolios.append((Portfolio(cash, [], name), trader))
+
+    return portfolios
