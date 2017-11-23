@@ -51,11 +51,8 @@ class BaseNnValuePredictor(IPredictor):
         Returns:
           The predicted next stock value for that company
         """
-        # TODO diese Assumptions hier sind Mist, da fehlt uns eine Klasse für
         # Assumptions about data: at least 100 pairs of type (_, float)
-        assert data.get_row_count() >= 100
-        assert len(data.get_first()) == 2
-        assert isinstance(data.get_first()[1], float)
+        assert data is not None and data.get_row_count() >= 100
 
         # Extract last 100 floats (here: stock values) as input for neural network (format: numpy array of arrays)
         input_values = np.array([[x[1] for x in data.get_from_offset(-100)]])

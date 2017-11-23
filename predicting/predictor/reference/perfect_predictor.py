@@ -33,7 +33,6 @@ class PerfectPredictor(IPredictor):
         stock_market_data = read_stock_market_data([company], [PERIOD_1, PERIOD_2, PERIOD_3])
         self.stock_data = stock_market_data[company]
 
-    # TODO Why providing `StockData` as method parameter when it has been already constructed/read in constructor? (jh)
     def doPredict(self, data: StockData) -> float:
         """
         Use the loaded stock values to predict the next stock value.
@@ -44,13 +43,8 @@ class PerfectPredictor(IPredictor):
         Returns:
           predicted next stock value for that company
         """
+        # Assumptions about data: at least one pair of type (_, float)
         assert data is not None and data.get_row_count() > 0
-
-        # TODO Don't do this here. As already stated above: Our whole algorithm relies on these assumptions. Either we
-        # should assert this at central places or not at all (jh - I prefer 'not at all')
-        assert len(data.get_first()) == 2
-        assert isinstance(data.get_first()[0], dt.date)
-        assert isinstance(data.get_first()[1], float)
 
         (current_date, current_value) = data.get_last()
         index = self.stock_data.index((current_date, current_value))
