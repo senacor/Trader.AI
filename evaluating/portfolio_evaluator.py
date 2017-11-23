@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import datetime
 from evaluating.evaluator_utils import draw, get_data_up_to_offset
@@ -9,6 +9,7 @@ from logger import logger
 
 PortfolioList = List[Portfolio]
 TraderList = List[ITrader]
+PortfolioTraderMappingList = List[Tuple[Portfolio, ITrader]]
 
 
 class PortfolioEvaluator:
@@ -49,9 +50,31 @@ class PortfolioEvaluator:
             All portfolios' value courses. If `self.draw_results` is `True`: It also draws the course of all portfolios
              given the market data
         """
-
         portfolio_trader_mapping = list(zip(portfolios, self.trader_list))
 
+        return self.inspect_over_time_with_mapping(market_data, portfolio_trader_mapping, evaluation_offset,
+                                                   date_offset)
+
+    def inspect_over_time_with_mapping(self, market_data: StockMarketData,
+                                       portfolio_trader_mapping: PortfolioTraderMappingList,
+                                       evaluation_offset: int = -1,
+                                       date_offset: datetime.date = None):
+        """
+        Behaves exactly as `#inspect_over_time *except* for the parameter `portfolio_trader_mapping`:
+        While `#inspect_over_time` uses the traders provided to the constructor of this class, this method uses the
+        provided list of trader-portfolio mappings. This allows for an fixed association between portfolios and their
+        traders
+
+        Args:
+            market_data:
+            portfolio_trader_mapping: A mapping between portfolios and traders.
+             Structure: `List[Tuple[Portfolio, ITrader]]`
+            evaluation_offset:
+            date_offset:
+
+        Returns:
+
+        """
         # Map that holds all portfolios in the course of time. Structure: {portfolio_name => {date => portfolio}}
         all_portfolios = {}
 

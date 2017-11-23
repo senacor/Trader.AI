@@ -1,53 +1,37 @@
 # Start evaluation traders:
 # Compare their performance over the testing period (2012-2017) against a buy-and-hold trader.
+from evaluating.evaluator_utils import initialize_portfolios
 from utils import read_stock_market_data
 from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
-from model.Portfolio import Portfolio
 from dependency_injection_containers import Traders
 import datetime
-from definitions import PERIOD_1, PERIOD_2, PERIOD_3
+from definitions import PERIOD_1, PERIOD_2
 
 if __name__ == "__main__":
     # Load stock market data for training and testing period
-    stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
-                                               [PERIOD_1, PERIOD_2])
+    stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2])
 
-    # Define traders
-    buy_and_hold_trader = Traders.BuyAndHoldTrader()
+    # Define portfolio-name/trader mappings
+    portfolio_name_trader_mappings = [
+        # Benchmark trader
+        ('Buy-and-hold Trader', Traders.BuyAndHoldTrader()),
 
-    simple_trader_with_perfect_prediction = Traders.SimpleTrader_with_perfect_prediction()
-    simple_trader_with_nn_binary_perfect_prediction = Traders.SimpleTrader_with_nn_binary_perfect_prediction()
-    simple_trader_with_nn_binary_prediction = Traders.SimpleTrader_with_nn_binary_prediction()
+        # Simple traders
+        ('Simple Trader (perfect prediction)', Traders.SimpleTrader_with_perfect_prediction()),
+        ('Simple Trader (NN binary perfect prediction)', Traders.SimpleTrader_with_nn_binary_perfect_prediction()),
+        ('Simple Trader (NN binary prediction)', Traders.SimpleTrader_with_nn_binary_prediction()),
 
-    dql_trader_with_perfect_prediction = Traders.DqlTrader_with_perfect_prediction()
-    dql_trader_with_nn_binary_perfect_prediction = Traders.DqlTrader_with_nn_binary_perfect_prediction()
-    dql_trader_with_nn_binary_prediction = Traders.DqlTrader_with_nn_binary_prediction()
+        # Deep Q-Learning traders
+        ('DQL Trader (perfect_prediction)', Traders.DqlTrader_with_perfect_prediction()),
+        ('DQL Trader (NN binary perfect prediction)', Traders.DqlTrader_with_nn_binary_perfect_prediction()),
+        ('DQL Trader (NN binary prediction))', Traders.DqlTrader_with_nn_binary_prediction()),
+    ]
 
-    # Define portfolios for the traders
-    benchmark_portfolio = Portfolio(10000, [], 'BuyAndHoldTrader')
-    
-    simple_trader_with_perfect_prediction_portfolio = Portfolio(10000, [], 'SimpleTrader_with_perfect_prediction')
-    simple_trader_with_nn_binary_perfect_prediction_portfolio = Portfolio(10000, [], 'SimpleTrader_with_nn_binary_perfect_prediction')
-    simple_trader_with_nn_binary_prediction_portfolio = Portfolio(10000, [], 'SimpleTrader_with_nn_binary_prediction')
-    
-    dql_trader_with_perfect_prediction_portfolio = Portfolio(10000, [], 'DqlTrader_with_perfect_prediction')
-    dql_trader_with_nn_binary_perfect_prediction_portfolio = Portfolio(10000, [], 'DqlTrader_with_nn_binary_perfect_prediction')
-    dql_trader_with_nn_binary_prediction_portfolio = Portfolio(10000, [], 'DqlTrader_with_nn_binary_prediction')
+    # Define portfolios for the traders and create a portfolio/trader mapping
+    portfolio_trader_mappings = initialize_portfolios(10000.0, portfolio_name_trader_mappings)
 
     # Evaluate their performance over the testing period
-    evaluator = PortfolioEvaluator([buy_and_hold_trader,
-                                    simple_trader_with_perfect_prediction, 
-                                    simple_trader_with_nn_binary_perfect_prediction,
-                                    simple_trader_with_nn_binary_prediction,
-                                    dql_trader_with_perfect_prediction,
-                                    dql_trader_with_nn_binary_perfect_prediction,
-                                    dql_trader_with_nn_binary_prediction], True)
-    evaluator.inspect_over_time(stock_market_data, [benchmark_portfolio, 
-                                                    simple_trader_with_perfect_prediction_portfolio, 
-                                                    simple_trader_with_nn_binary_perfect_prediction_portfolio,
-                                                    simple_trader_with_nn_binary_prediction_portfolio,
-                                                    dql_trader_with_perfect_prediction_portfolio,
-                                                    dql_trader_with_nn_binary_perfect_prediction_portfolio,
-                                                    dql_trader_with_nn_binary_prediction_portfolio],
-                                date_offset=datetime.date(2012, 1, 3))
+    evaluator = PortfolioEvaluator([], True)
+    evaluator.inspect_over_time_with_mapping(stock_market_data, portfolio_trader_mappings,
+                                             date_offset=datetime.date(2012, 1, 3))
