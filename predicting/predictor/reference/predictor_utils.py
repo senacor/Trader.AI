@@ -76,12 +76,12 @@ def create_model() -> Sequential:
     """
     network = Sequential()
 
-    # Input layer
+    # Input layer and first hidden layer
     network.add(Dense(FIRST_LAYER_SIZE, input_dim=INPUT_SIZE))
     network.add(BatchNormalization())
     network.add(LeakyReLU())
 
-    # First hidden layer
+    # Second hidden layer
     network.add(Dense(SECOND_LAYER_SIZE))
     network.add(BatchNormalization())
     network.add(LeakyReLU())
