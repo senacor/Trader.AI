@@ -16,9 +16,9 @@ from evaluating.portfolio_evaluator import PortfolioEvaluator
 from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
-from trading.trader.simple_trader import SimpleTrader
 from model.Order import SharesOfCompany
 from predicting.predictor.reference.random_predictor import RandomPredictor
+from trading.trader.reference.simple_trader import SimpleTrader
 
 
 class EvaluatorTest(unittest.TestCase):

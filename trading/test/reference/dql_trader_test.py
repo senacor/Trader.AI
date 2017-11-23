@@ -12,8 +12,8 @@ from utils import read_stock_market_data
 from model.SharesOfCompany import SharesOfCompany
 from model.Portfolio import Portfolio
 from model.Order import CompanyEnum, OrderType
-from trading.trader.dql_trader import DqlTrader, State
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
+from trading.trader.reference.dql_trader import DqlTrader, State
 
 class DqlTraderTest(unittest.TestCase):
     def setUp(self):

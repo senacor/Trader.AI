@@ -10,10 +10,10 @@ from model.Portfolio import Portfolio
 from model.Order import OrderType
 from model.Order import CompanyEnum
 
-from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from definitions import PERIOD_1
+from trading.trader.reference.simple_trader import SimpleTrader
 
 class SimpleTraderTest(unittest.TestCase):
     def setUp(self):
