@@ -17,7 +17,7 @@ from model.CompanyEnum import CompanyEnum
 from model.Portfolio import Portfolio
 from model.StockMarketData import StockMarketData
 from trading.trader.simple_trader import SimpleTrader
-from model.trader_actions import SharesOfCompany
+from model.Order import SharesOfCompany
 from predicting.predictor.reference.random_predictor import RandomPredictor
 
 

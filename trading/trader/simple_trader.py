@@ -7,11 +7,11 @@ from model.Portfolio import Portfolio
 from model.StockData import StockData
 from model.StockMarketData import StockMarketData
 from model.ITrader import ITrader
-from model.trader_actions import TradingActionList
-from model.trader_actions import TradingAction
-from model.trader_actions import TradingActionEnum
-from model.trader_actions import SharesOfCompany
-from model.trader_actions import CompanyEnum
+from model.Order import OrderList
+from model.Order import Order
+from model.Order import OrderType
+from model.Order import SharesOfCompany
+from model.Order import CompanyEnum
 from model.IPredictor import IPredictor
 import copy
 from logger import logger
@@ -19,7 +19,7 @@ from logger import logger
 
 class SimpleTrader(ITrader):
     '''
-    Simple Trader generates TradingAction based on simple logic, input data and prediction from NN-Engine
+    Simple Trader generates Order based on simple logic, input data and prediction from NN-Engine
     '''
 
     def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor):
@@ -30,7 +30,7 @@ class SimpleTrader(ITrader):
         self.stock_b_predictor = stock_b_predictor
 
     def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
-                stock_market_data: StockMarketData) -> TradingActionList:
+                stock_market_data: StockMarketData) -> OrderList:
         """ Generate action to be taken on the "stock market"
     
         Args:
@@ -38,62 +38,63 @@ class SimpleTrader(ITrader):
           current_portfolio_value : value of Portfolio at given Momemnt
           stock_market_data : StockMarketData for evaluation
         Returns:
-          A TradingActionList instance, may be empty never None
+          A OrderList instance, may be empty never None
         """
         local_portfolio = copy.deepcopy(portfolio)
 
-        result = TradingActionList()
+        result = OrderList()
 
         company_a_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
         if (self.stock_a_predictor is not None and company_a_data is not None):
             self.__trade_for_company(CompanyEnum.COMPANY_A, company_a_data, self.stock_a_predictor, local_portfolio,
-                                 result)
+                                     result)
         else:
-            logger.warning(f" stock_a_predictor:  {self.stock_a_predictor} or company_a_data: {company_a_data} is None -> No prediction for Company A")
+            logger.warning(
+                f" stock_a_predictor:  {self.stock_a_predictor} or company_a_data: {company_a_data} is None -> No prediction for Company A")
 
         company_b_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
         if (self.stock_b_predictor is not None and company_b_data is not None):
             self.__trade_for_company(CompanyEnum.COMPANY_B, company_b_data, self.stock_b_predictor, local_portfolio,
-                                 result)
+                                     result)
         else:
             logger.warning("stock_b_predictor or company_b_data is None -> No prediction for Company B")
 
         return result
 
-    def __trade_for_company(self, company_enum: CompanyEnum, company_data: StockData, predictor: IPredictor, portfolio: Portfolio,
-                        result_trading_action_list: TradingActionList):
+    def __trade_for_company(self, company_enum: CompanyEnum, company_data: StockData, predictor: IPredictor,
+                            portfolio: Portfolio, result_order_list: OrderList):
 
         lastValue = company_data.get_last()[-1]
 
         # This determines the trade action to apply
-        trading_action = self.__determine_action(company_data, predictor, lastValue)
+        order = self.__determine_action(company_data, predictor, lastValue)
 
-        if trading_action == TradingActionEnum.BUY:
+        if order == OrderType.BUY:
             if (portfolio.cash > lastValue):
                 # We can buy something
                 amount_of_units_to_buy = int(portfolio.cash // lastValue)
                 shares_of_company = SharesOfCompany(company_enum, amount_of_units_to_buy);
-                result_trading_action_list.add_trading_action(TradingAction(trading_action, shares_of_company))
+                result_order_list.add_order(Order(order, shares_of_company))
 
                 # Update Cash in portfolio
                 portfolio.cash = portfolio.cash - (amount_of_units_to_buy * lastValue)
 
-        elif trading_action == TradingActionEnum.SELL:
+        elif order == OrderType.SELL:
             # Check if something can be selled
             shares_of_apple_in_portfolio = self.__find_shares_of_company(company_enum, portfolio.shares)
             if (shares_of_apple_in_portfolio is not None):
                 # Sell everything
                 shares_of_company = SharesOfCompany(company_enum, shares_of_apple_in_portfolio.amount);
-                result_trading_action_list.add_trading_action(TradingAction(trading_action, shares_of_company))
+                result_order_list.add_order(Order(order, shares_of_company))
 
     def __determine_action(self, company_data, predictor, last_value):
         predicted_next_apple_value = predictor.doPredict(company_data)
 
         action = None
         if predicted_next_apple_value > last_value:
-            action = TradingActionEnum.BUY
+            action = OrderType.BUY
         elif predicted_next_apple_value < last_value:
-            action = TradingActionEnum.SELL
+            action = OrderType.SELL
 
         return action
 
