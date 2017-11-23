@@ -18,7 +18,8 @@ class Portfolio:
     """
 
     def __init__(self, cash: float, shares: SharesList, name: str = 'nameless'):
-        """ Constructor
+        """
+        Constructor
 
         Args:
           cash: The portfolio's initial cash level
@@ -42,7 +43,7 @@ class Portfolio:
             The portfolio's total value
         """
         values = [share.amount *
-                  [price[1] for price in prices.get_for_company(share.company_enum).iter() if date == price[0]][0]
+                  [price[1] for price in iter(prices[share.company_enum]) if date == price[0]][0]
                   for share in self.shares]
 
         return sum(values) + self.cash
@@ -69,7 +70,7 @@ class Portfolio:
             company_enum: The company to get/insert the stock count for
 
         Returns:
-            An object of type `SharesOfCompany` of this `company_enum`, either with intial share count of 0 or the
+            An object of type `SharesOfCompany` of this `company_enum`, either with initial share count of 0 or the
             actual share count
         """
         if not self.__has_stock(company_enum):
@@ -186,7 +187,6 @@ class Portfolio:
         Returns:
           `True` if given OrderList is valid in comparison to current Portfolio, `False` otherwise, never None
         """
-
         current_cash = self.cash
 
         most_recent_price_company_a = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)

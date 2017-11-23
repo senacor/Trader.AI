@@ -17,11 +17,11 @@ class TestStockData(TestCase):
     """
 
     def test_get_dates(self):
-        old_implementation = np.array([[x[0] for x in get_test_data().iter()]])[0].tolist()
+        old_implementation = np.array([[x[0] for x in iter(get_test_data())]])[0].tolist()
 
         assert get_test_data().get_dates() == old_implementation
 
     def test_get_values(self):
-        old_implementation = np.array([[x[1] for x in get_test_data().iter()]])[0].tolist()
+        old_implementation = np.array([[x[1] for x in iter(get_test_data())]])[0].tolist()
 
         assert get_test_data().get_values() == old_implementation

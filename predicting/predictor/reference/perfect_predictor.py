@@ -33,7 +33,7 @@ class PerfectPredictor(IPredictor):
         # TODO Why do we read all/both company's data? We only need one, see line underneath (jh)
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B],
                                                    [PERIOD_1, PERIOD_2, PERIOD_3])
-        self.stock_data = stock_market_data.get_for_company(company)
+        self.stock_data = stock_market_data[company]
 
     # TODO Why providing `StockData` as method parameter when it has been already constructed/read in constructor? (jh)
     def doPredict(self, data: StockData) -> float:

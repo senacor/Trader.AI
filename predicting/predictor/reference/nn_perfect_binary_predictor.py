@@ -241,14 +241,14 @@ if __name__ == "__main__":
     logger.debug("Data loading...")
     training_stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A, CompanyEnum.COMPANY_B], [PERIOD_1, PERIOD_2, PERIOD_3])
     
-    company_a_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+    company_a_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_A]
     dates_a = company_a_stock_data.get_dates()
     prices_a = company_a_stock_data.get_values()
     
     logger.debug(f"Data for Stock A loaded: {len(prices_a)} prices and {len(dates_a)} dates read.")
     learn_nn_and_save(dates_a, prices_a, MODEL_FILE_NAME_STOCK_A)
     
-    company_b_stock_data: StockData = training_stock_market_data.get_for_company(CompanyEnum.COMPANY_B)
+    company_b_stock_data: StockData = training_stock_market_data[CompanyEnum.COMPANY_B]
     dates_b = company_b_stock_data.get_dates()
     prices_b = company_b_stock_data.get_values()
     logger.debug(f"Data for Stock B loaded: {len(prices_b)} prices and {len(dates_b)} dates read.")

@@ -17,7 +17,7 @@ class StockMarketData:
 
         Args:
             market_data: Dictionary containing current and historical data for all companies in the stock market.
-             Structure: {`CompanyEnum`: list(`datetime.date`, `float`)}
+             Structure: `Dict[CompanyEnum, StockData]`
         """
         self.__market_data = market_data
 
@@ -32,14 +32,14 @@ class StockMarketData:
 
     def get_most_recent_price(self, company_enum: CompanyEnum) -> float:
         """
-        Determines the lastest stock price of the given `company_enum`.
+        Determines the latest stock price of the given `company_enum`.
         Returns None if no stock price for the given company was found.
 
         Args:
             company_enum: The company to determine the stock price of
 
         Returns:
-            The lastest `company_enum`'s stock price or None.
+            The latest `company_enum`'s stock price or None.
         """
         company_data = self.__market_data.get(company_enum)
         if company_data is not None:
@@ -56,7 +56,7 @@ class StockMarketData:
         """
         return next(iter(self.__market_data.values())).get_row_count()
 
-    def get_for_company(self, company_enum: CompanyEnum) -> StockData:
+    def __getitem__(self, company_enum: CompanyEnum) -> StockData:
         """
         Delivers data for the given `company_enum`, or `None` if no data can be found
 
