@@ -23,7 +23,6 @@ from utils import save_keras_sequential, load_keras_sequential, read_stock_marke
 from logger import logger
 from predicting.predictor.reference.nn_binary_predictor import StockANnBinaryPredictor, StockBNnBinaryPredictor
 
-
 class State:
     """
     Represents a state from the trader's viewpoint.
@@ -79,6 +78,7 @@ class DqlTrader(ITrader):
     """
     Implementation of ITrader based on reinforced Q-learning (RQL).
     """
+    RELATIVE_DATA_DIRECTORY =  'trading/trader/dql_trader_data'
 
     # Stock actions model the possible output from the neural network.
     # A stock action is of a pair of floats, each between -1.0 and +1.0.
@@ -145,7 +145,7 @@ class DqlTrader(ITrader):
         self.model = None
         if load_trained_model:
             logger.debug(f"DQL Trader: Try to load trained model")
-            self.model = load_keras_sequential('trading/trader/dql_trader_data', self.name)
+            self.model = load_keras_sequential(self.RELATIVE_DATA_DIRECTORY, self.name)
             logger.debug(f"DQL Trader: Loaded trained model")
         if self.model is None:  # loading failed or we didn't want to use a trained model
             self.model = Sequential()
@@ -160,7 +160,7 @@ class DqlTrader(ITrader):
         """
         Save the trained neural network under a fixed name specific for this trader.
         """
-        save_keras_sequential(self.model, 'trading/trader/dql_trader_data', self.name)
+        save_keras_sequential(self.model, self.RELATIVE_DATA_DIRECTORY, self.name)
         logger.info(f"DQL Trader: Saved trained model")
 
     def get_action(self, state: State) -> (float, float):
