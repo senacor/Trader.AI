@@ -22,7 +22,7 @@ class TeamGreenPredictorTest(unittest.TestCase):
     def testStockANnPredictor(self):
         # Get stock A data
         stock_market_data = read_stock_market_data([CompanyEnum.COMPANY_A], [PERIOD_1])
-        stock_data = stock_market_data.get_for_company(CompanyEnum.COMPANY_A)
+        stock_data = stock_market_data[CompanyEnum.COMPANY_A]
 
         # Load stock A predictor
         predictor = TeamGreenStockAPredictor()
