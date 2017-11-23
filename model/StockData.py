@@ -114,20 +114,20 @@ class StockData:
         """
         return StockData(self.__stock_data.copy()[:offset])
 
-    def get_dates(self) -> list:
+    def get_dates(self) -> List[datetime.date]:
         """
         Returns all dates out of StockDataList
 
         Returns:
-            all dates out of StockDataList as list
+            All dates out of StockDataList as a list of dates
         """
         return [data[0] for data in self.__stock_data]
 
-    def get_values(self) -> list:
+    def get_values(self) -> List[float]:
         """
         Returns all values out of StockDataList
 
         Returns:
-            all values out of StockDataList as list
+            All values out of StockDataList as a list of floats
         """
         return [data[1] for data in self.__stock_data]
