@@ -6,7 +6,7 @@ import datetime
 from model import StockMarketData
 from model.SharesOfCompany import SharesOfCompany
 from model.CompanyEnum import CompanyEnum
-from model.trader_actions import TradingActionList, TradingActionEnum, TradingAction
+from model.Order import OrderList, OrderType, Order
 from logger import logger
 
 SharesList = List[SharesOfCompany]
@@ -34,6 +34,10 @@ class Portfolio:
         Calculates the portfolio's total value based on the held shares multiplied by their current value added to the
         cash level.
 
+        Args:
+            date: The date on which the total value should be calculated
+            prices: The stock market data with which the total value should be calculated
+
         Returns:
             The portfolio's total value
         """
@@ -46,6 +50,7 @@ class Portfolio:
     def __has_stock(self, company_enum: CompanyEnum):
         """
         Checks whether the stock by the given `company_enum` is held in the portfolio
+
         Args:
             company_enum: The company to check the stock existence for
 
@@ -77,6 +82,12 @@ class Portfolio:
     def __get_by_name(self, company_enum: CompanyEnum) -> SharesOfCompany:
         """
         Returns SharesOfCompany for `company_enum`, or None if nothing found
+
+        Args:
+            company_enum: The company for which to return the shares
+
+        Returns:
+            A `SharesOfCompany` object
         """
         return next((share for share in self.shares if share.company_enum == company_enum), None)
 
@@ -84,6 +95,12 @@ class Portfolio:
         """
         Return the amount of shares we hold from the given `company_enum`.  If the portfolio doesn't hold any shares of
         this company, 0 ist returned
+
+        Args:
+            company_enum: The company for which to return the share count
+
+        Returns:
+            The amount of shares of the given company
         """
         share = self.__get_by_name(company_enum)
         if share is not None:
@@ -91,14 +108,14 @@ class Portfolio:
         else:
             return 0
 
-    def update(self, stock_market_data: StockMarketData, trade_action_list: TradingActionList):
+    def update(self, stock_market_data: StockMarketData, order_list: OrderList):
         """
-        Iterates through the list of trading actions (`trade_action_list`), applies those actions and returns an updated
-        `Portfolio` object based on the given `StockMarketData`. If `trade_action_list` is empty nothing will be changed
+        Iterates through the list of orders (`order_list`), applies those orders and returns an updated
+        `Portfolio` object based on the given `StockMarketData`. If `order_list` is empty nothing will be changed
 
         Args:
             stock_market_data: The market data based on which the actions are applied
-            trade_action_list: The list of trading action to apply
+            order_list: The list of orders to apply
 
         Returns:
             An updated portfolio. This is a deep copy of the given `portfolio` (see `copy.deepcopy`)
@@ -107,14 +124,14 @@ class Portfolio:
 
         logger.debug(f"Updating portfolio {self.name}:")
 
-        if trade_action_list.is_empty():
-            logger.debug("trade_action_list.is_empty -> No action this time")
+        if order_list.is_empty():
+            logger.debug("The order list is empty. No action this time")
             return updated_portfolio
 
         available_cash = updated_portfolio.cash
 
-        for trade_action in trade_action_list.iterator():
-            company_enum = trade_action.shares.company_enum
+        for order in iter(order_list):
+            company_enum = order.shares.company_enum
 
             current_date = stock_market_data.get_most_recent_trade_day()
             current_price = stock_market_data.get_most_recent_price(company_enum)
@@ -123,10 +140,10 @@ class Portfolio:
             # for share in update.shares:
             share = updated_portfolio.get_or_insert(company_enum)
             # if share.name is update.shares.name:
-            amount = trade_action.shares.amount
+            amount = order.shares.amount
             trade_volume = amount * current_price
 
-            if trade_action.action is TradingActionEnum.BUY:
+            if order.action is OrderType.BUY:
                 logger.debug(f"Buying {amount} shares of '{share.company_enum}' with an individual value of "
                              f"{current_price}")
                 logger.debug(f"  Volume of this trade: {trade_volume}")
@@ -138,7 +155,7 @@ class Portfolio:
                 else:
                     logger.warning(f"No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction "
                                    f"with volume of {trade_volume}")
-            elif trade_action.action is TradingActionEnum.SELL:
+            elif order.action is OrderType.SELL:
                 logger.debug(f"Selling {amount} shares of {share.company_enum} with individual value of "
                              f"{current_price}")
                 logger.debug(f"  Volume of this trade: {trade_volume}")
@@ -157,71 +174,71 @@ class Portfolio:
 
         return updated_portfolio
 
-    def is_trading_action_list_valid(self, trading_action_list: TradingActionList,
-                                     stock_market_data: StockMarketData) -> bool:
+    def is_order_list_valid(self, order_list: OrderList,
+                            stock_market_data: StockMarketData) -> bool:
         """
-        Validates if generated TradingActionList is valid in comparison to current Portfolio
+        Validates if generated OrderList is valid in comparison to current Portfolio
 
         Args:
-          trading_action_list: TradingActionList containing generated TradingActions to be sent into Evaluation (Stock Market)
-          stock_market_data: StockMarketData containing date for all companies
+          order_list: OrderList containing generated orders to be sent into evaluation
+          stock_market_data: StockMarketData containing dates and prices for all companies
 
         Returns:
-          `True` if given TradingActionList is valid in comparison to current Portfolio, `False` otherwise, never None
+          `True` if given OrderList is valid in comparison to current Portfolio, `False` otherwise, never None
         """
 
         current_cash = self.cash
 
         most_recent_price_company_a = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A)
-        trading_action_for_company_a = trading_action_list.get_by_CompanyEnum(CompanyEnum.COMPANY_A)
+        order_company_a = order_list.get_by_company_enum(CompanyEnum.COMPANY_A)
 
-        is_valid, current_cash = self.__is_trading_action_valid(current_cash, CompanyEnum.COMPANY_A,
-                                                                trading_action_for_company_a,
-                                                                most_recent_price_company_a)
+        is_valid, current_cash = self.__is_order_valid(current_cash, CompanyEnum.COMPANY_A,
+                                                       order_company_a,
+                                                       most_recent_price_company_a)
         if is_valid is False:
             return False
 
         most_recent_price_company_b = stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_B)
-        trading_action_for_company_b = trading_action_list.get_by_CompanyEnum(CompanyEnum.COMPANY_B)
+        order_company_b = order_list.get_by_company_enum(CompanyEnum.COMPANY_B)
 
-        is_valid, current_cash = self.__is_trading_action_valid(current_cash, CompanyEnum.COMPANY_B,
-                                                                trading_action_for_company_b,
-                                                                most_recent_price_company_b)
+        is_valid, current_cash = self.__is_order_valid(current_cash, CompanyEnum.COMPANY_B,
+                                                       order_company_b,
+                                                       most_recent_price_company_b)
         if is_valid is False:
             return False
 
         return True
 
-    def __is_trading_action_valid(self, current_cash: float, company_enum: CompanyEnum,
-                                  trading_action_for_company: TradingAction, most_recent_price_company: float):
+    def __is_order_valid(self, current_cash: float, company_enum: CompanyEnum,
+                         order: Order, most_recent_price_company: float):
         """
-        Validates if given TradingAction is valid
+        Validates if given Order is valid
 
         Args:
-          current_cash: TradingActionList containing generated TradingAction's to be sent into Evaluation (Stock Market)
+          current_cash: OrderList containing generated Order's to be sent into Evaluation (Stock Market)
           company_enum: CCompanyEnum
-          trading_action_for_company: TradingAction
+          order: Order
           most_recent_price_company: most recent price of company as float
 
         Returns:
-          A True if given TradingAction is valid in comparison to current Portfolio and Cash, False otherwise, never None
+          A True if given Order is valid in comparison to current Portfolio and Cash, False otherwise, never None
         """
-        if trading_action_for_company is not None:
-            if trading_action_for_company.action == TradingActionEnum.BUY:
-                price_to_pay = most_recent_price_company * trading_action_for_company.shares
+        if order is not None:
+            if order.action == OrderType.BUY:
+                price_to_pay = most_recent_price_company * order.shares
 
                 current_cash = current_cash - price_to_pay
                 if current_cash < 0:
                     logger.warning(
                         f"Not enough money to pay! tradingActionForCompany: "
-                        f"{trading_action_for_company}, Portfolio: {self}")
+                        f"{order}, Portfolio: {self}")
                     return False, current_cash
 
-            elif trading_action_for_company.action == TradingActionEnum.SELL:
-                if trading_action_for_company.shares > self.get_amount(company_enum):
+            elif order.action == OrderType.SELL:
+                if order.shares > self.get_amount(company_enum):
                     return False
             else:
-                raise ValueError(f'Action for tradingActionForCompanyB is not valid: {trading_action_for_company}')
+                raise ValueError(f'Action for tradingActionForCompanyB is not valid: {order}')
 
         return True, current_cash
 

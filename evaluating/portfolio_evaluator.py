@@ -28,11 +28,11 @@ class PortfolioEvaluator:
         self.draw_results = draw_results
 
     def inspect_over_time(self, market_data: StockMarketData, portfolios: PortfolioList, evaluation_offset: int = -1,
-                          date_offset: datetime.date=None):
+                          date_offset: datetime.date = None):
         """
         Lets the clock tick and executes this for every given `Portfolio` on every tick:
-        * Notifies the trader which returns a list of trading actions
-        * Apply the trading actions
+        * Notifies the trader which returns a list of orders
+        * Apply the orders
         * Save the portfolio's state after the trade(s)
 
         Args:

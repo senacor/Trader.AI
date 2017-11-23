@@ -7,8 +7,8 @@ Module for testing the SimpleTrader.
 '''
 import unittest
 from model.Portfolio import Portfolio
-from model.trader_actions import TradingActionEnum
-from model.trader_actions import CompanyEnum
+from model.Order import OrderType
+from model.Order import CompanyEnum
 
 from trading.trader.simple_trader import SimpleTrader
 from utils import read_stock_market_data
@@ -31,12 +31,15 @@ class SimpleTraderTest(unittest.TestCase):
         self.assertIsNotNone(portfolio)
 
         # Buy stocks based on prediction: With 10000, we can buy 287 stocks A for 34.80 each
-        trading_action_list = trader.doTrade(portfolio, 0.0, stock_market_data)
-        self.assertIsNotNone(trading_action_list)
-        self.assertEqual(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
-        self.assertEqual(trading_action_list.get(0).shares.amount, 287)
-        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
+        order_list = trader.doTrade(portfolio, 0.0, stock_market_data)
+        self.assertIsNotNone(order_list)
+
+        self.assertEqual(len(order_list), 1)
+
+        order = order_list[0]
+        self.assertEqual(order.action, OrderType.BUY)
+        self.assertEqual(order.shares.amount, 287)
+        self.assertEqual(order.shares.company_enum, CompanyEnum.COMPANY_A)
 
     def testSimpleTraderWithTwoStocks(self):
         trader = SimpleTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B))
@@ -51,9 +54,14 @@ class SimpleTraderTest(unittest.TestCase):
         # Why doesn't SimpleTrader buy stocks B?
         # This is because `SimpleTrader` buys sequentially without considering future/earlier trade actions. So in case
         # of two BUY actions, all available cash is spent for buying the first stock - an issue I already raised (jh)
-        trading_action_list = trader.doTrade(portfolio, 0.0, stock_market_data)
-        self.assertIsNotNone(trading_action_list)
-        self.assertEqual(trading_action_list.len(), 1)
-        self.assertEqual(trading_action_list.get(0).action, TradingActionEnum.BUY)
-        self.assertEqual(trading_action_list.get(0).shares.amount, 287)
-        self.assertEqual(trading_action_list.get(0).shares.company_enum, CompanyEnum.COMPANY_A)
+        order_list = trader.doTrade(portfolio, 0.0, stock_market_data)
+
+        order_list = order_list
+        self.assertIsNotNone(order_list)
+
+        self.assertEqual(len(order_list), 1)
+
+        order = order_list[0]
+        self.assertEqual(order.action, OrderType.BUY)
+        self.assertEqual(order.shares.amount, 287)
+        self.assertEqual(order.shares.company_enum, CompanyEnum.COMPANY_A)

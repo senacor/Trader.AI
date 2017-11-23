@@ -3,9 +3,9 @@ Created on 15.11.2017
 
 @author: rmueller
 '''
-from model.ITrader import ITrader, TradingActionList, Portfolio
+from model.ITrader import ITrader, OrderList, Portfolio
 from model.StockMarketData import StockMarketData
-from model.trader_actions import CompanyEnum
+from model.Order import CompanyEnum
 
 
 class BuyAndHoldTrader(ITrader):
@@ -20,7 +20,7 @@ class BuyAndHoldTrader(ITrader):
         self.bought_stocks = False
 
     def doTrade(self, portfolio: Portfolio, currentPortfolioValue: float,
-                stockMarketData: StockMarketData) -> TradingActionList:
+                stockMarketData: StockMarketData) -> OrderList:
         """ Generate action to be taken on the "stock market"
     
         Args:
@@ -28,13 +28,13 @@ class BuyAndHoldTrader(ITrader):
           currentPortfolioValue : value of Portfolio at given Momemnt
           stockMarketData : StockMarketData for evaluation
         Returns:
-          A TradingActionList instance, may be empty never None
+          A OrderList instance, may be empty never None
         """
         if self.bought_stocks:
-            return TradingActionList()
+            return OrderList()
         else:
             self.bought_stocks = True
-            trading_actions = TradingActionList()
+            order_list = OrderList()
 
             # Calculate how many cash to spend per company
             available_cash_per_stock = portfolio.cash / stockMarketData.get_number_of_companies()
@@ -44,6 +44,6 @@ class BuyAndHoldTrader(ITrader):
                 most_recent_price = stockMarketData.get_most_recent_price(company)
                 if most_recent_price is not None:
                     amount_to_buy = available_cash_per_stock // most_recent_price
-                    trading_actions.buy(company, amount_to_buy)
+                    order_list.buy(company, amount_to_buy)
 
-        return trading_actions
+        return order_list

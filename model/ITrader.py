@@ -1,7 +1,7 @@
 import abc
 
 from model import Portfolio, StockMarketData
-from model.trader_actions import TradingActionList
+from model.Order import OrderList
 
 
 class ITrader(metaclass=abc.ABCMeta):
@@ -11,7 +11,7 @@ class ITrader(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def doTrade(self, portfolio: Portfolio, current_portfolio_value: float,
-                stock_market_data: StockMarketData) -> TradingActionList:
+                stock_market_data: StockMarketData) -> OrderList:
         """ Generate action to be taken on the "stock market"
 
         Args:
@@ -19,6 +19,6 @@ class ITrader(metaclass=abc.ABCMeta):
           current_portfolio_value : value of Portfolio at given Momemnt
           stock_market_data : StockMarketData for evaluation
         Returns:
-          A TradingActionList instance, may be empty never None
+          A OrderList instance, may be empty never None
         """
         pass
