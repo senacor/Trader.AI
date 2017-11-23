@@ -26,8 +26,7 @@ class TestStockMarketData(TestCase):
 
         stock_market_data = get_stock_market_data()
 
-        assert stock_market_data.get_most_recent_trade_day() == \
-               stock_market_data.get_for_company(CompanyEnum.COMPANY_A).get_last()[0]
+        assert stock_market_data.get_most_recent_trade_day() == stock_market_data[CompanyEnum.COMPANY_A].get_last()[0]
 
     def test_get_most_recent_price(self):
         """
@@ -39,10 +38,9 @@ class TestStockMarketData(TestCase):
         stock_market_data = get_stock_market_data()
 
         assert stock_market_data.get_most_recent_price(CompanyEnum.COMPANY_A) == \
-               stock_market_data.get_for_company(CompanyEnum.COMPANY_A).get_last()[1]
+               stock_market_data[CompanyEnum.COMPANY_A].get_last()[1]
 
     def test_get_row_count(self):
         stock_market_data = get_stock_market_data()
 
-        assert stock_market_data.get_row_count() == stock_market_data.get_for_company(
-            CompanyEnum.COMPANY_A).get_row_count()
+        assert stock_market_data.get_row_count() == stock_market_data[CompanyEnum.COMPANY_A].get_row_count()

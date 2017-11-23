@@ -1,10 +1,10 @@
-'''
+"""
 Created on 07.11.2017
 
 This module contains everything related to orders
 
 @author: jtymoszuk
-'''
+"""
 from enum import Enum
 
 from model.CompanyEnum import CompanyEnum
@@ -47,26 +47,6 @@ class OrderList:
         """
         self.__order_list = list()
 
-    def __add_order(self, order_type: OrderType, shares: SharesOfCompany):
-        """
-        Adds the given order to the list
-
-        Args:
-            order_type: The type of order to add
-            shares: The stocks (name and quantity) to buy or sell
-        """
-        self.add_order(Order(order_type, shares))
-
-    def add_order(self, order: Order):
-        """
-        Adds the given order to list, if not `None`
-        
-        Args:
-            order: The order to add
-        """
-        if order is not None:
-            self.__order_list.append(order)
-
     def __len__(self) -> int:
         """
         Returns the length of the underlying order list
@@ -87,6 +67,15 @@ class OrderList:
             The underlying order list's `index`nth element
         """
         return self.__order_list[index]
+
+    def __iter__(self):
+        """
+        Returns an iterator of the underlying order list
+
+        Returns:
+            The iterator
+        """
+        return iter(self.__order_list)
 
     def get_by_company_enum(self, company_enum: CompanyEnum) -> Order:
         """
@@ -112,15 +101,6 @@ class OrderList:
         """
         return len(self) == 0
 
-    def __iter__(self):
-        """
-        Returns an iterator of the underlying order list
-
-        Returns:
-            The iterator
-        """
-        return iter(self.__order_list)
-
     def buy(self, company: CompanyEnum, amount: int):
         """
         Adds a order of type BUY to the list
@@ -140,3 +120,13 @@ class OrderList:
             amount: The amount of stocks to sell
         """
         self.__add_order(OrderType.SELL, SharesOfCompany(company, amount))
+
+    def __add_order(self, order_type: OrderType, shares: SharesOfCompany):
+        """
+        Adds the given order to the list
+
+        Args:
+            order_type: The type of order to add
+            shares: The stocks (name and quantity) to buy or sell
+        """
+        self.__order_list.append(Order(order_type, shares))

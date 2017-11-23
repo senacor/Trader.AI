@@ -14,21 +14,23 @@ class StockData:
     def __init__(self, stock_data: StockDataList):
         """
         Constructor
+
         Args:
             stock_data: A list of tuples with dates and the corresponding stock price.
-             Structure: list[(datetime.date, float)]
+             Structure: `List[Tuple[datetime.date, float]]`
         """
         self.__stock_data = stock_data
 
     def append(self, stock_data_item: StockDataTuple):
         """
+        Appends the given stock data item to the list
 
         Args:
-            stock_data_item:
+            stock_data_item: The stock data to append
         """
         self.__stock_data.append(stock_data_item)
 
-    def iter(self):
+    def __iter__(self):
         """
         Returns an iterator over the underlying list of tuples
 
@@ -40,6 +42,7 @@ class StockData:
     def get(self, index: int):
         """
         Returns the `index`th item in the list of stock data
+
         Args:
             index: The index to get
 
@@ -69,6 +72,7 @@ class StockData:
     def get_from_offset(self, offset: int):
         """
         Calls `[offset:]` on the list of underlying stock data
+
         Args:
             offset: The offset to take
 
@@ -89,6 +93,7 @@ class StockData:
     def index(self, item: StockDataTuple):
         """
         Calls `#index` on the underlying list of tuples
+
         Args:
             item: The item to look up the index for
 
@@ -100,6 +105,7 @@ class StockData:
     def copy_to_offset(self, offset: int):
         """
         Creates a copy of the underlying stock data and returns only the first `offset` items
+
         Args:
             offset: The offset to use
 
