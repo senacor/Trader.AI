@@ -7,7 +7,7 @@ import random
 from collections import deque
 import numpy as np
 import datetime as dt
-from definitions import DQLTRADER_PERFECT_PREDICTOR, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR
+from definitions import DQLTRADER_PERFECT_PREDICTOR, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR, DQLTRADER_NN_BINARY_PREDICTOR
 
 from definitions import PERIOD_1, PERIOD_2
 from evaluating.portfolio_evaluator import PortfolioEvaluator
@@ -20,13 +20,12 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 from model.Order import CompanyEnum
-
 from utils import save_keras_sequential, load_keras_sequential, read_stock_market_data
 from logger import logger
 from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from predicting.predictor.reference.nn_perfect_binary_predictor import StockANnPerfectBinaryPredictor
 from predicting.predictor.reference.nn_perfect_binary_predictor import StockBNnPerfectBinaryPredictor
-
+from predicting.predictor.reference.nn_binary_predictor import StockANnBinaryPredictor, StockBNnBinaryPredictor
 
 class State:
     """
@@ -329,7 +328,8 @@ if __name__ == "__main__":
 
     # Initialize trader: use perfect predictors, don't use an already trained model, but learn while trading
     #trader = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), False, True, DQLTRADER_PERFECT_PREDICTOR)
-    trader = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), False, True, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
+    #trader = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), False, True, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
+    trader = DqlTrader(StockANnBinaryPredictor(), StockBNnBinaryPredictor(), False, True, DQLTRADER_NN_BINARY_PREDICTOR)
 
     # Start evaluation and train correspondingly; don't display the results in a plot but display final portfolio value
     evaluator = PortfolioEvaluator([trader], False)
@@ -343,7 +343,8 @@ if __name__ == "__main__":
 
         # Evaluation over training and visualization
         #trader_test = DqlTrader(PerfectPredictor(CompanyEnum.COMPANY_A), PerfectPredictor(CompanyEnum.COMPANY_B), True, False, DQLTRADER_PERFECT_PREDICTOR)
-        trader_test = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), True, False, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
+        #trader_test = DqlTrader(StockANnPerfectBinaryPredictor(), StockBNnPerfectBinaryPredictor(), True, False, DQLTRADER_PERFECT_NN_BINARY_PREDICTOR)
+        trader_test = DqlTrader(StockANnBinaryPredictor(), StockBNnBinaryPredictor(), True, False, DQLTRADER_NN_BINARY_PREDICTOR)
         evaluator_test = PortfolioEvaluator([trader_test], False)
         all_portfolios_over_time = evaluator_test.inspect_over_time(test_data, [portfolio], date_offset=start_test_day)
         portfolio_over_time = all_portfolios_over_time[name]
