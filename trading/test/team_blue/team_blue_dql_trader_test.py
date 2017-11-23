@@ -14,7 +14,9 @@ from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from definitions import PERIOD_1
 from trading.trader.team_blue.team_blue_dql_trader import TeamBlueDqlTrader
 
+
 class TeamBlueDqlTraderTest(unittest.TestCase):
+
     def setUp(self):
         pass
 

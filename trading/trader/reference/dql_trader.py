@@ -23,6 +23,7 @@ from utils import save_keras_sequential, load_keras_sequential, read_stock_marke
 from logger import logger
 from predicting.predictor.reference.nn_binary_predictor import StockANnBinaryPredictor, StockBNnBinaryPredictor
 
+
 class State:
     """
     Represents a state from the trader's viewpoint.
@@ -78,7 +79,7 @@ class DqlTrader(ITrader):
     """
     Implementation of ITrader based on reinforced Q-learning (RQL).
     """
-    RELATIVE_DATA_DIRECTORY =  'trading/trader/dql_trader_data'
+    RELATIVE_DATA_DIRECTORY = 'trading/trader/dql_trader_data'
 
     # Stock actions model the possible output from the neural network.
     # A stock action is of a pair of floats, each between -1.0 and +1.0.
@@ -104,8 +105,8 @@ class DqlTrader(ITrader):
                      (-1.0, -1.0)]
 
     def __init__(self, stock_a_predictor: IPredictor, stock_b_predictor: IPredictor,
-                 load_trained_model: bool = True,
-                 train_while_trading: bool = False, name: str = 'dql_trader'):
+                 load_trained_model: bool=True,
+                 train_while_trading: bool=False, name: str='dql_trader'):
         """
         Constructor
         Args:

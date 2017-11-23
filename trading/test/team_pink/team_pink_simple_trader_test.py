@@ -14,7 +14,9 @@ from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from definitions import PERIOD_1
 from trading.trader.team_pink.team_pink_simple_trader import TeamPinkSimpleTrader
 
+
 class TeamPinkSimpleTraderTest(unittest.TestCase):
+
     def setUp(self):
         pass
 
@@ -34,5 +36,4 @@ class TeamPinkSimpleTraderTest(unittest.TestCase):
         self.assertIsNotNone(order_list)
 
         self.assertEqual(len(order_list), 0)
-        
 

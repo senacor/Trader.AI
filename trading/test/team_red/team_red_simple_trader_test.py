@@ -14,7 +14,9 @@ from predicting.predictor.reference.perfect_predictor import PerfectPredictor
 from definitions import PERIOD_1
 from trading.trader.team_blue.team_blue_simple_trader import TeamBlueSimpleTrader
 
+
 class TeamBlueSimpleTraderTest(unittest.TestCase):
+
     def setUp(self):
         pass
 
@@ -34,5 +36,4 @@ class TeamBlueSimpleTraderTest(unittest.TestCase):
         self.assertIsNotNone(order_list)
 
         self.assertEqual(len(order_list), 0)
-        
 

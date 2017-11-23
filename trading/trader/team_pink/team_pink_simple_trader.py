@@ -9,6 +9,7 @@ from model.ITrader import ITrader
 from model.Order import OrderList
 from model.IPredictor import IPredictor
 
+
 class TeamPinkSimpleTrader(ITrader):
     """
     Simple Trader generates Order based on simple logic, input data and prediction from NN-Engine
@@ -37,6 +38,6 @@ class TeamPinkSimpleTrader(ITrader):
 
         result = OrderList()
 
-        #TODO: implement trading logic
+        # TODO: implement trading logic
 
         return result
