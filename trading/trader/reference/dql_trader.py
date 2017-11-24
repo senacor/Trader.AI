@@ -79,7 +79,7 @@ class DqlTrader(ITrader):
     """
     Implementation of ITrader based on reinforced Q-learning (RQL).
     """
-    RELATIVE_DATA_DIRECTORY = 'trading/trader/dql_trader_data'
+    RELATIVE_DATA_DIRECTORY = 'trading/trader/reference/dql_trader_data'
 
     # Stock actions model the possible output from the neural network.
     # A stock action is of a pair of floats, each between -1.0 and +1.0.
