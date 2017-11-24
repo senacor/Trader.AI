@@ -1,6 +1,6 @@
 Trader AI
 ===
-[![Build Status](https://travis-ci.org/senacor/Trader.AI.svg?branch=master)](https://travis-ci.org/senacor/Trader.AI.svg?branch=master)
+[![Build Status](https://travis-ci.org/senacor/Trader.AI.svg?branch=master)](https://travis-ci.org/senacor/Trader.AI)
 
 ## Abstract
 Python application to show AI functionality based on Keras and TensorFlow.
