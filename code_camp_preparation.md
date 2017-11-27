@@ -60,7 +60,7 @@ $ virtual_env/Scripts/activate
 Download `requirements.txt` and install all Code Camp-related dependencies (in the newly
 created virtual environment):
 ```
-$ wget https://raw.githubusercontent.com/senacor/Trader.AI/master/requirements.txt
+$ wget https://gist.githubusercontent.com/jonasholtkamp/a0b12b17e510e12a61c8f2b18e8355d1/raw/6d61a0a12fd1edf9826563a78acec0bd764abf07/requirements.txt
 $ pip install -r requirements.txt
 ```
 
