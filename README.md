@@ -39,11 +39,6 @@ trained using supervised learning, and the latter neural network can be trained 
 Q-learning).
 
 The following resources provide some basic introductions into the topic of Neural Networks:
-* \# TODO [Material aus Confluence](https://tech-projects.senacor.com/confluence/pages/viewpage.action?pageId=30638253) -> 
-    sollten wir noch einzeln je nach Sinnhaftigkeit verlinken
-* \# TODO Unsere Präsentation fürs InnoLab, jedenfalls die Folien zum AI-/NN-/ML-Thema allgemein
-
-Some other interesting links: \# TODO
 * AI basics
   * [30 amazing applications of deep learning](http://www.yaronhadad.com/deep-learning-most-amazing-applications/)
   * [Neural Network to play a snake game – Towards Data Science – Medium](https://medium.com/towards-data-science/today-im-going-to-talk-about-a-small-practical-example-of-using-neural-networks-training-one-to-6b2cbd6efdb3)
