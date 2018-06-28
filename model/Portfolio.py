@@ -131,7 +131,7 @@ class Portfolio:
 
         available_cash = updated_portfolio.cash
 
-        for order in iter(order_list):
+        for order in order_list:
             company_enum = order.shares.company_enum
 
             current_date = stock_market_data.get_most_recent_trade_day()
@@ -154,7 +154,7 @@ class Portfolio:
                     updated_portfolio.cash -= trade_volume
                     available_cash -= trade_volume
                 else:
-                    logger.warning(f"No sufficient cash reserve ({updated_portfolio.cash}) for planned transaction "
+                    logger.warning(f"No sufficient cash reserve ({available_cash}) for planned transaction "
                                    f"with volume of {trade_volume}")
             elif order.action is OrderType.SELL:
                 logger.debug(f"Selling {amount} shares of {share.company_enum} with individual value of "
@@ -164,6 +164,7 @@ class Portfolio:
                 if share.amount >= amount:
                     share.amount -= amount
                     updated_portfolio.cash += trade_volume
+                    available_cash += trade_volume
                 else:
                     logger.warning(f"Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} "
                                    f"shares")
@@ -225,7 +226,7 @@ class Portfolio:
         """
         if order is not None:
             if order.action == OrderType.BUY:
-                price_to_pay = most_recent_price_company * order.shares
+                price_to_pay = most_recent_price_company * order.shares.amount
 
                 current_cash = current_cash - price_to_pay
                 if current_cash < 0:
@@ -235,7 +236,7 @@ class Portfolio:
                     return False, current_cash
 
             elif order.action == OrderType.SELL:
-                if order.shares > self.get_amount(company_enum):
+                if order.shares.amount > self.get_amount(company_enum):
                     return False
             else:
                 raise ValueError(f'Action for tradingActionForCompanyB is not valid: {order}')

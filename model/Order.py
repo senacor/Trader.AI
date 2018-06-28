@@ -35,6 +35,9 @@ class Order:
         self.action = action
         self.shares = shares
 
+    def __repr__(self) -> str:
+        return f"<Order action=\"{self.action}\" shares=\"{self.shares}\">"
+
 
 class OrderList:
     """
@@ -130,3 +133,6 @@ class OrderList:
             shares: The stocks (name and quantity) to buy or sell
         """
         self.__order_list.append(Order(order_type, shares))
+
+    def __repr__(self) -> str:
+        return f"<OrderList orders=\"{self.__order_list}\">"

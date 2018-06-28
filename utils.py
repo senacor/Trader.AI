@@ -29,6 +29,10 @@ def save_keras_sequential(model: Sequential, relative_path: str, file_name_witho
     Returns:
         True if successful, False otherwise, never None
     """
+    if model.model is None:
+        logger.error(f"save_keras_sequential: Cannot write an empty model as file")
+        return False
+
     try:
         model_as_json = model.to_json()
 
