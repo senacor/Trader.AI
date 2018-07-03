@@ -15,7 +15,7 @@ This file comprises some helpful functions to work with `Portfolios` and `StockM
 """
 
 
-def draw(portfolio_over_time: PortfoliosOverTime, prices: StockMarketData):
+def draw(portfolio_over_time: PortfoliosOverTime, prices: StockMarketData, colors):
     """
     Draws all given portfolios based on the given `prices`
 
@@ -27,7 +27,7 @@ def draw(portfolio_over_time: PortfoliosOverTime, prices: StockMarketData):
 
     for name, portfolio in portfolio_over_time.items():
         values = [pf.total_value(date, prices) for date, pf in portfolio.items()]
-        plt.plot(portfolio.keys(), values, label=name)
+        plt.plot(portfolio.keys(), values, label=name, color=colors[name])
 
     plt.legend(portfolio_over_time.keys())
     plt.show()
@@ -69,7 +69,7 @@ def initialize_portfolios(cash: float, portfolio_trader_mappings: PortfolioNameT
     """
     portfolios = list()
 
-    for name, trader in portfolio_trader_mappings:
-        portfolios.append((Portfolio(cash, [], name), trader))
+    for name, trader, color in portfolio_trader_mappings:
+        portfolios.append((Portfolio(cash, [], name), trader, color))
 
     return portfolios

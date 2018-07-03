@@ -14,7 +14,7 @@ from keras.models import Sequential
 from definitions import PERIOD_1, PERIOD_2
 from keras.callbacks import History
 
-TEAM_NAME = "team_pink"
+TEAM_NAME = "team_black"
 
 RELATIVE_PATH = 'predicting/predictor/' + TEAM_NAME + '/' + TEAM_NAME + '_predictor_data'
 MODEL_FILE_NAME_STOCK_A = TEAM_NAME + '_predictor_stock_a_network'
@@ -24,7 +24,7 @@ MODEL_FILE_NAME_STOCK_B = TEAM_NAME + '_predictor_stock_b_network'
 INPUT_SIZE = 42  # TODO
 
 
-class TeamPinkBasePredictor(IPredictor):
+class TeamBlackBasePredictor(IPredictor):
     """
     Predictor based on an already trained neural network.
     """
@@ -57,7 +57,7 @@ class TeamPinkBasePredictor(IPredictor):
         return 0.0
 
 
-class TeamPinkStockAPredictor(TeamPinkBasePredictor):
+class TeamBlackStockAPredictor(TeamBlackBasePredictor):
     """
     Predictor for stock A based on an already trained neural network.
     """
@@ -69,7 +69,7 @@ class TeamPinkStockAPredictor(TeamPinkBasePredictor):
         super().__init__(MODEL_FILE_NAME_STOCK_A)
 
 
-class TeamPinkStockBPredictor(TeamPinkBasePredictor):
+class TeamBlackStockBPredictor(TeamBlackBasePredictor):
     """
     Predictor for stock B based on an already trained neural network.
     """

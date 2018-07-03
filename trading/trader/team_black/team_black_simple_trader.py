@@ -10,7 +10,7 @@ from model.Order import OrderList
 from model.IPredictor import IPredictor
 
 
-class TeamPinkSimpleTrader(ITrader):
+class TeamBlackSimpleTrader(ITrader):
     """
     Simple Trader generates Order based on simple logic, input data and prediction from NN-Engine
     """

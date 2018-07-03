@@ -81,6 +81,9 @@ class PortfolioEvaluator:
         # Cache that holds the latest object of each portfolio. Structure: {portfolio_name => portfolio}
         portfolio_cache = {}
 
+        # Map that holds the drawing colors for each portfolio
+        colors = {}
+
         if not market_data.check_data_length():
             # Checks whether all data series are of the same length (i.e. have an equal count of date->price items)
             return
@@ -114,7 +117,7 @@ class PortfolioEvaluator:
             portfolio_list = [p_t[0] for p_t in portfolio_trader_mapping]
             logger.debug(f"Start updating portfolios {portfolio_list} on {current_date} (tick {current_tick})")
 
-            for portfolio, trader in portfolio_trader_mapping:
+            for portfolio, trader, color in portfolio_trader_mapping:
                 if current_tick == -evaluation_offset:
                     # Save the starting state of this portfolio
                     yesterday = current_date - datetime.timedelta(days=1)
@@ -137,10 +140,12 @@ class PortfolioEvaluator:
                 all_portfolios[updated_portfolio.name][current_date] = updated_portfolio
                 portfolio_cache.update({portfolio.name: updated_portfolio})
 
+                colors[portfolio.name] = color
+
             logger.debug(f"End updating portfolios {portfolio_list} on {current_date} (tick {current_tick})\n")
 
         # Draw a diagram of the portfolios' changes over time - if we're not unit testing
         if self.draw_results:
-            draw(all_portfolios, market_data)
+            draw(all_portfolios, market_data, colors)
 
         return all_portfolios

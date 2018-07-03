@@ -6,13 +6,13 @@ Module for testing of predicting components
 @author: jtymoszuk
 """
 import unittest
-from predicting.predictor.team_black.team_black_predictor import TeamPinkStockAPredictor
+from predicting.predictor.team_black.team_black_predictor import TeamBlackStockAPredictor
 from model.CompanyEnum import CompanyEnum
 from definitions import PERIOD_1
 from utils import read_stock_market_data
 
 
-class TeamPinkPredictorTest(unittest.TestCase):
+class TeamBlackPredictorTest(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -25,7 +25,7 @@ class TeamPinkPredictorTest(unittest.TestCase):
         stock_data = stock_market_data[CompanyEnum.COMPANY_A]
 
         # Load stock A predictor
-        predictor = TeamPinkStockAPredictor()
+        predictor = TeamBlackStockAPredictor()
 
         # Check prediction
         stock_prediction = predictor.doPredict(stock_data)
@@ -33,5 +33,5 @@ class TeamPinkPredictorTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TeamPinkPredictorTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TeamBlackPredictorTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
