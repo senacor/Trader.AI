@@ -15,36 +15,40 @@ if __name__ == "__main__":
     # Define portfolio-name/trader mappings
     portfolio_name_trader_mappings = [
         # Benchmark trader
-        ('Buy-and-hold Trader', Traders.BuyAndHoldTrader()),
+        ('Buy-and-hold Trader', Traders.BuyAndHoldTrader(), 'chartreuse'),
 
         # Simple traders
-        ('Simple Trader (perfect prediction)', Traders.SimpleTrader_with_perfect_prediction()),
-        ('Simple Trader (NN binary perfect prediction)', Traders.SimpleTrader_with_nn_binary_perfect_prediction()),
-        ('Simple Trader (NN binary prediction)', Traders.SimpleTrader_with_nn_binary_prediction()),
+        ('Simple Trader (perfect prediction)', Traders.SimpleTrader_with_perfect_prediction(), 'pink'),
+        ('Simple Trader (NN binary perfect prediction)', Traders.SimpleTrader_with_nn_binary_perfect_prediction(),
+         'yellow'),
+        ('Simple Trader (NN binary prediction)', Traders.SimpleTrader_with_nn_binary_prediction(), 'brown'),
 
         # Deep Q-Learning traders
-        ('DQL Trader (perfect prediction)', Traders.DqlTrader_with_perfect_prediction()),
-        ('DQL Trader (NN binary perfect prediction)', Traders.DqlTrader_with_nn_binary_perfect_prediction()),
-        ('DQL Trader (NN binary prediction)', Traders.DqlTrader_with_nn_binary_prediction()),
-         
+        ('DQL Trader (perfect prediction)', Traders.DqlTrader_with_perfect_prediction(), 'gray'),
+        ('DQL Trader (NN binary perfect prediction)', Traders.DqlTrader_with_nn_binary_perfect_prediction(), 'magenta'),
+        ('DQL Trader (NN binary prediction)', Traders.DqlTrader_with_nn_binary_prediction(), 'burlywood'),
+
         # Code-Camp Task 0 traders
-        ('Team Blue Simple Trader (perfect prediction)', Traders.TeamBlueSimpleTrader_with_perfect_prediction()),
-        ('Team Green Simple Trader (perfect prediction)', Traders.TeamGreenSimpleTrader_with_perfect_prediction()),
-        ('Team Pink Simple Trader (perfect prediction)', Traders.TeamPinkSimpleTrader_with_perfect_prediction()),
-        ('Team Red Simple Trader (perfect prediction)', Traders.TeamRedSimpleTrader_with_perfect_prediction()),
-          
+        (
+        'Team Blue Simple Trader (perfect prediction)', Traders.TeamBlueSimpleTrader_with_perfect_prediction(), 'blue'),
+        ('Team Green Simple Trader (perfect prediction)', Traders.TeamGreenSimpleTrader_with_perfect_prediction(),
+         'green'),
+        ('Team Black Simple Trader (perfect prediction)', Traders.TeamBlackSimpleTrader_with_perfect_prediction(),
+         'black'),
+        ('Team Red Simple Trader (perfect prediction)', Traders.TeamRedSimpleTrader_with_perfect_prediction(), 'red'),
+
         # Code-Camp Task 1 traders
-        ('Simple Trader (Team Blue prediction)', Traders.SimpleTrader_with_team_blue_prediction()),
-        ('Simple Trader (Team Green prediction)', Traders.SimpleTrader_with_team_green_prediction()),
-        ('Simple Trader (Team Pink prediction)', Traders.SimpleTrader_with_team_pink_prediction()),
-        ('Simple Trader (Team Red prediction)', Traders.SimpleTrader_with_team_red_prediction()),
-                
+        ('Simple Trader (Team Blue prediction)', Traders.SimpleTrader_with_team_blue_prediction(), 'blue'),
+        ('Simple Trader (Team Green prediction)', Traders.SimpleTrader_with_team_green_prediction(), 'green'),
+        ('Simple Trader (Team Black prediction)', Traders.SimpleTrader_with_team_black_prediction(), 'black'),
+        ('Simple Trader (Team Red prediction)', Traders.SimpleTrader_with_team_red_prediction(), 'red'),
+
         # Code-Camp Task 2 traders    
-        ('Team Blue DQL Trader (perfect prediction)', Traders.TeamBlueDqlTrader_with_perfect_prediction()),
-        ('Team Green DQL Trader (perfect prediction)', Traders.TeamGreenDqlTrader_with_perfect_prediction()),
-        ('Team Pink DQL Trader (perfect prediction)', Traders.TeamPinkDqlTrader_with_perfect_prediction()),
-        ('Team Red DQL Trader (perfect prediction)', Traders.TeamRedDqlTrader_with_perfect_prediction())                
-                                    
+        ('Team Blue DQL Trader (perfect prediction)', Traders.TeamBlueDqlTrader_with_perfect_prediction(), 'blue'),
+        ('Team Green DQL Trader (perfect prediction)', Traders.TeamGreenDqlTrader_with_perfect_prediction(), 'green'),
+        ('Team Black DQL Trader (perfect prediction)', Traders.TeamBlackDqlTrader_with_perfect_prediction(), 'black'),
+        ('Team Red DQL Trader (perfect prediction)', Traders.TeamRedDqlTrader_with_perfect_prediction(), 'red')
+
     ]
 
     # Define portfolios for the traders and create a portfolio/trader mapping

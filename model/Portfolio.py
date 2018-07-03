@@ -164,7 +164,6 @@ class Portfolio:
                 if share.amount >= amount:
                     share.amount -= amount
                     updated_portfolio.cash += trade_volume
-                    available_cash += trade_volume
                 else:
                     logger.warning(f"Not sufficient shares in portfolio ({amount}) for planned sale of {share.amount} "
                                    f"shares")
