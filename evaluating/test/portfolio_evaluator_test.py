@@ -42,7 +42,7 @@ class EvaluatorTest(unittest.TestCase):
         trader_3 = SimpleTrader(RandomPredictor(), RandomPredictor())
         traders = [trader_1, trader_2]
 
-        portfolio_trader_mappings = list(zip(portfolios, traders))
+        portfolio_trader_mappings = list(zip(portfolios, traders, [None]*len(portfolios)))
 
         evaluator_1 = PortfolioEvaluator([trader_1, trader_1])
         evaluator_2 = PortfolioEvaluator([])

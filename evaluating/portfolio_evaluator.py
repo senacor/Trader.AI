@@ -50,7 +50,7 @@ class PortfolioEvaluator:
             All portfolios' value courses. If `self.draw_results` is `True`: It also draws the course of all portfolios
              given the market data
         """
-        portfolio_trader_mapping = list(zip(portfolios, self.trader_list))
+        portfolio_trader_mapping = list(zip(portfolios, self.trader_list, [None]*len(portfolios)))
 
         return self.inspect_over_time_with_mapping(market_data, portfolio_trader_mapping, evaluation_offset,
                                                    date_offset)
